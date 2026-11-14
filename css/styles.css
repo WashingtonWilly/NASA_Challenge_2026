@@ -1,32 +1,38 @@
 /* ==========================================================================
-   AllpaWiñay — Guía de estilo visual institucional y cartográfica
+   RotaSat — Guía de estilo visual institucional y cartográfica
    NASA International Space Apps Challenge 2026 · Riobamba
    ========================================================================== */
 
 :root {
-  --papel: #EFEADC;
-  --papel-claro: #F7F3E8;
-  --campo: #FBF8F0;
-  --banda: #E4DDCB;
-  --tinta: #2B2A22;
-  --texto-2: #5A5440;
-  --gris: #6B6450;
-  --oliva: #3E4A1E;
-  --tierra: #A6512B;
-  --tierra-hover: #8C4322;
-  --borde: #D6CDB4;
-  --curva: #C9BFA2;
-  --texto-nav: #F4EFE2;
-  --subrayado-nav: #D9A178;
-  --ok: #4F6B1F;
-  --ok-bg: #E6EAD3;
+  --papel: #EEF3E8;
+  --papel-claro: #F7FAF3;
+  --campo: #FFFFFF;
+  --banda: #E1ECD8;
+  --tinta: #1F2A1D;
+  --texto-2: #4A5446;
+  --gris: #5F6B58;
+  --oliva: #2E7D32;
+  --tierra: #6D4C41;
+  --tierra-hover: #5A3D34;
+  --borde: #D3DECA;
+  --curva: #B9C9AD;
+  --texto-nav: #F4F8EF;
+  --subrayado-nav: #F9A825;
+  --ok: #2E7D32;
+  --ok-bg: #E3F0DF;
   --alerta: #B7791F;
-  --alerta-bg: #F4E6C8;
+  --alerta-bg: #FBEFCF;
   --riesgo: #9B2C1F;
   --riesgo-bg: #F2D9D2;
   --fuente: 'Public Sans', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --radio: 4px;
+  /* Paleta del logo RotaSat */
+  --verde-rotasat: #2E7D32;
+  --verde-oscuro: #1B5E20;
+  --tierra-rotasat: #6D4C41;
+  --sol: #F9A825;
+  --cielo: #1565C0;
 }
 
 *, *::before, *::after {
@@ -87,12 +93,108 @@ body {
 }
 
 .sidebar-brand {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 16px;
+  justify-content: center;
+  padding: 22px 16px 18px;
+  border-bottom: 1px solid var(--borde);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(21, 101, 192, 0.07), transparent 65%),
+    linear-gradient(180deg, #FFFFFF 0%, var(--papel-claro) 100%);
+}
+
+.sidebar-brand::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 64px;
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--verde-rotasat), var(--sol), var(--cielo));
+}
+
+.sidebar-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  text-decoration: none;
   color: var(--tinta);
+}
+
+.sidebar-logo:focus-visible {
+  outline: 2px solid var(--cielo);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.sidebar-logo-img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  margin-bottom: 6px;
+  transition: transform 0.25s ease;
+}
+
+.sidebar-logo:hover .sidebar-logo-img {
+  transform: translateY(-2px) scale(1.03);
+}
+
+.sidebar-logo-nombre {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--verde-rotasat);
+}
+
+.sidebar-logo-nombre span {
+  color: var(--cielo);
+}
+
+.sidebar-logo-lema {
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--gris);
+  max-width: 175px;
+}
+
+.sidebar-logo-evento {
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--tierra-rotasat);
+  background: #FDF3D7;
+  border: 1px solid #F3D98C;
+}
+
+.sidebar-mobile-toggle {
+  display: none;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: #FFFFFF;
+  color: var(--verde-rotasat);
+  cursor: pointer;
+}
+
+.sidebar-body {
+  flex: 1;
+  padding: 16px 0 12px;
 }
 
 .sidebar-brand-sub {
@@ -161,7 +263,7 @@ body {
 
 .sidebar-item.activo {
   background-color: var(--banda);
-  border-left-color: #6B3A24;
+  border-left-color: var(--sol);
   font-weight: 700;
   color: var(--tinta);
 }
@@ -181,7 +283,7 @@ body {
 }
 
 .sidebar-item.activo .sidebar-item-left .icono {
-  color: #6B3A24;
+  color: var(--oliva);
 }
 
 .sidebar-item-text {
@@ -225,7 +327,7 @@ body {
 }
 
 .sidebar-badge-status.bajo {
-  background-color: #E3EAD8;
+  background-color: var(--banda);
   color: var(--oliva);
 }
 
@@ -524,8 +626,8 @@ nav.nav-principal a.nav-link:hover {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--tierra);
-  color: #FBF6EA;
+  background: var(--verde-rotasat);
+  color: #FFFFFF;
   border: 0;
   border-radius: var(--radio);
   padding: 10px 16px;
@@ -535,12 +637,12 @@ nav.nav-principal a.nav-link:hover {
 }
 
 .btn:hover {
-  background: var(--tierra-hover);
-  color: #FBF6EA;
+  background: var(--verde-oscuro);
+  color: #FFFFFF;
 }
 
 .btn .icono {
-  color: #FBF6EA;
+  color: var(--sol);
 }
 
 .btn-sec {
@@ -819,7 +921,7 @@ input[type="radio"] {
   margin: 0;
   font-size: 0.98rem;
   font-weight: 700;
-  color: #1B365D;
+  color: var(--cielo);
 }
 
 .btn-geo {
@@ -827,8 +929,8 @@ input[type="radio"] {
   align-items: center;
   gap: 6px;
   background: #FFFFFF;
-  color: #1B365D;
-  border: 1px solid #1B365D;
+  color: var(--cielo);
+  border: 1px solid var(--cielo);
   border-radius: 6px;
   padding: 6px 12px;
   font-family: var(--fuente);
@@ -844,7 +946,7 @@ input[type="radio"] {
 .icono-geo {
   width: 16px;
   height: 16px;
-  color: #1B365D;
+  color: var(--cielo);
   flex-shrink: 0;
 }
 
@@ -869,13 +971,13 @@ input[type="radio"] {
 }
 
 .location-search-input:focus {
-  outline: 2px solid #1B365D;
+  outline: 2px solid var(--cielo);
   outline-offset: 1px;
 }
 
 .btn-buscar {
   flex: 1 1 25%;
-  background: #1B365D;
+  background: var(--cielo);
   color: #FFFFFF;
   border: 0;
   border-radius: 6px;
@@ -889,7 +991,7 @@ input[type="radio"] {
 }
 
 .btn-buscar:hover {
-  background: #132847;
+  background: #0D47A1;
 }
 
 .location-status {
@@ -1547,7 +1649,7 @@ th.num {
    Pie de página
    ========================================================================== */
 footer {
-  background: var(--oliva);
+  background: var(--verde-oscuro);
   color: var(--texto-nav);
   font-size: 0.85rem;
   padding: 32px 0;
@@ -1593,8 +1695,48 @@ footer a:hover {
     border-bottom: 1px solid var(--borde);
   }
 
-  .sidebar-toggle {
+  .sidebar-toggle,
+  .sidebar-mobile-toggle {
     display: inline-flex;
+  }
+
+  .sidebar-brand {
+    justify-content: flex-start;
+    padding: 10px 64px 10px 16px;
+  }
+
+  .sidebar-brand::after {
+    left: 16px;
+    transform: none;
+  }
+
+  .sidebar-logo {
+    flex-direction: row;
+    text-align: left;
+    gap: 10px;
+  }
+
+  .sidebar-logo-img {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0;
+  }
+
+  .sidebar-logo-nombre {
+    font-size: 20px;
+  }
+
+  .sidebar-logo-lema,
+  .sidebar-logo-evento {
+    display: none;
+  }
+
+  .sidebar-nav .sidebar-body {
+    display: none;
+  }
+
+  .sidebar-nav.abierto .sidebar-body {
+    display: block;
   }
 
   .sidebar-nav .sidebar-menu-group,
@@ -1656,9 +1798,9 @@ footer a:hover {
 .estado-datos-vivo {
   margin-top: 10px;
   padding: 10px 14px;
-  border: 1px solid #D6CDB4;
+  border: 1px solid var(--borde);
   border-radius: 10px;
-  background: #FBF8F0;
+  background: var(--papel-claro);
   font-size: 0.85rem;
 }
 .estado-datos-vivo ul { margin: 6px 0 0; padding-left: 4px; list-style: none; }
@@ -1667,5 +1809,5 @@ footer a:hover {
 /* Parcela activa: nombre y si tiene historial satelital */
 .parcela-activa { margin-top: 10px; font-size: 0.9rem; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
 .pill-sat { font-size: 0.78rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; border: 1px solid; }
-.pill-sat.ok { background: #E8F1DD; color: #3E5A1E; border-color: #9DB873; }
+.pill-sat.ok { background: #E3F0DF; color: #1B5E20; border-color: #8BC48F; }
 .pill-sat.warn { background: #FBF3DD; color: #7A4F12; border-color: #D6B46A; }

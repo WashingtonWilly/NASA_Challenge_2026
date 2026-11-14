@@ -1,6 +1,6 @@
 /**
  * ecuador_dpa.js — División Político-Administrativa del Ecuador (24 provincias, cantones y parroquias)
- * Incluye centroides provinciales de respaldo y vínculos a parcelas demostrativas de AllpaWiñay.
+ * Incluye centroides provinciales de respaldo y vínculos a parcelas demostrativas de RotaSat.
  */
 (function (root) {
   'use strict';
