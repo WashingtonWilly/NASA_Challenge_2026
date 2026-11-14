@@ -14,6 +14,8 @@ Flujo:
        - Suelo 0–30 cm: ISRIC SoilGrids 250 m.
        - NDVI / NDTI mensual: HLS Landsat + Sentinel-2, desde los CSV de AppEEARS en data/appeears/.
        - Humedad radicular: SMAP L4, desde los mismos CSV de AppEEARS.
+       - Altitud, pendiente y orientación: NASADEM 30 m, desde los mismos CSV de AppEEARS
+         (punto central + 4 vecinos; ver data/appeears/puntos_pedido2.csv).
   3. Todo lo que siga siendo de ejemplo queda marcado como "EJEMPLO" en su campo "fuente"
      y en parcela["estado_datos"], para que nunca se presente como dato satelital.
 
@@ -26,7 +28,7 @@ import sys
 from hls import inferir_historia_desde_ndvi
 from power import obtener_clima_mensual_power, anomalia_lluvia_power
 from soil import consultar_soilgrids
-from appeears import leer_carpeta, serie_ndvi_parcela, smap_parcela
+from appeears import leer_carpeta, serie_ndvi_parcela, smap_parcela, terreno_parcela
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -285,11 +287,17 @@ def construir_parcelas_ejemplo():
 EJEMPLO = "EJEMPLO (dato provisional, falta dato real)"
 
 
-def enriquecer_con_datos_reales(p, obs_hls, obs_smap, online=True):
+def enriquecer_con_datos_reales(p, obs_hls, obs_smap, obs_dem=(), online=True):
     """Reemplaza cada bloque de ejemplo por el dato real disponible y deja registro en estado_datos."""
     lat, lon = p["centroide"]["lat"], p["centroide"]["lon"]
     estado = {"clima": EJEMPLO, "anomalia": EJEMPLO, "suelo": EJEMPLO, "ndvi": EJEMPLO,
               "smap": "sin dato", "terreno": "EJEMPLO (verificar con NASADEM 30 m)"}
+
+    terreno = terreno_parcela(obs_dem, lat, lon)
+    if terreno:
+        fuente_t = terreno.pop("fuente")
+        p["terreno"].update(terreno)
+        estado["terreno"] = fuente_t + ("" if "pendiente_pct" in terreno else " (solo altitud; faltan los 4 puntos vecinos)")
 
     if online:
         clima = obtener_clima_mensual_power(lat, lon, elev_parcela_m=p["terreno"]["elev_m"])
@@ -334,9 +342,10 @@ def enriquecer_con_datos_reales(p, obs_hls, obs_smap, online=True):
 
 def main():
     online = "--offline" not in sys.argv
-    obs_hls, obs_smap = leer_carpeta(os.path.join(BASE_DIR, "data", "appeears"))
-    print(f"AppEEARS: {len(obs_hls)} observaciones HLS sin nubes y {len(obs_smap)} de SMAP en data/appeears/")
-    parcelas = [enriquecer_con_datos_reales(p, obs_hls, obs_smap, online) for p in construir_parcelas_ejemplo()]
+    obs_hls, obs_smap, obs_dem = leer_carpeta(os.path.join(BASE_DIR, "data", "appeears"))
+    print(f"AppEEARS: {len(obs_hls)} observaciones HLS sin nubes, {len(obs_smap)} de SMAP y "
+          f"{len(obs_dem)} de NASADEM en data/appeears/")
+    parcelas = [enriquecer_con_datos_reales(p, obs_hls, obs_smap, obs_dem, online) for p in construir_parcelas_ejemplo()]
 
     for p in parcelas:
         ruta_parcela = os.path.join(BASE_DIR, "data", "parcelas", f"{p['id']}.json")

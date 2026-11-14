@@ -3,7 +3,9 @@
 appeears.py — Lee los CSV de AppEEARS (Point Sample) y arma, por parcela:
   - la serie mensual de NDVI y NDTI a partir de HLSL30 (Landsat 8/9) y HLSS30 (Sentinel-2),
     descartando nubes, bordes de nube y sombras con la capa Fmask;
-  - la humedad de la zona radicular de SMAP L4 (SPL4SMGP, sm_rootzone).
+  - la humedad de la zona radicular de SMAP L4 (SPL4SMGP, sm_rootzone);
+  - la elevación NASADEM (30 m) del centro y de 4 puntos vecinos (N, S, E, O), con la que se
+    calculan altitud, pendiente y orientación de la parcela.
 
 Uso: copiar los CSV que entrega AppEEARS en data/appeears/ y correr generar_parcelas.py.
 Cada punto del CSV se asigna a la parcela cuyo centroide esté a menos de RADIO_KM.
@@ -47,8 +49,8 @@ def _col(cols, producto, sufijo):
 
 
 def leer_carpeta(carpeta):
-    """Devuelve (obs_hls, obs_smap): listas de dicts con lat, lon, fecha y valores."""
-    obs_hls, obs_smap = [], []
+    """Devuelve (obs_hls, obs_smap, obs_dem): listas de dicts con lat, lon, fecha y valores."""
+    obs_hls, obs_smap, obs_dem = [], [], []
     for ruta in sorted(glob.glob(os.path.join(carpeta, "*.csv"))):
         with open(ruta, newline="", encoding="utf-8-sig") as f:
             lector = csv.DictReader(f)
@@ -66,6 +68,8 @@ def leer_carpeta(carpeta):
                     juegos.append(c)
             col_sm = next((c for c in cols if "sm_rootzone" in c and not c.endswith(("_pctl", "_wetness"))
                            and "pctl" not in c and "wetness" not in c), None)
+            col_dem = next((c for c in cols if ("NASADEM" in c and c.upper().endswith("HGT"))
+                            or ("SRTMGL1" in c and c.upper().endswith("DEM"))), None)
             for fila in lector:
                 lat, lon = _num(fila.get(col_lat)), _num(fila.get(col_lon))
                 try:
@@ -90,11 +94,15 @@ def leer_carpeta(carpeta):
                         "ndvi": calcular_ndvi(nir, red),
                         "ndti": calcular_ndti(s1, s2) if (s1 and s2 and s1 > 0 and s2 > 0) else None,
                     })
+                if col_dem:
+                    z = _num(fila.get(col_dem))
+                    if z is not None and -100 < z < 7000:
+                        obs_dem.append({"lat": lat, "lon": lon, "z": z})
                 if col_sm:
                     sm = _num(fila.get(col_sm))
                     if sm is not None and 0 <= sm <= 1:
                         obs_smap.append({"lat": lat, "lon": lon, "fecha": fecha, "sm": sm})
-    return obs_hls, obs_smap
+    return obs_hls, obs_smap, obs_dem
 
 
 def _mediana(v):
@@ -174,3 +182,44 @@ def smap_parcela(obs_smap, lat, lon, dias=90):
         "anomalia_pct": round(100 * (reciente - promedio) / promedio) if promedio > 0 else 0,
         "hasta": ultima.isoformat(),
     }
+
+
+def terreno_parcela(obs_dem, lat, lon, radio_km=0.3):
+    """
+    Altitud, pendiente (%) y orientación con NASADEM: el punto central y 4 vecinos a ~55 m
+    (N, S, E, O). Pendiente = gradiente por diferencias centrales; pendiente máxima = la mayor
+    de las 4 pendientes centro-vecino.
+    """
+    pts = {}
+    for o in obs_dem:
+        d = _dist_km(lat, lon, o["lat"], o["lon"])
+        if d <= radio_km:
+            k = (round(o["lat"], 6), round(o["lon"], 6))
+            pts.setdefault(k, []).append(o["z"])
+    if not pts:
+        return None
+    pts = {k: sum(v) / len(v) for k, v in pts.items()}
+    centro = min(pts, key=lambda k: _dist_km(lat, lon, k[0], k[1]))
+    zc = pts[centro]
+    vecinos = {"N": None, "S": None, "E": None, "O": None}
+    for k, z in pts.items():
+        if k == centro:
+            continue
+        dlat, dlon = k[0] - centro[0], k[1] - centro[1]
+        lado = ("N" if dlat > 0 else "S") if abs(dlat) > abs(dlon) else ("E" if dlon > 0 else "O")
+        dist_m = _dist_km(centro[0], centro[1], k[0], k[1]) * 1000
+        if dist_m > 5 and vecinos[lado] is None:
+            vecinos[lado] = (z, dist_m)
+    salida = {"elev_m": round(zc), "fuente": "NASADEM 30 m vía AppEEARS"}
+    if all(vecinos.values()):
+        (zn, dn), (zs, ds), (ze, de), (zo, do) = (vecinos[x] for x in ("N", "S", "E", "O"))
+        gy = (zn - zs) / (dn + ds)   # sube hacia el norte
+        gx = (ze - zo) / (de + do)   # sube hacia el este
+        pend = 100 * math.hypot(gx, gy)
+        pend_max = max(100 * abs(z - zc) / d for z, d in vecinos.values())
+        # orientación: hacia donde baja el terreno
+        ang = (math.degrees(math.atan2(-gx, -gy)) + 360) % 360
+        dirs = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"]
+        salida.update({"pendiente_pct": round(pend, 1), "pendiente_max_pct": round(max(pend, pend_max), 1),
+                       "orientacion": dirs[int(((ang + 22.5) % 360) // 45)]})
+    return salida

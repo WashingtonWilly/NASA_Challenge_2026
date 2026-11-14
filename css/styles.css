@@ -1233,3 +1233,15 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Datos todavía provisionales (ver parcela.estado_datos y scripts/generar_parcelas.py) */
+.tag-ejemplo, .kpi-source-tag.tag-ejemplo {
+  background: #fff1d6 !important;
+  color: #8a4b00 !important;
+  border: 1px dashed #d08a1e !important;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
