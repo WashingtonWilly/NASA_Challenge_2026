@@ -277,7 +277,36 @@
   /**
    * Renderiza los KPIs biofísicos y vulnerabilidades de campo del Paso 1
    */
+  /**
+   * ¿Este bloque de datos de la parcela sigue siendo de EJEMPLO? (lo marca scripts/generar_parcelas.py)
+   */
+  function esEjemplo(parcela, campo) {
+    const e = parcela && parcela.estado_datos;
+    return !!(e && typeof e[campo] === 'string' && e[campo].startsWith('EJEMPLO'));
+  }
+
+  /**
+   * Cambia la etiqueta de fuente a "EJEMPLO" cuando el dato todavía no es real.
+   */
+  function marcarFuente(id, parcela, campo, textoReal) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!el.dataset.textoReal) el.dataset.textoReal = textoReal || el.textContent;
+    const ejemplo = esEjemplo(parcela, campo);
+    el.textContent = ejemplo ? `EJEMPLO · ${el.dataset.textoReal}` : el.dataset.textoReal;
+    el.classList.toggle('tag-ejemplo', ejemplo);
+    el.title = (parcela.estado_datos && parcela.estado_datos[campo]) || '';
+  }
+
   function renderizarPaso1Terreno(parcela) {
+    marcarFuente('tag-elev', parcela, 'terreno');
+    marcarFuente('tag-pend', parcela, 'terreno');
+    marcarFuente('tag-clima', parcela, 'clima');
+    marcarFuente('tag-historia', parcela, 'ndvi');
+    const tagBal = document.getElementById('tag-chart-balance');
+    if (tagBal) tagBal.hidden = !esEjemplo(parcela, 'clima');
+    const tagHls = document.getElementById('tag-chart-hls');
+    if (tagHls) tagHls.hidden = !esEjemplo(parcela, 'ndvi');
     const cuadras = haACuadras(parcela.area_ha);
     document.getElementById('kpi-area-val').textContent = `${parcela.area_ha} ha`;
     document.getElementById('kpi-area-sub').textContent = `Equivale a ~${cuadras} cuadras (${parcela.ubicacion_texto})`;
@@ -294,7 +323,7 @@
     const lluviaEscenario = Math.round(lluviaAnual * factorEsc);
 
     document.getElementById('kpi-clima-val').textContent = `${lluviaEscenario} mm/año`;
-    document.getElementById('kpi-clima-sub').textContent = `Demanda evaporativa ET₀: ${Math.round(et0Anual)} mm/año (10 años NASA POWER)`;
+    document.getElementById('kpi-clima-sub').textContent = `Demanda evaporativa ET₀: ${Math.round(et0Anual)} mm/año (${esEjemplo(parcela, 'clima') ? 'EJEMPLO, falta NASA POWER' : '10 años NASA POWER'})`;
 
     // Diagnóstico de vulnerabilidades en la parcela
     const vulnContainer = document.getElementById('vuln-badges-container');
@@ -340,7 +369,7 @@
     if (mesesDesnudo >= 8) {
       badges.push({
         nivel: 'medio',
-        texto: `🛰️ Suelo desnudo frecuente: ${mesesDesnudo} de ${totalObs} meses con NDVI < 0.25 (HLS 30 m)`
+        texto: `🛰️ Suelo desnudo frecuente: ${mesesDesnudo} de ${totalObs} meses con NDVI < 0.25 (${esEjemplo(parcela, 'ndvi') ? 'EJEMPLO, falta HLS' : 'HLS 30 m'})`
       });
     } else {
       badges.push({
@@ -712,7 +741,7 @@
         labels,
         datasets: [
           {
-            label: 'Verdor del Cultivo (NDVI HLS 30 m)',
+            label: esEjemplo(parcela, 'ndvi') ? 'NDVI de EJEMPLO (falta CSV de AppEEARS)' : 'Verdor del Cultivo (NDVI HLS 30 m)',
             data: dataNdvi,
             borderColor: '#236B38',
             backgroundColor: 'rgba(35, 107, 56, 0.18)',
