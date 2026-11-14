@@ -19,8 +19,9 @@ Flujo:
   3. Todo lo que siga siendo de ejemplo queda marcado como "EJEMPLO" en su campo "fuente"
      y en parcela["estado_datos"], para que nunca se presente como dato satelital.
 
-Uso:  python scripts/generar_parcelas.py          (con internet)
-      python scripts/generar_parcelas.py --offline (solo lee CSV locales)
+Uso:  python scripts/generar_parcelas.py          (con internet; guarda copia en data/crudos/)
+      python scripts/generar_parcelas.py --offline (usa data/crudos/ y los CSV de data/appeears/)
+      python scripts/generar_parcelas.py --urls    (lista las URL para descargarlas desde el navegador)
 """
 import json
 import os
@@ -299,17 +300,19 @@ def enriquecer_con_datos_reales(p, obs_hls, obs_smap, obs_dem=(), online=True):
         p["terreno"].update(terreno)
         estado["terreno"] = fuente_t + ("" if "pendiente_pct" in terreno else " (solo altitud; faltan los 4 puntos vecinos)")
 
-    if online:
-        clima = obtener_clima_mensual_power(lat, lon, elev_parcela_m=p["terreno"]["elev_m"])
+    crudos = os.path.join(BASE_DIR, "data", "crudos")
+    if True:  # con internet descarga y guarda en data/crudos/; sin internet usa lo guardado
+        clima = obtener_clima_mensual_power(lat, lon, elev_parcela_m=p["terreno"]["elev_m"],
+                                            cache=os.path.join(crudos, f"power_clima_{p['id']}.json"), online=online)
         if clima:
             p["clima_mensual"] = clima["meses"]
             estado["clima"] = (f"NASA POWER {clima['periodo']} (diario, AG); T corregida "
                                f"{clima['correccion_T_C']:+.1f} °C por altitud (celda a {clima['elev_celda_m']} m)")
-        anom = anomalia_lluvia_power(lat, lon)
+        anom = anomalia_lluvia_power(lat, lon, cache=os.path.join(crudos, f"power_lluvia_{p['id']}.json"), online=online)
         if anom:
             p["anomalia"] = anom
             estado["anomalia"] = f"NASA POWER PRECTOTCORR, {anom['ventana']} vs {anom['anios_referencia']}"
-        suelo = consultar_soilgrids(lat, lon)
+        suelo = consultar_soilgrids(lat, lon, cache=os.path.join(crudos, f"soilgrids_{p['id']}.json"), online=online)
         if suelo:
             # Andisol: suelos volcánicos andinos (Sierra) con carbono orgánico alto
             suelo["es_andisol"] = p["region"].startswith("Sierra") and suelo["soc_pct"] >= 2.0
@@ -340,7 +343,28 @@ def enriquecer_con_datos_reales(p, obs_hls, obs_smap, obs_dem=(), online=True):
     return p
 
 
+def imprimir_urls():
+    """URL de cada descarga y el nombre con que debe guardarse en data/crudos/ (alternativa sin Python)."""
+    import urllib.parse
+    from datetime import datetime
+    for p in construir_parcelas_ejemplo():
+        lat, lon, pid = p["centroide"]["lat"], p["centroide"]["lon"], p["id"]
+        base = "https://power.larc.nasa.gov/api/temporal/daily/point?"
+        print(f"\n{p['nombre']}")
+        print(f"  power_clima_{pid}.json\n    " + base + urllib.parse.urlencode({
+            "parameters": "T2M_MAX,T2M_MIN,T2M,PRECTOTCORR", "community": "AG", "latitude": round(lat, 4),
+            "longitude": round(lon, 4), "start": "20150101", "end": "20241231", "format": "JSON"}))
+        print(f"  power_lluvia_{pid}.json\n    " + base + urllib.parse.urlencode({
+            "parameters": "PRECTOTCORR", "community": "AG", "latitude": round(lat, 4), "longitude": round(lon, 4),
+            "start": "20010101", "end": datetime.utcnow().strftime("%Y%m%d"), "format": "JSON"}))
+        q = [("lon", round(lon, 4)), ("lat", round(lat, 4))] + [("depth", d) for d in ("0-5cm", "5-15cm", "15-30cm")] + \
+            [("value", "mean")] + [("property", x) for x in ("clay", "sand", "silt", "phh2o", "soc", "nitrogen")]
+        print(f"  soilgrids_{pid}.json\n    https://rest.isric.org/soilgrids/v2.0/properties/query?" + urllib.parse.urlencode(q))
+
+
 def main():
+    if "--urls" in sys.argv:
+        return imprimir_urls()
     online = "--offline" not in sys.argv
     obs_hls, obs_smap, obs_dem = leer_carpeta(os.path.join(BASE_DIR, "data", "appeears"))
     print(f"AppEEARS: {len(obs_hls)} observaciones HLS sin nubes, {len(obs_smap)} de SMAP y "

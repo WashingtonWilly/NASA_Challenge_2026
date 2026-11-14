@@ -10,6 +10,7 @@ Consulta ISRIC SoilGrids REST API v2.0 (capas 0-5, 5-15 y 15-30 cm, promedio pon
 import json
 import urllib.request
 import urllib.parse
+from descarga import obtener_json
 
 
 def clasificar_textura(arcilla_pct: float, arena_pct: float) -> str:
@@ -20,7 +21,7 @@ def clasificar_textura(arcilla_pct: float, arena_pct: float) -> str:
     return "Franco"
 
 
-def consultar_soilgrids(lat: float, lon: float):
+def consultar_soilgrids(lat: float, lon: float, cache: str = None, online: bool = True):
     base_url = "https://rest.isric.org/soilgrids/v2.0/properties/query"
     query = urllib.parse.urlencode([
         ("lon", round(lon, 4)),
@@ -37,9 +38,9 @@ def consultar_soilgrids(lat: float, lon: float):
         ("property", "nitrogen"),
     ])
     try:
-        req = urllib.request.Request(f"{base_url}?{query}", headers={"User-Agent": "NASA-SpaceApps-FieldShift/1.0"})
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+        data = obtener_json(f"{base_url}?{query}", cache, online, timeout=60)
+        if data is None:
+            return None
         # Promedio ponderado por espesor de las capas 0–5, 5–15 y 15–30 cm
         espesor = {"0-5cm": 5, "5-15cm": 10, "15-30cm": 15}
         layers = {}
