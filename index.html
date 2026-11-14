@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AllpaWiñay — Sistema de apoyo a la decisión agrícola | NASA Space Apps 2026</title>
+  <title>RotaSat — Sistema de apoyo a la decisión agrícola | NASA Space Apps 2026</title>
   <meta name="description" content="Herramienta de apoyo a la toma de decisiones agrícolas que integra observaciones de la Tierra de la NASA (POWER, GPM, SMAP, NASADEM, HLS) y SoilGrids para recomendar rotaciones de cultivos resilientes." />
 
   <!-- Tipografías oficiales: Public Sans e IBM Plex Mono -->
@@ -17,6 +17,9 @@
 
   <!-- Hoja de estilos principal -->
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/png" href="img/favicon.png" />
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+  <meta name="theme-color" content="#2E7D32" />
 </head>
 <body>
 
@@ -26,12 +29,11 @@
          ================================================================== -->
     <aside class="sidebar-nav" id="sidebar-nav" aria-label="Módulos de control">
       <div class="sidebar-brand">
-        <a href="#tab-simulador" class="sidebar-logo" data-tab-go="tab-simulador">
-          <i data-lucide="wheat" class="icono"></i>
-          <div>
-            <strong>AllpaWiñay</strong>
-            <span class="mono">Space Apps 2026 · Riobamba</span>
-          </div>
+        <a href="#tab-simulador" class="sidebar-logo" data-tab-go="tab-simulador" aria-label="RotaSat, ir al simulador">
+          <img src="img/rotasat-icono.png" alt="" class="sidebar-logo-img" width="96" height="96" />
+          <strong class="sidebar-logo-nombre">Rota<span>Sat</span></strong>
+          <span class="sidebar-logo-lema">Rotación de cultivos con datos de la NASA</span>
+          <span class="sidebar-logo-evento mono">Space Apps 2026 · Riobamba</span>
         </a>
         <button type="button" id="btn-sidebar-toggle" class="sidebar-mobile-toggle" aria-expanded="false" aria-label="Mostrar menú">
           <i data-lucide="menu" class="icono"></i>
@@ -147,7 +149,7 @@
               <div class="mono">Sistema de apoyo a la decisión agrícola</div>
               <h1>Rotación de cultivos resiliente para el agro andino y costero</h1>
               <p class="lead">
-                AllpaWiñay combina observaciones satelitales de la Tierra de la NASA (POWER, GPM, SMAP, NASADEM/SRTM y HLS) con datos edáficos de SoilGrids y el conocimiento del agricultor para planificar secuencias de siembra a 36 meses.
+                RotaSat combina observaciones satelitales de la Tierra de la NASA (POWER, GPM, SMAP, NASADEM/SRTM y HLS) con datos edáficos de SoilGrids y el conocimiento del agricultor para planificar secuencias de siembra a 36 meses.
               </p>
               <div class="hero-actions">
                 <button type="button" class="btn" data-tab-go="tab-terreno">Evaluar mi parcela</button>
@@ -632,7 +634,7 @@
               </summary>
               <div class="explain-details-body">
                 <p style="margin:0; font-size:0.9rem; color:var(--texto-2);">
-                  AllpaWiñay armoniza 6 fuentes de observación de la Tierra de la NASA e ISRIC con distintas resoluciones espaciales y temporales hacia la escala de parcela y paso mensual durante 36 meses.
+                  RotaSat armoniza 6 fuentes de observación de la Tierra de la NASA e ISRIC con distintas resoluciones espaciales y temporales hacia la escala de parcela y paso mensual durante 36 meses.
                 </p>
 
                 <h3 style="margin:8px 0 4px; color:var(--oliva);">1. Armonización multirresolución de sensores NASA y suelo</h3>
@@ -746,7 +748,7 @@
             </div>
             <div class="field-group">
               <label for="cuenta-nombre">Nombre completo</label>
-              <input type="text" id="cuenta-nombre" class="field-input" value="Equipo Técnico AllpaWiñay" />
+              <input type="text" id="cuenta-nombre" class="field-input" value="Equipo Técnico RotaSat" />
             </div>
             <div class="field-group">
               <label for="cuenta-rol">Rol en campo</label>
@@ -771,7 +773,7 @@
       <footer>
         <div class="contenedor">
           <div>
-            <p><strong>Equipo AllpaWiñay</strong> · NASA International Space Apps Challenge 2026 · Sede Riobamba, Ecuador</p>
+            <p><strong>Equipo RotaSat</strong> · NASA International Space Apps Challenge 2026 · Sede Riobamba, Ecuador</p>
             <p>Fuentes de datos: NASA POWER, GPM IMERG, SMAP L4, NASADEM/SRTM, HLS (Landsat 8/9 + Sentinel-2), ISRIC SoilGrids, MAG-SIPA e INIAP.</p>
           </div>
           <div>
