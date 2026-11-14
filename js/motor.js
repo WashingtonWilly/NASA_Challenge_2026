@@ -176,7 +176,9 @@
     const ej = campo => (typeof est[campo] === 'string' && est[campo].startsWith('EJEMPLO')) ? 'EJEMPLO, aún sin dato real — ' : '';
     const evidenciaNasa = [
       `${ej('clima')}NASA POWER (climatología 10 años) + GPM IMERG / SMAP L4 (10 km): la lluvia efectiva cubre el ${bal.coberturaAguaPct}% de la demanda hídrica del plan (${bal.etcTotal} mm); considera la anomalía regional de ${anomaliaPct > 0 ? '+' : ''}${anomaliaPct}% en ${parcela.anomalia?.ventana || 'el último trimestre'}.`,
-      `${ej('ndvi')}HLS Landsat 8/9 + Sentinel-2 (30 m): detectó ${mesesDesnudoHist} de ${totalMesesHist} meses (${pctDesnudoHist}%) con suelo descubierto (NDVI < 0.25); esta rotación sincroniza la cobertura vegetal con los picos de lluvia.`,
+      (parcela.ndvi_mensual || []).length
+        ? `${ej('ndvi')}HLS Landsat 8/9 + Sentinel-2 (30 m): detectó ${mesesDesnudoHist} de ${totalMesesHist} meses (${pctDesnudoHist}%) con suelo descubierto (NDVI < 0.25); esta rotación sincroniza la cobertura vegetal con los picos de lluvia.`
+        : `HLS Landsat 8/9 + Sentinel-2 (30 m): este lote todavía no tiene historial satelital (se pide a AppEEARS y tarda horas); la recomendación usa clima, suelo y altitud.`,
       `${ej('suelo') || ej('terreno')}NASADEM SRTM (30 m) + ISRIC SoilGrids (250 m): lote a ${altitud} m s.n.m. con pendiente media del ${pendiente}% y suelo ${parcela.suelo?.textura || 'Franco'} (${parcela.suelo?.soc_pct || 2.0}% carbono orgánico, pH ${parcela.suelo?.ph || 6.0}).`
     ];
 

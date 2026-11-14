@@ -70,6 +70,13 @@ Al terminar imprime el **estado de los datos** de cada parcela. Todo lo que siga
 también queda marcado así en la app (campo `fuente` y `estado_datos`): **no se presenta como dato satelital**.
 La app también muestra la etiqueta **EJEMPLO** junto a cada fuente (clima, terreno, NDVI) mientras el dato no sea real.
 
+### Lote dibujado por el usuario (cualquier parcela del Ecuador)
+Al dibujar un polígono en el mapa, `js/datos_vivo.js` consulta en vivo desde el navegador
+**NASA POWER** (clima 2015–2024 y anomalía de lluvia), **NASA SRTM 30 m** vía OpenTopoData (altitud,
+pendiente y orientación con 5 puntos) e **ISRIC SoilGrids** (suelo). El recuadro bajo el mapa muestra qué
+fuente respondió (✅) y cuál no (⚠️, queda marcada EJEMPLO). El historial NDVI (HLS) de un lote nuevo
+requiere un pedido a AppEEARS y no se consulta en vivo.
+
 > Nota: `test_cordura.js` espera una anomalía de lluvia < −15 % en Chimborazo. Con datos reales esa
 > condición puede no cumplirse; si esa prueba falla, es el dato real, no un error del motor.
 

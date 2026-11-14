@@ -208,23 +208,17 @@
         state.drawnItems.addLayer(layer);
 
         const latlngs = layer.getLatLngs()[0] || [];
-        const areaHa = calcularAreaPoligonoHa(latlngs);
-        const bounds = layer.getBounds();
-        const center = bounds.getCenter();
+        const lote = crearLoteDibujado(obtenerParcelaActual(), latlngs, layer.getBounds().getCenter());
+        state.parcelasActivas[lote.id] = lote;
+        state.parcelasOriginales[lote.id] = clonar(lote);
+        state.parcelaActualId = lote.id;
+        state.rotacionSeleccionadaGraficoId = 'recomendada_1';
+        document.querySelectorAll('[data-parcela-id]').forEach(b => b.classList.remove('active'));
 
-        const p = obtenerParcelaActual();
-        p.area_ha = areaHa;
-        p.centroide = {
-          lat: Number(center.lat.toFixed(4)),
-          lon: Number(center.lng.toFixed(4))
-        };
-        p.geometria = {
-          type: 'Polygon',
-          coordinates: [latlngs.map(pt => [Number(pt.lng.toFixed(5)), Number(pt.lat.toFixed(5))])]
-        };
-
-        layer.bindPopup(crearPopupParcelaHtml(p)).openPopup();
+        sincronizarControlesPaso2ConParcela();
+        layer.bindPopup(crearPopupParcelaHtml(lote)).openPopup();
         actualizarTodo();
+        cargarDatosLoteEnVivo(lote, layer);
       });
     }
 
@@ -244,6 +238,96 @@
         </div>
       </div>
     `;
+  }
+
+  /**
+   * Lote dibujado por el usuario: parte de la parcela de demo seleccionada solo como respaldo
+   * y marca TODO como pendiente hasta que respondan los datos en vivo (js/datos_vivo.js).
+   */
+  function crearLoteDibujado(base, latlngs, center) {
+    const lat = Number(center.lat.toFixed(5)), lon = Number(center.lng.toFixed(5));
+    const lote = clonar(base);
+    lote.id = 'lote_dibujado';
+    lote.nombre = 'Lote dibujado por el usuario';
+    lote.ubicacion_texto = `Lat ${lat.toFixed(4)}, Lon ${lon.toFixed(4)}`;
+    lote.area_ha = calcularAreaPoligonoHa(latlngs);
+    lote.centroide = { lat, lon };
+    lote.geometria = {
+      type: 'Polygon',
+      coordinates: [latlngs.map(pt => [Number(pt.lng.toFixed(5)), Number(pt.lat.toFixed(5))])
+        .concat(latlngs.length ? [[Number(latlngs[0].lng.toFixed(5)), Number(latlngs[0].lat.toFixed(5))]] : [])]
+    };
+    const cargando = 'EJEMPLO (consultando datos en vivo; mientras tanto, valores de la parcela de demo)';
+    lote.estado_datos = {
+      clima: cargando, anomalia: cargando, suelo: cargando, terreno: cargando,
+      ndvi: 'SIN DATO: lote nuevo; el historial HLS se pide a AppEEARS (tarda horas)', smap: 'sin dato'
+    };
+    lote.anomalia = Object.assign({}, lote.anomalia, { fuente: 'EJEMPLO (consultando NASA POWER…)' });
+    lote.suelo = Object.assign({}, lote.suelo, { fuente: 'EJEMPLO (consultando SoilGrids…)', editado_por_usuario: false });
+    lote.ndvi_mensual = [];
+    lote.historia_inferida = [];
+    delete lote.smap;
+    return lote;
+  }
+
+  function mostrarEstadoDatosVivo(filas, mensaje) {
+    const el = document.getElementById('estado-datos-vivo');
+    if (!el) return;
+    el.hidden = false;
+    const icono = v => v === null ? '⏳' : (v ? '✅' : '⚠️');
+    el.innerHTML = `<strong>${mensaje}</strong><ul>` +
+      filas.map(f => `<li>${icono(f.ok)} ${f.texto}</li>`).join('') + '</ul>';
+  }
+
+  async function cargarDatosLoteEnVivo(lote, layer) {
+    if (!window.DatosVivo) return;
+    const token = (state.tokenLote = (state.tokenLote || 0) + 1);
+    const filas = {
+      terreno: { texto: 'Altitud y pendiente · NASA SRTM 30 m', ok: null },
+      clima: { texto: 'Clima 2015–2024 · NASA POWER', ok: null },
+      anomalia: { texto: 'Anomalía de lluvia · NASA POWER', ok: null },
+      suelo: { texto: 'Suelo · ISRIC SoilGrids 250 m', ok: null },
+      ndvi: { texto: 'Historial satelital HLS: solo con pedido a AppEEARS (tarda horas)', ok: false }
+    };
+    const pintar = msg => mostrarEstadoDatosVivo(Object.values(filas), msg);
+    pintar('Consultando datos de la NASA para su lote…');
+
+    const r = await window.DatosVivo.cargar(lote.centroide.lat, lote.centroide.lon, (fuente, ok) => {
+      if (token !== state.tokenLote || !filas[fuente]) return;
+      filas[fuente].ok = ok;
+      pintar('Consultando datos de la NASA para su lote…');
+    });
+    if (token !== state.tokenLote) return; // el usuario dibujó otro lote mientras tanto
+
+    const p = state.parcelasActivas[lote.id];
+    if (!p) return;
+    const falla = 'EJEMPLO (no respondió el servicio; se mantienen valores de la parcela de demo)';
+    if (r.terreno) {
+      Object.assign(p.terreno, r.terreno);
+      p.region = r.region || p.region;
+      p.estado_datos.terreno = 'NASA SRTM 30 m (vía OpenTopoData), 5 puntos';
+    } else { p.estado_datos.terreno = falla; }
+    if (r.clima) {
+      p.clima_mensual = r.clima.meses;
+      p.estado_datos.clima = `NASA POWER 2015–2024 (diario, AG); T corregida ${r.clima.dT >= 0 ? '+' : ''}${r.clima.dT.toFixed(1)} °C por altitud`;
+    } else { p.estado_datos.clima = falla; }
+    if (r.anomalia) {
+      p.anomalia = r.anomalia;
+      p.estado_datos.anomalia = `NASA POWER PRECTOTCORR, ${r.anomalia.ventana} vs ${r.anomalia.anios_referencia}`;
+    } else { p.estado_datos.anomalia = falla; p.anomalia.fuente = falla; }
+    if (r.suelo) {
+      p.suelo = r.suelo;
+      p.estado_datos.suelo = 'ISRIC SoilGrids 250 m (0–30 cm)';
+    } else { p.estado_datos.suelo = falla; p.suelo.fuente = falla; }
+    state.parcelasOriginales[lote.id] = clonar(p);
+
+    const nOk = ['terreno', 'clima', 'anomalia', 'suelo'].filter(k => r[k]).length;
+    pintar(nOk === 4
+      ? 'Listo: su lote ya usa datos reales de la NASA y SoilGrids.'
+      : `Se cargaron ${nOk} de 4 fuentes; lo demás queda marcado como EJEMPLO.`);
+    sincronizarControlesPaso2ConParcela();
+    if (layer) layer.setPopupContent(crearPopupParcelaHtml(p));
+    actualizarTodo();
   }
 
   function dibujarPoligonoParcelaActual(centrar) {
@@ -317,13 +401,19 @@
     return !!(e && typeof e[campo] === 'string' && e[campo].startsWith('EJEMPLO'));
   }
 
+  function sinDato(parcela, campo) {
+    const e = parcela && parcela.estado_datos;
+    return !!(e && typeof e[campo] === 'string' && e[campo].startsWith('SIN DATO'));
+  }
+
   function marcarFuente(id, parcela, campo, textoReal) {
     const el = document.getElementById(id);
     if (!el) return;
     if (!el.dataset.textoReal) el.dataset.textoReal = textoReal || el.textContent;
     const ejemplo = esEjemplo(parcela, campo);
-    el.textContent = ejemplo ? `Ejemplo · ${el.dataset.textoReal}` : el.dataset.textoReal;
-    el.classList.toggle('tag-ejemplo', ejemplo);
+    const falta = sinDato(parcela, campo);
+    el.textContent = ejemplo ? `Ejemplo · ${el.dataset.textoReal}` : (falta ? `Sin dato · ${el.dataset.textoReal}` : el.dataset.textoReal);
+    el.classList.toggle('tag-ejemplo', ejemplo || falta);
     el.title = (parcela.estado_datos && parcela.estado_datos[campo]) || '';
   }
 
@@ -339,7 +429,12 @@
     const tagBal = document.getElementById('tag-chart-balance');
     if (tagBal) tagBal.hidden = !esEjemplo(parcela, 'clima');
     const tagHls = document.getElementById('tag-chart-hls');
-    if (tagHls) tagHls.hidden = !esEjemplo(parcela, 'ndvi');
+    if (tagHls) {
+      tagHls.hidden = !(esEjemplo(parcela, 'ndvi') || sinDato(parcela, 'ndvi'));
+      tagHls.textContent = sinDato(parcela, 'ndvi')
+        ? 'Lote nuevo: el historial satelital se pide a AppEEARS (tarda horas)'
+        : 'Ejemplo: sin CSV satelital';
+    }
 
     const cuadras = haACuadras(parcela.area_ha);
     document.getElementById('kpi-area-val').innerHTML = `${parcela.area_ha} <span class="unidad">ha</span>`;
@@ -400,7 +495,12 @@
 
     const mesesDesnudo = (parcela.ndvi_mensual || []).filter(m => m.ndvi < 0.25).length;
     const totalObs = (parcela.ndvi_mensual || []).length || 24;
-    if (mesesDesnudo >= 8) {
+    if (!(parcela.ndvi_mensual || []).length) {
+      badges.push({
+        clase: 'alerta',
+        texto: 'Sin dato · Historial de suelo desnudo (HLS) no disponible para este lote'
+      });
+    } else if (mesesDesnudo >= 8) {
       badges.push({
         clase: 'alerta',
         texto: `Medio · Suelo desnudo frecuente: ${mesesDesnudo} de ${totalObs} meses con NDVI < 0.25`
@@ -946,6 +1046,9 @@
         if (!state.parcelasActivas[nuevoId]) return;
         state.parcelaActualId = nuevoId;
         state.rotacionSeleccionadaGraficoId = 'recomendada_1';
+        state.tokenLote = (state.tokenLote || 0) + 1;
+        const estVivo = document.getElementById('estado-datos-vivo');
+        if (estVivo) estVivo.hidden = true;
 
         document.querySelectorAll('[data-parcela-id]').forEach(b => b.classList.remove('active'));
         this.classList.add('active');

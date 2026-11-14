@@ -1242,3 +1242,15 @@ footer a:hover {
     margin-right: 16px;
   }
 }
+
+/* Estado de la consulta en vivo de un lote dibujado (js/datos_vivo.js) */
+.estado-datos-vivo {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: 1px solid #D6CDB4;
+  border-radius: 10px;
+  background: #FBF8F0;
+  font-size: 0.85rem;
+}
+.estado-datos-vivo ul { margin: 6px 0 0; padding-left: 4px; list-style: none; }
+.estado-datos-vivo li { margin: 2px 0; }
