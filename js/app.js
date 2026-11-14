@@ -61,8 +61,8 @@
     if (typeof Chart === 'undefined') return;
     Chart.defaults.font.family = "'Public Sans', sans-serif";
     Chart.defaults.font.size = 12;
-    Chart.defaults.color = '#5F6B58';
-    Chart.defaults.borderColor = '#D3DECA';
+    Chart.defaults.color = '#6B6450';
+    Chart.defaults.borderColor = '#D6CDB4';
     if (Chart.defaults.plugins && Chart.defaults.plugins.legend && Chart.defaults.plugins.legend.labels) {
       Chart.defaults.plugins.legend.labels.boxWidth = 12;
     }
@@ -177,14 +177,14 @@
             allowIntersection: false,
             showArea: true,
             shapeOptions: {
-              color: '#1565C0',
+              color: '#A6512B',
               weight: 2,
               fillOpacity: 0.25
             }
           },
           rectangle: {
             shapeOptions: {
-              color: '#1565C0',
+              color: '#A6512B',
               weight: 2,
               fillOpacity: 0.25
             }
@@ -236,9 +236,9 @@
   function crearPopupParcelaHtml(parcela) {
     const cuadras = haACuadras(parcela.area_ha);
     return `
-      <div style="font-family: 'Public Sans', sans-serif; min-width: 210px; color: #1F2A1D;">
-        <strong style="font-size: 0.92rem; color: #2E7D32;">${parcela.nombre}</strong>
-        <div style="font-size: 0.82rem; color: #4A5446; margin-top: 4px; font-variant-numeric: tabular-nums;">
+      <div style="font-family: 'Public Sans', sans-serif; min-width: 210px; color: #2B2A22;">
+        <strong style="font-size: 0.92rem; color: #3E4A1E;">${parcela.nombre}</strong>
+        <div style="font-size: 0.82rem; color: #5A5440; margin-top: 4px; font-variant-numeric: tabular-nums;">
           Ubicación: ${parcela.ubicacion_texto}<br/>
           Superficie: <b>${parcela.area_ha} ha</b> (${cuadras} cuadras)<br/>
           Altitud: <b>${fmtMiles(parcela.terreno.elev_m)} m s.n.m.</b> · Pendiente: <b>${parcela.terreno.pendiente_pct} %</b><br/>
@@ -399,7 +399,7 @@
       const latlngs = coords.map(par => [par[1], par[0]]);
       const colorBorde = parcela.terreno.pendiente_pct > 25
         ? '#9B2C1F'
-        : (parcela.terreno.pendiente_pct >= 12 ? '#B7791F' : '#2E7D32');
+        : (parcela.terreno.pendiente_pct >= 12 ? '#B7791F' : '#4F6B1F');
 
       const poly = L.polygon(latlngs, {
         color: colorBorde,
@@ -901,7 +901,7 @@
             type: 'bar',
             label: 'Lluvia efectiva Pef (mm/mes)',
             data: dataPef,
-            backgroundColor: '#64A0DC',
+            backgroundColor: '#6F8A9A',
             borderWidth: 0
           },
           {
@@ -926,7 +926,7 @@
             align: 'start',
             labels: {
               boxWidth: 12,
-              color: '#5F6B58',
+              color: '#6B6450',
               font: { family: "'Public Sans', sans-serif", size: 12 }
             }
           },
@@ -950,24 +950,24 @@
               minRotation: 45,
               autoSkip: true,
               maxTicksLimit: 18,
-              color: '#5F6B58',
+              color: '#6B6450',
               font: { family: "'Public Sans', sans-serif", size: 11 }
             }
           },
           y: {
             beginAtZero: true,
             grid: {
-              color: '#D3DECA',
+              color: '#D6CDB4',
               lineWidth: 1
             },
             ticks: {
-              color: '#5F6B58',
+              color: '#6B6450',
               font: { family: "'Public Sans', sans-serif", size: 12 }
             },
             title: {
               display: true,
               text: 'Agua mensual (mm)',
-              color: '#5F6B58',
+              color: '#6B6450',
               font: { family: "'Public Sans', sans-serif", size: 12 }
             }
           }
@@ -1002,7 +1002,7 @@
           {
             label: esEjemplo(parcela, 'ndvi') ? 'NDVI de ejemplo (sin CSV satelital)' : 'NDVI (vegetación)',
             data: dataNdvi,
-            borderColor: '#2E7D32',
+            borderColor: '#3E4A1E',
             backgroundColor: 'transparent',
             borderWidth: 2,
             fill: false,
@@ -1012,7 +1012,7 @@
           {
             label: 'NDTI (rastrojo / labranza)',
             data: dataNdti,
-            borderColor: '#6D4C41',
+            borderColor: '#A6512B',
             backgroundColor: 'transparent',
             borderWidth: 2,
             fill: false,
@@ -1043,7 +1043,7 @@
             align: 'start',
             labels: {
               boxWidth: 12,
-              color: '#5F6B58',
+              color: '#6B6450',
               font: { family: "'Public Sans', sans-serif", size: 12 }
             }
           }
@@ -1054,7 +1054,7 @@
               display: false
             },
             ticks: {
-              color: '#5F6B58',
+              color: '#6B6450',
               font: { family: "'Public Sans', sans-serif", size: 11 }
             }
           },
@@ -1062,17 +1062,17 @@
             min: 0,
             max: 1.0,
             grid: {
-              color: '#D3DECA',
+              color: '#D6CDB4',
               lineWidth: 1
             },
             ticks: {
-              color: '#5F6B58',
+              color: '#6B6450',
               font: { family: "'Public Sans', sans-serif", size: 12 }
             },
             title: {
               display: true,
               text: 'Índice espectral (0 a 1)',
-              color: '#5F6B58',
+              color: '#6B6450',
               font: { family: "'Public Sans', sans-serif", size: 12 }
             }
           }
