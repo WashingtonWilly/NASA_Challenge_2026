@@ -1,7 +1,7 @@
 /**
  * app.js — Capa C: Controlador interactivo de interfaz, mapa satelital Leaflet + Leaflet.draw,
  * gráficos Chart.js (balance hídrico 36m + historial HLS NDVI/NDTI) y explicabilidad NASA.
- * Alineado con AllpaWiñay — Guía de estilo visual.
+ * Alineado con RotaSat — Guía de estilo visual.
  */
 (function () {
   'use strict';

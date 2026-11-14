@@ -1,11 +1,13 @@
-# 🌾 AllpaWiñay — DSS de Rotación de Cultivos con Datos Satelitales NASA
+<p align="center"><img src="img/rotasat-logo-completo.png" alt="RotaSat" width="260"></p>
+
+# 🛰️ RotaSat — DSS de Rotación de Cultivos con Datos Satelitales NASA
 **NASA Space Apps Challenge 2026 · Reto: *"Field Shift: Adapting Farms with NASA Data"***
 **Sede:** Riobamba, Ecuador (Sierra Central y Litoral Ecuatoriano)
 
 ---
 
 ## 🎯 Resumen Ejecutivo
-**AllpaWiñay** (*Tierra que crece y perdura* en kichwa) es un **Sistema de Apoyo a la Toma de Decisiones (DSS)** centrado en el agricultor que combina **6 fuentes de observación de la Tierra de la NASA e ISRIC** con conocimiento agronómico local (INIAP, FAO-56, MAG-SIPA) para evaluar en **menos de 35 milisegundos** cientos de secuencias de rotación de cultivos a 3 años (36 meses).
+**RotaSat** (rotación de cultivos + satélite) es un **Sistema de Apoyo a la Toma de Decisiones (DSS)** centrado en el agricultor que combina **6 fuentes de observación de la Tierra de la NASA e ISRIC** con conocimiento agronómico local (INIAP, FAO-56, MAG-SIPA) para evaluar en **menos de 35 milisegundos** cientos de secuencias de rotación de cultivos a 3 años (36 meses).
 
 La herramienta compara la **práctica actual del agricultor** frente a **3 estrategias de rotación resilientes**, explicando para cada una:
 1. **¿Por qué se sugiere?** (Sincronía Carbono/Nitrógeno, corte de ciclos de plagas y alternancia de arquitectura radicular).
