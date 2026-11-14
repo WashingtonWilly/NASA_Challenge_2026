@@ -5,15 +5,34 @@ para las parcelas de demostración:
 1. Sierra (Licto / Guano, Chimborazo, 2.950 m, pendiente 14 %, historia Papa 2024 → Papa 2025)
 2. Costa (El Guabo / Machala, El Oro, 28 m, pendiente 4 %, historia Maíz duro 2024 → Arroz 2025)
 3. Caso Borde Ladera Andina (Colta, Chimborazo, 3.180 m, pendiente 28 % > 25 % y riesgo de helada)
+
+Flujo:
+  1. Parte de los valores de EJEMPLO de cada parcela (construir_parcelas_ejemplo).
+  2. Los reemplaza por datos reales cuando hay conexión o archivos:
+       - Clima mensual 2015–2024: NASA POWER (con corrección de temperatura por altitud).
+       - Anomalía de lluvia de los últimos 3 meses: NASA POWER (PRECTOTCORR).
+       - Suelo 0–30 cm: ISRIC SoilGrids 250 m.
+       - NDVI / NDTI mensual: HLS Landsat + Sentinel-2, desde los CSV de AppEEARS en data/appeears/.
+       - Humedad radicular: SMAP L4, desde los mismos CSV de AppEEARS.
+  3. Todo lo que siga siendo de ejemplo queda marcado como "EJEMPLO" en su campo "fuente"
+     y en parcela["estado_datos"], para que nunca se presente como dato satelital.
+
+Uso:  python scripts/generar_parcelas.py          (con internet)
+      python scripts/generar_parcelas.py --offline (solo lee CSV locales)
 """
 import json
 import os
+import sys
 from hls import inferir_historia_desde_ndvi
+from power import obtener_clima_mensual_power, anomalia_lluvia_power
+from soil import consultar_soilgrids
+from appeears import leer_carpeta, serie_ndvi_parcela, smap_parcela
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def construir_parcelas():
+def construir_parcelas_ejemplo():
+    """Valores de EJEMPLO (escritos a mano). Solo se usan si no hay dato real."""
     # 1. Parcela Sierra: Licto, Chimborazo (2.950 m)
     ndvi_chimborazo = [
         {"mes": "2023-11", "ndvi": 0.34, "ndti": 0.11, "n_obs": 2, "interpolado": False},
@@ -263,8 +282,62 @@ def construir_parcelas():
     return [parcela_chimborazo, parcela_el_oro, parcela_colta]
 
 
+EJEMPLO = "EJEMPLO (dato provisional, falta dato real)"
+
+
+def enriquecer_con_datos_reales(p, obs_hls, obs_smap, online=True):
+    """Reemplaza cada bloque de ejemplo por el dato real disponible y deja registro en estado_datos."""
+    lat, lon = p["centroide"]["lat"], p["centroide"]["lon"]
+    estado = {"clima": EJEMPLO, "anomalia": EJEMPLO, "suelo": EJEMPLO, "ndvi": EJEMPLO,
+              "smap": "sin dato", "terreno": "EJEMPLO (verificar con NASADEM 30 m)"}
+
+    if online:
+        clima = obtener_clima_mensual_power(lat, lon, elev_parcela_m=p["terreno"]["elev_m"])
+        if clima:
+            p["clima_mensual"] = clima["meses"]
+            estado["clima"] = (f"NASA POWER {clima['periodo']} (diario, AG); T corregida "
+                               f"{clima['correccion_T_C']:+.1f} °C por altitud (celda a {clima['elev_celda_m']} m)")
+        anom = anomalia_lluvia_power(lat, lon)
+        if anom:
+            p["anomalia"] = anom
+            estado["anomalia"] = f"NASA POWER PRECTOTCORR, {anom['ventana']} vs {anom['anios_referencia']}"
+        suelo = consultar_soilgrids(lat, lon)
+        if suelo:
+            # Andisol: suelos volcánicos andinos (Sierra) con carbono orgánico alto
+            suelo["es_andisol"] = p["region"].startswith("Sierra") and suelo["soc_pct"] >= 2.0
+            p["suelo"] = suelo
+            estado["suelo"] = "ISRIC SoilGrids 250 m (0–30 cm)"
+
+    serie = serie_ndvi_parcela(obs_hls, lat, lon)
+    if serie:
+        p["ndvi_mensual"] = serie
+        p["historia_inferida"] = inferir_historia_desde_ndvi(serie)
+        n = sum(s["n_obs"] for s in serie)
+        estado["ndvi"] = f"HLS Landsat + Sentinel-2 (30 m) vía AppEEARS: {n} observaciones sin nubes, {len(serie)} meses"
+    sm = smap_parcela(obs_smap, lat, lon)
+    if sm:
+        p["smap"] = sm
+        estado["smap"] = sm["fuente"]
+        if estado["anomalia"] != EJEMPLO:
+            p["anomalia"]["mensaje"] += (f" Humedad del suelo SMAP: {sm['sm_rootzone_m3m3']} m³/m³ "
+                                         f"({sm['anomalia_pct']:+d} % frente a su promedio).")
+
+    # Marcar explícitamente lo que sigue siendo de ejemplo
+    if estado["anomalia"] == EJEMPLO:
+        p["anomalia"]["fuente"] = EJEMPLO
+        p["anomalia"]["mensaje"] = "EJEMPLO: " + p["anomalia"]["mensaje"]
+    if estado["suelo"] == EJEMPLO:
+        p["suelo"]["fuente"] = EJEMPLO
+    p["estado_datos"] = estado
+    return p
+
+
 def main():
-    parcelas = construir_parcelas()
+    online = "--offline" not in sys.argv
+    obs_hls, obs_smap = leer_carpeta(os.path.join(BASE_DIR, "data", "appeears"))
+    print(f"AppEEARS: {len(obs_hls)} observaciones HLS sin nubes y {len(obs_smap)} de SMAP en data/appeears/")
+    parcelas = [enriquecer_con_datos_reales(p, obs_hls, obs_smap, online) for p in construir_parcelas_ejemplo()]
+
     for p in parcelas:
         ruta_parcela = os.path.join(BASE_DIR, "data", "parcelas", f"{p['id']}.json")
         with open(ruta_parcela, "w", encoding="utf-8") as f:
@@ -303,7 +376,13 @@ def main():
     with open(ruta_embebidos, "w", encoding="utf-8") as f:
         f.write(contenido_js)
 
-    print("Generados:", len(parcelas), "archivos parcela.json, GeoJSON y js/datos_embebidos.js")
+    print("Generados:", len(parcelas), "archivos parcela.json, GeoJSON y js/datos_embebidos.js\n")
+    print("ESTADO DE LOS DATOS (todo lo que diga EJEMPLO no es dato satelital):")
+    for p in parcelas:
+        print(f"\n  {p['nombre']}")
+        for k, v in p["estado_datos"].items():
+            marca = "  ⚠" if v.startswith("EJEMPLO") else ("  ·" if v == "sin dato" else "  ✓")
+            print(f"   {marca} {k:9s} {v}")
 
 
 if __name__ == "__main__":

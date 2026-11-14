@@ -140,14 +140,14 @@
     }
   ],
   "anomalia": {
-    "fuente": "GPM IMERG + SMAP L4",
+    "fuente": "EJEMPLO (dato provisional, falta dato real)",
     "res_km": 10,
     "pct": -21,
     "ventana": "ago–oct 2026",
-    "mensaje": "Su zona viene 21 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
+    "mensaje": "EJEMPLO: Su zona viene 21 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
   },
   "suelo": {
-    "fuente": "SoilGrids 250 m",
+    "fuente": "EJEMPLO (dato provisional, falta dato real)",
     "textura": "Franco",
     "arcilla_pct": 28.0,
     "arena_pct": 36.0,
@@ -387,5 +387,13 @@
     "maiz_duro",
     "arroz"
   ],
-  "nematodo_declarado": false
+  "nematodo_declarado": false,
+  "estado_datos": {
+    "clima": "EJEMPLO (dato provisional, falta dato real)",
+    "anomalia": "EJEMPLO (dato provisional, falta dato real)",
+    "suelo": "EJEMPLO (dato provisional, falta dato real)",
+    "ndvi": "EJEMPLO (dato provisional, falta dato real)",
+    "smap": "sin dato",
+    "terreno": "EJEMPLO (verificar con NASADEM 30 m)"
+  }
 }
