@@ -519,9 +519,33 @@
       });
     }
 
-    vulnContainer.innerHTML = badges
+    const badgesHtml = badges
       .map(b => `<span class="estado ${b.clase}">${b.texto}</span>`)
       .join('');
+    vulnContainer.innerHTML = badgesHtml;
+
+    const vulnMirror = document.getElementById('vuln-badges-mirror');
+    if (vulnMirror) vulnMirror.innerHTML = badgesHtml;
+
+    // Actualizar tarjeta "Parcela en memoria" y badge de vulnerabilidades en la barra lateral
+    const sbNombre = document.getElementById('sidebar-parcela-nombre');
+    const sbArea = document.getElementById('sidebar-parcela-area');
+    const sbElev = document.getElementById('sidebar-parcela-elev');
+    const sbPend = document.getElementById('sidebar-parcela-pend');
+    if (sbNombre) sbNombre.textContent = parcela.nombre || 'Parcela activa';
+    if (sbArea) sbArea.textContent = `${parcela.area_ha} ha`;
+    if (sbElev) sbElev.textContent = `${fmtMiles(parcela.terreno.elev_m)} m`;
+    if (sbPend) sbPend.textContent = `${parcela.terreno.pendiente_pct} %`;
+
+    const sbVuln = document.getElementById('sidebar-vuln-badge');
+    if (sbVuln) {
+      const tieneAlto = badges.some(b => b.clase === 'riesgo');
+      const tieneMedio = badges.some(b => b.clase === 'alerta');
+      const nivel = tieneAlto ? 'Alto' : (tieneMedio ? 'Medio' : 'Bajo');
+      const claseExtra = tieneAlto ? '' : (tieneMedio ? ' medio' : ' bajo');
+      sbVuln.className = `sidebar-badge-status${claseExtra}`;
+      sbVuln.innerHTML = `<span class="status-dot" aria-hidden="true"></span>${nivel}`;
+    }
   }
 
   /**
@@ -1249,9 +1273,111 @@
   }
 
   /**
+   * Configura la navegación tipo Single Page Application (Vertical Tabs) en la barra lateral
+   */
+  function configurarSidebarTabs() {
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const btnToggle = document.getElementById('btn-sidebar-toggle');
+    const tabButtons = document.querySelectorAll('.sidebar-item[data-tab-target]');
+    const tabPanels = document.querySelectorAll('[data-tab-panel]');
+
+    function activarPestana(targetId) {
+      if (!targetId) return;
+
+      tabButtons.forEach(btn => {
+        const esActivo = btn.getAttribute('data-tab-target') === targetId;
+        btn.classList.toggle('activo', esActivo);
+        btn.setAttribute('aria-selected', esActivo ? 'true' : 'false');
+      });
+
+      tabPanels.forEach(panel => {
+        const esActivo = panel.id === targetId;
+        panel.classList.toggle('activo', esActivo);
+        panel.hidden = !esActivo;
+      });
+
+      if (sidebarNav) {
+        sidebarNav.classList.remove('abierto');
+      }
+      if (btnToggle) {
+        btnToggle.setAttribute('aria-expanded', 'false');
+      }
+
+      if (targetId === 'tab-terreno' && state.map) {
+        setTimeout(() => {
+          state.map.invalidateSize();
+          dibujarPoligonoParcelaActual(false);
+        }, 60);
+      }
+
+      if (targetId === 'tab-rotaciones') {
+        setTimeout(() => {
+          if (state.chartBalance) state.chartBalance.resize();
+          if (state.chartHLS) state.chartHLS.resize();
+        }, 60);
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        activarPestana(btn.getAttribute('data-tab-target'));
+      });
+    });
+
+    document.querySelectorAll('[data-tab-go]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        const targetId = el.getAttribute('data-tab-go');
+        if (targetId) {
+          e.preventDefault();
+          activarPestana(targetId);
+        }
+      });
+    });
+
+    if (btnToggle && sidebarNav) {
+      btnToggle.addEventListener('click', () => {
+        const abierto = sidebarNav.classList.toggle('abierto');
+        btnToggle.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+      });
+    }
+
+    const btnExportar = document.getElementById('btn-exportar-parcela');
+    if (btnExportar) {
+      btnExportar.addEventListener('click', () => {
+        const parcela = obtenerParcelaActual();
+        const blob = new Blob([JSON.stringify(parcela, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${parcela.id || 'parcela'}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    const btnAdminReset = document.getElementById('btn-admin-reset');
+    if (btnAdminReset) {
+      btnAdminReset.addEventListener('click', () => {
+        Object.keys(state.parcelasOriginales).forEach(id => {
+          state.parcelas[id] = clonar(state.parcelasOriginales[id]);
+        });
+        state.opciones.escenarioLluviaPct = 0;
+        sincronizarControlesPaso2ConParcela();
+        actualizarTodo();
+        dibujarPoligonoParcelaActual(true);
+      });
+    }
+  }
+
+  /**
    * Configura todos los eventos de botones, sliders e inputs
    */
   function configurarEventos() {
+    configurarSidebarTabs();
     configurarPanelUbicacion();
 
     const onSoilChange = () => {

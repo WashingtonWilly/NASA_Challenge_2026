@@ -20,115 +20,202 @@
 </head>
 <body>
 
-  <!-- ====================================================================
-       1. FRANJA SUPERIOR
-       ==================================================================== -->
-  <div class="banda-top">
-    <div class="banda-top-inner">
-      <span>Proyecto para NASA International Space Apps Challenge 2026 · Riobamba</span>
-      <span class="lang-switch"><strong>ES</strong> / EN</span>
-    </div>
-  </div>
-
-  <!-- ====================================================================
-       2. BARRA DE NAVEGACIÓN
-       ==================================================================== -->
-  <nav class="nav-principal" aria-label="Navegación principal">
-    <div class="nav-inner">
-      <a href="#" class="logo">
-        <i data-lucide="wheat" class="icono"></i>
-        <span>AllpaWiñay</span>
-      </a>
-      <div class="nav-links">
-        <a href="#paso-1" class="nav-link activo">Mi terreno</a>
-        <a href="#paso-2" class="nav-link">Suelo y prioridades</a>
-        <a href="#paso-3" class="nav-link">Comparar rotaciones</a>
-        <a href="#panel-calculo" class="nav-link">Metodología NASA</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- ====================================================================
-       3. HERO INSTITUCIONAL CON CURVAS DE NIVEL Y TARJETA DE DATOS
-       ==================================================================== -->
-  <header class="hero">
-    <div class="contenedor">
-      <div>
-        <div class="mono">Sistema de apoyo a la decisión agrícola</div>
-        <h1>Rotación de cultivos resiliente para el agro andino y costero</h1>
-        <p class="lead">
-          AllpaWiñay combina observaciones satelitales de la Tierra de la NASA (POWER, GPM, SMAP, NASADEM/SRTM y HLS) con datos edáficos de SoilGrids y el conocimiento del agricultor para planificar secuencias de siembra a 36 meses.
-        </p>
-        <div class="hero-actions">
-          <a href="#paso-1" class="btn">Evaluar mi parcela</a>
-          <a href="#panel-calculo">Ver cómo lo calculamos</a>
-        </div>
+  <div class="app-shell">
+    <!-- ==================================================================
+         BARRA LATERAL FIJA (NAVEGACIÓN EN PESTAÑAS VERTICALES)
+         ================================================================== -->
+    <aside class="sidebar-nav" id="sidebar-nav" aria-label="Módulos de control">
+      <div class="sidebar-brand">
+        <a href="#tab-simulador" class="sidebar-logo" data-tab-go="tab-simulador">
+          <i data-lucide="wheat" class="icono"></i>
+          <div>
+            <strong>AllpaWiñay</strong>
+            <span class="mono">RotaSat · Space Apps 2026</span>
+          </div>
+        </a>
+        <button type="button" id="btn-sidebar-toggle" class="sidebar-mobile-toggle" aria-expanded="false" aria-label="Mostrar menú">
+          <i data-lucide="menu" class="icono"></i>
+        </button>
       </div>
 
-      <!-- Tarjeta de datos del lote y monitoreo regional -->
-      <aside class="card-datos" id="anomaly-card" aria-label="Resumen satelital activo">
-        <h3>
-          <span><i data-lucide="satellite" class="icono"></i> <span id="anomaly-title">Monitoreo satelital activo</span></span>
-          <span id="anomaly-state-badge" class="estado alerta">Medio</span>
-        </h3>
-        <p id="anomaly-message" style="font-size:0.85rem; color:var(--texto-2); margin:0 0 10px;">
-          Cargando anomalía trimestral de precipitaciones y humedad superficial del suelo...
-        </p>
-        <div class="fila">
-          <span>Sensores hidrológicos</span>
-          <span id="anomaly-sensor-pill">GPM IMERG + SMAP L4 (10 km)</span>
-        </div>
-        <div class="fila">
-          <span>Ponderación hídrica en IRR</span>
-          <span id="anomaly-weight-pill" class="tabular-nums">38 % del índice</span>
-        </div>
-        <div class="fila">
-          <span>Resolución topográfica y óptica</span>
-          <span class="tabular-nums">30 <span class="unidad">m</span> (NASADEM / HLS)</span>
-        </div>
-      </aside>
-    </div>
+      <div class="sidebar-body" id="sidebar-body">
+        <div class="sidebar-section-label">Módulos de control</div>
 
-    <!-- Tarjetas de pasos (3 columnas, borde superior 3 px) -->
-    <div class="contenedor pasos-strip">
-      <div class="pasos">
-        <a href="#paso-1" class="paso activo">
-          <div class="paso-meta">
-            <i data-lucide="map" class="icono"></i>
-            <span class="mono">Paso 1</span>
+        <nav class="sidebar-menu" role="tablist" aria-orientation="vertical">
+          <button type="button" class="sidebar-item activo" role="tab" aria-selected="true" data-tab-target="tab-simulador">
+            <span class="sidebar-item-left">
+              <i data-lucide="compass" class="icono"></i>
+              <span>Simulador RotaSat</span>
+            </span>
+          </button>
+
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-terreno">
+            <span class="sidebar-item-left">
+              <i data-lucide="map" class="icono"></i>
+              <span>Mi terreno</span>
+            </span>
+          </button>
+
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-suelo">
+            <span class="sidebar-item-left">
+              <i data-lucide="sprout" class="icono"></i>
+              <span>Suelo y prioridades</span>
+            </span>
+          </button>
+
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-rotaciones">
+            <span class="sidebar-item-left">
+              <i data-lucide="shuffle" class="icono"></i>
+              <span>Comparar rotaciones</span>
+            </span>
+          </button>
+
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-satelites">
+            <span class="sidebar-item-left">
+              <i data-lucide="satellite" class="icono"></i>
+              <span>Satélites y sensores</span>
+            </span>
+            <span class="sidebar-badge-num">8</span>
+          </button>
+
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-vulnerabilidades">
+            <span class="sidebar-item-left">
+              <i data-lucide="shield-alert" class="icono"></i>
+              <span>Vulnerabilidades</span>
+            </span>
+            <span id="sidebar-vuln-badge" class="sidebar-badge-status alto">
+              <span class="status-dot"></span>
+              <span class="status-text">Alto</span>
+            </span>
+          </button>
+
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-metodologia">
+            <span class="sidebar-item-left">
+              <i data-lucide="calculator" class="icono"></i>
+              <span>Metodología NASA</span>
+            </span>
+          </button>
+
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-admin">
+            <span class="sidebar-item-left">
+              <i data-lucide="settings" class="icono"></i>
+              <span>Administración</span>
+            </span>
+          </button>
+
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-cuenta">
+            <span class="sidebar-item-left">
+              <i data-lucide="user" class="icono"></i>
+              <span>Acceso y cuenta</span>
+            </span>
+          </button>
+        </nav>
+
+        <!-- Tarjeta inferior: Parcela en memoria -->
+        <div class="sidebar-memory-card" aria-label="Parcela en memoria">
+          <div class="sidebar-memory-title">
+            <i data-lucide="database" class="icono"></i>
+            <span>Parcela en memoria</span>
           </div>
-          <h3>Mi terreno</h3>
-          <p>Seleccione una parcela o dibuje los linderos para extraer relieve, clima y vulnerabilidades.</p>
-        </a>
-        <a href="#paso-2" class="paso">
-          <div class="paso-meta">
-            <i data-lucide="sprout" class="icono"></i>
-            <span class="mono">Paso 2</span>
+          <div id="sidebar-parcela-nombre" class="sidebar-memory-name">Licto / Guamote</div>
+          <div class="sidebar-memory-meta tabular-nums">
+            <span id="sidebar-parcela-area">1.8 ha</span> ·
+            <span id="sidebar-parcela-elev">2 950 m</span> ·
+            <span id="sidebar-parcela-pend">14 %</span>
           </div>
-          <h3>Suelo y prioridades</h3>
-          <p>Ajuste textura, carbono orgánico y pH, declare los cultivos previos y pondere sus metas.</p>
-        </a>
-        <a href="#paso-3" class="paso">
-          <div class="paso-meta">
-            <i data-lucide="shuffle" class="icono"></i>
-            <span class="mono">Paso 3</span>
-          </div>
-          <h3>Comparar rotaciones</h3>
-          <p>Contraste las 3 rotaciones más resilientes frente a su práctica actual y revise el balance hídrico.</p>
-        </a>
+        </div>
       </div>
-    </div>
-  </header>
-
-  <!-- ====================================================================
-       CONTENIDO PRINCIPAL EN 3 PASOS
-       ==================================================================== -->
-  <main class="main-container">
+    </aside>
 
     <!-- ==================================================================
-         PASO 1: MI TERRENO (MAPA SATELITAL + TELEMETRÍA NASA)
+         ÁREA PRINCIPAL DE CONTENIDO (SPA POR PESTAÑAS)
          ================================================================== -->
-    <section id="paso-1" class="step-section">
+    <div class="app-main">
+      <!-- Franja superior -->
+      <div class="banda-top">
+        <div class="banda-top-inner">
+          <span>Proyecto para NASA International Space Apps Challenge 2026 · Riobamba</span>
+          <span class="lang-switch"><strong>ES</strong> / EN</span>
+        </div>
+      </div>
+
+      <!-- MÓDULO 0 (POR DEFECTO): SIMULADOR ROTASAT -->
+      <div id="tab-simulador" class="tab-panel activo" data-tab-panel="tab-simulador" role="tabpanel">
+        <header class="hero">
+          <div class="contenedor">
+            <div>
+              <div class="mono">Sistema de apoyo a la decisión agrícola</div>
+              <h1>Rotación de cultivos resiliente para el agro andino y costero</h1>
+              <p class="lead">
+                AllpaWiñay combina observaciones satelitales de la Tierra de la NASA (POWER, GPM, SMAP, NASADEM/SRTM y HLS) con datos edáficos de SoilGrids y el conocimiento del agricultor para planificar secuencias de siembra a 36 meses.
+              </p>
+              <div class="hero-actions">
+                <button type="button" class="btn" data-tab-go="tab-terreno">Evaluar mi parcela</button>
+                <a href="#tab-metodologia" data-tab-go="tab-metodologia">Ver cómo lo calculamos</a>
+              </div>
+            </div>
+
+            <!-- Tarjeta de datos del lote y monitoreo regional -->
+            <aside class="card-datos" id="anomaly-card" aria-label="Resumen satelital activo">
+              <h3>
+                <span><i data-lucide="satellite" class="icono"></i> <span id="anomaly-title">Monitoreo satelital activo</span></span>
+                <span id="anomaly-state-badge" class="estado alerta">Medio</span>
+              </h3>
+              <p id="anomaly-message" style="font-size:0.85rem; color:var(--texto-2); margin:0 0 10px;">
+                Cargando anomalía trimestral de precipitaciones y humedad superficial del suelo...
+              </p>
+              <div class="fila">
+                <span>Sensores hidrológicos</span>
+                <span id="anomaly-sensor-pill">GPM IMERG + SMAP L4 (10 km)</span>
+              </div>
+              <div class="fila">
+                <span>Ponderación hídrica en IRR</span>
+                <span id="anomaly-weight-pill" class="tabular-nums">38 % del índice</span>
+              </div>
+              <div class="fila">
+                <span>Resolución topográfica y óptica</span>
+                <span class="tabular-nums">30 <span class="unidad">m</span> (NASADEM / HLS)</span>
+              </div>
+            </aside>
+          </div>
+
+          <!-- Tarjetas de pasos (3 columnas, borde superior 3 px) -->
+          <div class="contenedor pasos-strip">
+            <div class="pasos">
+              <a href="#tab-terreno" class="paso activo" data-tab-go="tab-terreno">
+                <div class="paso-meta">
+                  <i data-lucide="map" class="icono"></i>
+                  <span class="mono">Paso 1</span>
+                </div>
+                <h3>Mi terreno</h3>
+                <p>Seleccione una parcela o dibuje los linderos para extraer relieve, clima y vulnerabilidades.</p>
+              </a>
+              <a href="#tab-suelo" class="paso" data-tab-go="tab-suelo">
+                <div class="paso-meta">
+                  <i data-lucide="sprout" class="icono"></i>
+                  <span class="mono">Paso 2</span>
+                </div>
+                <h3>Suelo y prioridades</h3>
+                <p>Ajuste textura, carbono orgánico y pH, declare los cultivos previos y pondere sus metas.</p>
+              </a>
+              <a href="#tab-rotaciones" class="paso" data-tab-go="tab-rotaciones">
+                <div class="paso-meta">
+                  <i data-lucide="shuffle" class="icono"></i>
+                  <span class="mono">Paso 3</span>
+                </div>
+                <h3>Comparar rotaciones</h3>
+                <p>Contraste las 3 rotaciones más resilientes frente a su práctica actual y revise el balance hídrico.</p>
+              </a>
+            </div>
+          </div>
+        </header>
+      </div>
+
+      <!-- CONTENIDO PRINCIPAL DE MÓDULOS -->
+      <main class="main-container">
+
+        <!-- MÓDULO 1: MI TERRENO -->
+        <section id="tab-terreno" class="step-section tab-panel" data-tab-panel="tab-terreno" role="tabpanel" hidden>
       <div class="step-header">
         <div class="mono"><i data-lucide="map" class="icono"></i> Paso 1</div>
         <h2>Mi terreno y diagnóstico satelital de la parcela</h2>
@@ -254,10 +341,8 @@
       </div>
     </section>
 
-    <!-- ==================================================================
-         PASO 2: MI SUELO, HISTORIAL Y PRIORIDADES DEL AGRICULTOR
-         ================================================================== -->
-    <section id="paso-2" class="step-section">
+        <!-- MÓDULO 2: MI SUELO, HISTORIAL Y PRIORIDADES -->
+        <section id="tab-suelo" class="step-section tab-panel" data-tab-panel="tab-suelo" role="tabpanel" hidden>
       <div class="step-header">
         <div class="mono"><i data-lucide="sprout" class="icono"></i> Paso 2</div>
         <h2>Mi suelo, historial de siembra y prioridades</h2>
@@ -399,10 +484,8 @@
       </div>
     </section>
 
-    <!-- ==================================================================
-         PASO 3: COMPARATIVA DE ROTACIONES (TOP 3 + PRÁCTICA ACTUAL + GRÁFICOS)
-         ================================================================== -->
-    <section id="paso-3" class="step-section">
+        <!-- MÓDULO 3: COMPARATIVA DE ROTACIONES -->
+        <section id="tab-rotaciones" class="step-section tab-panel" data-tab-panel="tab-rotaciones" role="tabpanel" hidden>
       <div class="step-header">
         <div class="mono"><i data-lucide="shuffle" class="icono"></i> Paso 3</div>
         <h2>Comparativa de estrategias de rotación a 3 años (36 meses)</h2>
@@ -456,94 +539,243 @@
         </div>
       </div>
 
-      <!-- Panel desplegable "Ver cómo lo calculamos" -->
-      <div id="panel-calculo" style="margin-top: 24px;">
-        <details open>
-          <summary>
-            <span><i data-lucide="satellite" class="icono"></i> Ver cómo lo calculamos — Armonización de satélites NASA y modelo matemático IRR</span>
-            <i data-lucide="chevron-down" class="icono"></i>
-          </summary>
-          <div class="explain-details-body">
-            <p style="margin:0; font-size:0.9rem; color:var(--texto-2);">
-              AllpaWiñay armoniza 6 fuentes de observación de la Tierra de la NASA e ISRIC con distintas resoluciones espaciales y temporales hacia la escala de parcela y paso mensual durante 36 meses.
-            </p>
+        </section>
 
-            <h3 style="margin:8px 0 4px; color:var(--oliva);">1. Armonización multirresolución de sensores NASA y suelo</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Fuente / misión</th>
-                  <th>Variables extraídas</th>
-                  <th>Resolución nativa</th>
-                  <th>Armonización en la parcela</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>NASA POWER</strong> (MERRA-2 / CERES)</td>
-                  <td><code>PRECTOTCORR</code>, <code>T2M_MAX</code>, <code>T2M_MIN</code>, <code>ALLSKY_SFC_SW_DWN</code></td>
-                  <td class="num">~50 <span class="unidad">km</span>, diario</td>
-                  <td>Climatología mensual en el centroide del lote; radiación extraterrestre Ra y ET₀ por Hargreaves (FAO-56).</td>
-                </tr>
-                <tr>
-                  <td><strong>NASA GPM IMERG + SMAP L4</strong></td>
-                  <td>Anomalía trimestral de lluvia (%) y humedad radicular</td>
-                  <td class="num">10 <span class="unidad">km</span> / 9 <span class="unidad">km</span></td>
-                  <td>Si la anomalía regional cae bajo -15 %, pondera por <code>1.3×</code> el peso hídrico antes de normalizar el IRR.</td>
-                </tr>
-                <tr>
-                  <td><strong>NASADEM / SRTM</strong> (LP DAAC)</td>
-                  <td>Elevación media, pendiente media y máxima, orientación</td>
-                  <td class="num">30 <span class="unidad">m</span>, estático</td>
-                  <td>Estadística zonal dentro del polígono; define piso térmico y coeficiente de escorrentía superficial.</td>
-                </tr>
-                <tr>
-                  <td><strong>NASA HLS</strong> (<code>HLSL30</code> + <code>HLSS30</code>)</td>
-                  <td>Bandas Red, NIR, SWIR1, SWIR2 → series de <code>NDVI</code> y <code>NDTI</code></td>
-                  <td class="num">30 <span class="unidad">m</span>, 2–3 días</td>
-                  <td>Enmascaramiento de nubes Fmask y mediana mensual para cuantificar meses de suelo desnudo (<code>NDVI &lt; 0.25</code>).</td>
-                </tr>
-                <tr>
-                  <td><strong>ISRIC SoilGrids v2.0</strong></td>
-                  <td>Textura, carbono orgánico (<code>soc</code>), nitrógeno y <code>pH</code> (0–30 cm)</td>
-                  <td class="num">250 <span class="unidad">m</span>, estático</td>
-                  <td>Promedio ponderado de 0 a 30 cm; editable por el agricultor cuando dispone de análisis de suelo local.</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <h3 style="margin:8px 0 4px; color:var(--oliva);">2. Formulación del motor agronómico e índice IRR</h3>
-            <div class="formula-card">
-              ET0 = 0.0023 * (T_med + 17.8) * sqrt(T_max - T_min) * (0.408 * R_a) * dias_mes<br/>
-              P_ef(m) = f_pend(SRTM) * f_FAO(P_m) + Reserva_Andisol(SOC)<br/>
-              ET_c(m) = K_c(etapa) * ET0(m)  |  Deficit D(m) = max(0, ET_c(m) - P_ef(m))<br/><br/>
-              IRR = w_H2O * I_H2O + w_N * I_N + w_MOS * I_MOS + w_rent * I_rent<br/>
-              I_H2O = 1 - [ sum(D(m)) / sum(ET_c(m)) ]<br/>
-              I_N   = clip((sum(Creditos_N) - sum(Extracciones_N) + 300) / 600, 0, 1) + Bono_CN - Penal_Inmov<br/>
-              I_MOS = clip(sum(Residuo_i * h_i * f_forraje) / 4.5, 0, 1) - Penal_Raiz + Bono_Ladera<br/>
-              I_rent = clip(sum(Margen_i) / Max_Margen_Zona, 0, 1) + Bono_Diversificacion
+        <!-- MÓDULO 4: SATÉLITES Y SENSORES (8) -->
+        <section id="tab-satelites" class="step-section tab-panel" data-tab-panel="tab-satelites" role="tabpanel" hidden>
+          <div class="step-header">
+            <div class="mono"><i data-lucide="satellite" class="icono"></i> Constelación activa (8)</div>
+            <h2>Satélites y sensores integrados en la parcela</h2>
+            <p>Fuentes de observación de la Tierra de la NASA y cartografía edáfica que alimentan el motor agronómico.</p>
+          </div>
+          <div class="vetados-grid">
+            <div class="card-datos">
+              <h3><span>NASA POWER</span><span class="mono">~50 km</span></h3>
+              <div class="fila"><span>Variables</span><span>Precipitación, Tmax, Tmin</span></div>
+              <div class="fila"><span>Frecuencia</span><span>Serie diaria / 10 años</span></div>
+            </div>
+            <div class="card-datos">
+              <h3><span>GPM IMERG</span><span class="mono">10 km</span></h3>
+              <div class="fila"><span>Variables</span><span>Anomalía trimestral de lluvia</span></div>
+              <div class="fila"><span>Frecuencia</span><span>Mensual en vivo</span></div>
+            </div>
+            <div class="card-datos">
+              <h3><span>SMAP L4</span><span class="mono">9 km</span></h3>
+              <div class="fila"><span>Variables</span><span>Humedad radicular</span></div>
+              <div class="fila"><span>Frecuencia</span><span>Balance hídrico inicial</span></div>
+            </div>
+            <div class="card-datos">
+              <h3><span>NASADEM</span><span class="mono">30 m</span></h3>
+              <div class="fila"><span>Variables</span><span>Elevación y piso térmico</span></div>
+              <div class="fila"><span>Frecuencia</span><span>Estático zonal</span></div>
+            </div>
+            <div class="card-datos">
+              <h3><span>SRTM</span><span class="mono">30 m</span></h3>
+              <div class="fila"><span>Variables</span><span>Pendiente y escorrentía</span></div>
+              <div class="fila"><span>Frecuencia</span><span>Estático zonal</span></div>
+            </div>
+            <div class="card-datos">
+              <h3><span>Landsat 8 / 9 (HLS)</span><span class="mono">30 m</span></h3>
+              <div class="fila"><span>Variables</span><span>NDVI y NDTI histórico</span></div>
+              <div class="fila"><span>Frecuencia</span><span>Cada 2–3 días (Fmask)</span></div>
+            </div>
+            <div class="card-datos">
+              <h3><span>Sentinel-2 (HLS)</span><span class="mono">30 m</span></h3>
+              <div class="fila"><span>Variables</span><span>Verdor y suelo descubierto</span></div>
+              <div class="fila"><span>Frecuencia</span><span>Armonizado con Landsat</span></div>
+            </div>
+            <div class="card-datos">
+              <h3><span>ISRIC SoilGrids v2.0</span><span class="mono">250 m</span></h3>
+              <div class="fila"><span>Variables</span><span>Textura, SOC y pH (0–30 cm)</span></div>
+              <div class="fila"><span>Frecuencia</span><span>Editable en campo</span></div>
             </div>
           </div>
-        </details>
-      </div>
-    </section>
+        </section>
 
-  </main>
+        <!-- MÓDULO 5: VULNERABILIDADES -->
+        <section id="tab-vulnerabilidades" class="step-section tab-panel" data-tab-panel="tab-vulnerabilidades" role="tabpanel" hidden>
+          <div class="step-header">
+            <div class="mono"><i data-lucide="shield-alert" class="icono"></i> Diagnóstico de riesgo</div>
+            <h2>Vulnerabilidades detectadas en la parcela activa</h2>
+            <p>Resumen consolidado de riesgos de erosión por pendiente, heladas nocturnas, suelo descubierto y pausas fitosanitarias.</p>
+          </div>
+          <div class="vulnerability-card">
+            <h3><i data-lucide="shield-check" class="icono"></i> Semáforo de vulnerabilidades del lote</h3>
+            <div id="vuln-badges-mirror" class="vuln-badges">
+              <span class="estado alerta">Seleccione o revise una parcela en "Mi terreno" para actualizar</span>
+            </div>
+          </div>
+          <div style="margin-top: 16px;">
+            <button type="button" class="btn-sec" data-tab-go="tab-terreno">
+              <i data-lucide="map" class="icono"></i> Ir al mapa y ajustar linderos
+            </button>
+          </div>
+        </section>
 
-  <!-- ====================================================================
-       PIE DE PÁGINA
-       ==================================================================== -->
-  <footer>
-    <div class="contenedor">
-      <div>
-        <p><strong>Equipo AllpaWiñay</strong> · NASA International Space Apps Challenge 2026 · Sede Riobamba, Ecuador</p>
-        <p>Fuentes de datos: NASA POWER, GPM IMERG, SMAP L4, NASADEM/SRTM, HLS (Landsat 8/9 + Sentinel-2), ISRIC SoilGrids, MAG-SIPA e INIAP.</p>
-      </div>
-      <div>
-        <a href="https://github.com/WashingtonWilly/NASA_Challenge_2026" target="_blank" rel="noopener">Repositorio en GitHub</a>
-      </div>
-    </div>
-  </footer>
+        <!-- MÓDULO 6: METODOLOGÍA NASA -->
+        <section id="tab-metodologia" class="step-section tab-panel" data-tab-panel="tab-metodologia" role="tabpanel" hidden>
+          <div class="step-header">
+            <div class="mono"><i data-lucide="calculator" class="icono"></i> Transparencia científica</div>
+            <h2>Metodología NASA y modelo matemático IRR</h2>
+            <p>Armonización de los productos orbitales e ISRIC hacia la escala mensual de parcela a 36 meses.</p>
+          </div>
+          <div id="panel-calculo">
+            <details open>
+              <summary>
+                <span><i data-lucide="satellite" class="icono"></i> Ver cómo lo calculamos — Armonización de satélites NASA y modelo matemático IRR</span>
+                <i data-lucide="chevron-down" class="icono"></i>
+              </summary>
+              <div class="explain-details-body">
+                <p style="margin:0; font-size:0.9rem; color:var(--texto-2);">
+                  AllpaWiñay armoniza 6 fuentes de observación de la Tierra de la NASA e ISRIC con distintas resoluciones espaciales y temporales hacia la escala de parcela y paso mensual durante 36 meses.
+                </p>
+
+                <h3 style="margin:8px 0 4px; color:var(--oliva);">1. Armonización multirresolución de sensores NASA y suelo</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Fuente / misión</th>
+                      <th>Variables extraídas</th>
+                      <th>Resolución nativa</th>
+                      <th>Armonización en la parcela</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>NASA POWER</strong> (MERRA-2 / CERES)</td>
+                      <td><code>PRECTOTCORR</code>, <code>T2M_MAX</code>, <code>T2M_MIN</code>, <code>ALLSKY_SFC_SW_DWN</code></td>
+                      <td class="num">~50 <span class="unidad">km</span>, diario</td>
+                      <td>Climatología mensual en el centroide del lote; radiación extraterrestre Ra y ET₀ por Hargreaves (FAO-56).</td>
+                    </tr>
+                    <tr>
+                      <td><strong>NASA GPM IMERG + SMAP L4</strong></td>
+                      <td>Anomalía trimestral de lluvia (%) y humedad radicular</td>
+                      <td class="num">10 <span class="unidad">km</span> / 9 <span class="unidad">km</span></td>
+                      <td>Si la anomalía regional cae bajo -15 %, pondera por <code>1.3×</code> el peso hídrico antes de normalizar el IRR.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>NASADEM / SRTM</strong> (LP DAAC)</td>
+                      <td>Elevación media, pendiente media y máxima, orientación</td>
+                      <td class="num">30 <span class="unidad">m</span>, estático</td>
+                      <td>Estadística zonal dentro del polígono; define piso térmico y coeficiente de escorrentía superficial.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>NASA HLS</strong> (<code>HLSL30</code> + <code>HLSS30</code>)</td>
+                      <td>Bandas Red, NIR, SWIR1, SWIR2 → series de <code>NDVI</code> y <code>NDTI</code></td>
+                      <td class="num">30 <span class="unidad">m</span>, 2–3 días</td>
+                      <td>Enmascaramiento de nubes Fmask y mediana mensual para cuantificar meses de suelo desnudo (<code>NDVI &lt; 0.25</code>).</td>
+                    </tr>
+                    <tr>
+                      <td><strong>ISRIC SoilGrids v2.0</strong></td>
+                      <td>Textura, carbono orgánico (<code>soc</code>), nitrógeno y <code>pH</code> (0–30 cm)</td>
+                      <td class="num">250 <span class="unidad">m</span>, estático</td>
+                      <td>Promedio ponderado de 0 a 30 cm; editable por el agricultor cuando dispone de análisis de suelo local.</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h3 style="margin:8px 0 4px; color:var(--oliva);">2. Formulación del motor agronómico e índice IRR</h3>
+                <div class="formula-card">
+                  ET0 = 0.0023 * (T_med + 17.8) * sqrt(T_max - T_min) * (0.408 * R_a) * dias_mes<br/>
+                  P_ef(m) = f_pend(SRTM) * f_FAO(P_m) + Reserva_Andisol(SOC)<br/>
+                  ET_c(m) = K_c(etapa) * ET0(m)  |  Deficit D(m) = max(0, ET_c(m) - P_ef(m))<br/><br/>
+                  IRR = w_H2O * I_H2O + w_N * I_N + w_MOS * I_MOS + w_rent * I_rent<br/>
+                  I_H2O = 1 - [ sum(D(m)) / sum(ET_c(m)) ]<br/>
+                  I_N   = clip((sum(Creditos_N) - sum(Extracciones_N) + 300) / 600, 0, 1) + Bono_CN - Penal_Inmov<br/>
+                  I_MOS = clip(sum(Residuo_i * h_i * f_forraje) / 4.5, 0, 1) - Penal_Raiz + Bono_Ladera<br/>
+                  I_rent = clip(sum(Margen_i) / Max_Margen_Zona, 0, 1) + Bono_Diversificacion
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- MÓDULO 7: ADMINISTRACIÓN -->
+        <section id="tab-admin" class="step-section tab-panel" data-tab-panel="tab-admin" role="tabpanel" hidden>
+          <div class="step-header">
+            <div class="mono"><i data-lucide="settings" class="icono"></i> Gestión de datos</div>
+            <h2>Administración del catálogo y parcelas</h2>
+            <p>Respalde la configuración de la parcela activa en formato JSON o restaure los valores de demostración.</p>
+          </div>
+          <div class="paso2-grid">
+            <div class="panel-card">
+              <div class="panel-card-header">
+                <h3><i data-lucide="database" class="icono"></i> Exportar parcela activa</h3>
+              </div>
+              <p style="font-size:0.85rem; color:var(--texto-2); margin:0;">
+                Descargue un archivo JSON con los linderos, parámetros edáficos e historial declarado de la parcela en memoria.
+              </p>
+              <div>
+                <button type="button" id="btn-exportar-parcela" class="btn-sec">
+                  <i data-lucide="download" class="icono"></i> Descargar parcela.json
+                </button>
+              </div>
+            </div>
+            <div class="panel-card">
+              <div class="panel-card-header">
+                <h3><i data-lucide="rotate-ccw" class="icono"></i> Restablecer entorno</h3>
+              </div>
+              <p style="font-size:0.85rem; color:var(--texto-2); margin:0;">
+                Vuelve a los valores iniciales de demostración (Licto, El Guabo y Colta) y limpia ediciones locales.
+              </p>
+              <div>
+                <button type="button" id="btn-admin-reset" class="btn-sec">
+                  Restaurar datos originales
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MÓDULO 8: ACCESO Y CUENTA -->
+        <section id="tab-cuenta" class="step-section tab-panel" data-tab-panel="tab-cuenta" role="tabpanel" hidden>
+          <div class="step-header">
+            <div class="mono"><i data-lucide="user" class="icono"></i> Perfil de campo</div>
+            <h2>Acceso y cuenta de usuario</h2>
+            <p>Configure su perfil de agricultor o técnico extensionista para personalizar los reportes de campo.</p>
+          </div>
+          <div class="panel-card" style="max-width: 560px;">
+            <div class="panel-card-header">
+              <h3><i data-lucide="user" class="icono"></i> Datos del responsable</h3>
+              <span class="estado ok">Sesión local activa</span>
+            </div>
+            <div class="field-group">
+              <label for="cuenta-nombre">Nombre completo</label>
+              <input type="text" id="cuenta-nombre" class="field-input" value="Equipo Técnico AllpaWiñay" />
+            </div>
+            <div class="field-group">
+              <label for="cuenta-rol">Rol en campo</label>
+              <select id="cuenta-rol" class="field-select">
+                <option value="agricultor">Agricultor / Productor</option>
+                <option value="tecnico" selected>Técnico agrónomo (MAG / INIAP)</option>
+                <option value="investigador">Investigador / Jurado Space Apps</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="cuenta-zona">Zona de trabajo principal</label>
+              <input type="text" id="cuenta-zona" class="field-input" value="Riobamba, Chimborazo — Ecuador" />
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- ==================================================================
+           PIE DE PÁGINA
+           ================================================================== -->
+      <footer>
+        <div class="contenedor">
+          <div>
+            <p><strong>Equipo AllpaWiñay</strong> · NASA International Space Apps Challenge 2026 · Sede Riobamba, Ecuador</p>
+            <p>Fuentes de datos: NASA POWER, GPM IMERG, SMAP L4, NASADEM/SRTM, HLS (Landsat 8/9 + Sentinel-2), ISRIC SoilGrids, MAG-SIPA e INIAP.</p>
+          </div>
+          <div>
+            <a href="https://github.com/WashingtonWilly/NASA_Challenge_2026" target="_blank" rel="noopener">Repositorio en GitHub</a>
+          </div>
+        </div>
+      </footer>
+    </div><!-- /.app-main -->
+  </div><!-- /.app-shell -->
 
   <!-- Scripts Externos: Lucide Icons, Leaflet, Leaflet.draw y Chart.js -->
   <script src="https://unpkg.com/lucide@latest"></script>
