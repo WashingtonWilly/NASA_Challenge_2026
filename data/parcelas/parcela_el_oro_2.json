@@ -1,0 +1,391 @@
+{
+  "id": "parcela_el_oro_2",
+  "nombre": "Parcela 2 — Costa (El Guabo, El Oro)",
+  "region": "Costa",
+  "ubicacion_texto": "Sector Río Bonito / El Guabo, El Oro (Zona de ciclo corto)",
+  "geometria": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -79.8335,
+          -3.2438
+        ],
+        [
+          -79.8315,
+          -3.2438
+        ],
+        [
+          -79.8315,
+          -3.2454
+        ],
+        [
+          -79.8335,
+          -3.2454
+        ],
+        [
+          -79.8335,
+          -3.2438
+        ]
+      ]
+    ]
+  },
+  "area_ha": 3.5,
+  "centroide": {
+    "lat": -3.2446,
+    "lon": -79.8325
+  },
+  "terreno": {
+    "elev_m": 28,
+    "pendiente_pct": 4.0,
+    "pendiente_max_pct": 7.0,
+    "orientacion": "O"
+  },
+  "clima_mensual": [
+    {
+      "mes": 1,
+      "nombre_mes": "Ene",
+      "P_mm": 145,
+      "ET0_mm": 122,
+      "Tmin_abs": 21.2,
+      "Tmed": 26.4
+    },
+    {
+      "mes": 2,
+      "nombre_mes": "Feb",
+      "P_mm": 195,
+      "ET0_mm": 116,
+      "Tmin_abs": 21.5,
+      "Tmed": 26.8
+    },
+    {
+      "mes": 3,
+      "nombre_mes": "Mar",
+      "P_mm": 180,
+      "ET0_mm": 126,
+      "Tmin_abs": 21.4,
+      "Tmed": 26.9
+    },
+    {
+      "mes": 4,
+      "nombre_mes": "Abr",
+      "P_mm": 110,
+      "ET0_mm": 120,
+      "Tmin_abs": 21.0,
+      "Tmed": 26.5
+    },
+    {
+      "mes": 5,
+      "nombre_mes": "May",
+      "P_mm": 42,
+      "ET0_mm": 112,
+      "Tmin_abs": 19.8,
+      "Tmed": 25.4
+    },
+    {
+      "mes": 6,
+      "nombre_mes": "Jun",
+      "P_mm": 18,
+      "ET0_mm": 98,
+      "Tmin_abs": 18.6,
+      "Tmed": 24.1
+    },
+    {
+      "mes": 7,
+      "nombre_mes": "Jul",
+      "P_mm": 14,
+      "ET0_mm": 96,
+      "Tmin_abs": 18.1,
+      "Tmed": 23.6
+    },
+    {
+      "mes": 8,
+      "nombre_mes": "Ago",
+      "P_mm": 12,
+      "ET0_mm": 102,
+      "Tmin_abs": 18.0,
+      "Tmed": 23.8
+    },
+    {
+      "mes": 9,
+      "nombre_mes": "Sep",
+      "P_mm": 15,
+      "ET0_mm": 108,
+      "Tmin_abs": 18.4,
+      "Tmed": 24.2
+    },
+    {
+      "mes": 10,
+      "nombre_mes": "Oct",
+      "P_mm": 19,
+      "ET0_mm": 114,
+      "Tmin_abs": 18.9,
+      "Tmed": 24.6
+    },
+    {
+      "mes": 11,
+      "nombre_mes": "Nov",
+      "P_mm": 24,
+      "ET0_mm": 118,
+      "Tmin_abs": 19.4,
+      "Tmed": 25.1
+    },
+    {
+      "mes": 12,
+      "nombre_mes": "Dic",
+      "P_mm": 58,
+      "ET0_mm": 124,
+      "Tmin_abs": 20.5,
+      "Tmed": 25.9
+    }
+  ],
+  "anomalia": {
+    "fuente": "GPM IMERG + SMAP L4",
+    "res_km": 10,
+    "pct": -21,
+    "ventana": "ago–oct 2026",
+    "mensaje": "Su zona viene 21 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
+  },
+  "suelo": {
+    "fuente": "SoilGrids 250 m",
+    "textura": "Franco",
+    "arcilla_pct": 28.0,
+    "arena_pct": 36.0,
+    "ph": 6.3,
+    "soc_pct": 1.8,
+    "n_gkg": 1.4,
+    "es_andisol": false,
+    "editado_por_usuario": false
+  },
+  "ndvi_mensual": [
+    {
+      "mes": "2023-11",
+      "ndvi": 0.22,
+      "ndti": 0.17,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2023-12",
+      "ndvi": 0.42,
+      "ndti": 0.12,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-01",
+      "ndvi": 0.68,
+      "ndti": 0.07,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-02",
+      "ndvi": 0.77,
+      "ndti": 0.05,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-03",
+      "ndvi": 0.71,
+      "ndti": 0.06,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-04",
+      "ndvi": 0.49,
+      "ndti": 0.15,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-05",
+      "ndvi": 0.26,
+      "ndti": 0.19,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-06",
+      "ndvi": 0.21,
+      "ndti": 0.16,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-07",
+      "ndvi": 0.19,
+      "ndti": 0.14,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-08",
+      "ndvi": 0.18,
+      "ndti": 0.12,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-09",
+      "ndvi": 0.19,
+      "ndti": 0.11,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-10",
+      "ndvi": 0.21,
+      "ndti": 0.1,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-11",
+      "ndvi": 0.23,
+      "ndti": 0.11,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-12",
+      "ndvi": 0.48,
+      "ndti": 0.09,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-01",
+      "ndvi": 0.73,
+      "ndti": 0.05,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-02",
+      "ndvi": 0.79,
+      "ndti": 0.04,
+      "n_obs": 1,
+      "interpolado": true
+    },
+    {
+      "mes": "2025-03",
+      "ndvi": 0.75,
+      "ndti": 0.05,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-04",
+      "ndvi": 0.58,
+      "ndti": 0.09,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-05",
+      "ndvi": 0.29,
+      "ndti": 0.18,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-06",
+      "ndvi": 0.22,
+      "ndti": 0.16,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-07",
+      "ndvi": 0.2,
+      "ndti": 0.13,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-08",
+      "ndvi": 0.19,
+      "ndti": 0.11,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-09",
+      "ndvi": 0.18,
+      "ndti": 0.1,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-10",
+      "ndvi": 0.2,
+      "ndti": 0.1,
+      "n_obs": 3,
+      "interpolado": false
+    }
+  ],
+  "historia_inferida": [
+    {
+      "anio": 2023,
+      "ciclos": 0,
+      "meses_cultivo": [],
+      "meses_desnudo": [
+        11
+      ],
+      "meses_residuo": [
+        11
+      ]
+    },
+    {
+      "anio": 2024,
+      "ciclos": 1,
+      "meses_cultivo": [
+        1,
+        2,
+        3
+      ],
+      "meses_desnudo": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "meses_residuo": [
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "anio": 2025,
+      "ciclos": 1,
+      "meses_cultivo": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "meses_desnudo": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "meses_residuo": [
+        5,
+        6
+      ]
+    }
+  ],
+  "historia_declarada": [
+    "maiz_duro",
+    "arroz"
+  ],
+  "nematodo_declarado": false
+}

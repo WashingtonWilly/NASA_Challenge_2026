@@ -1,0 +1,42 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "parcela_el_oro_2",
+        "nombre": "Parcela 2 — Costa (El Guabo, El Oro)",
+        "area_ha": 3.5,
+        "elev_m": 28,
+        "pendiente_pct": 4.0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -79.8335,
+              -3.2438
+            ],
+            [
+              -79.8315,
+              -3.2438
+            ],
+            [
+              -79.8315,
+              -3.2454
+            ],
+            [
+              -79.8335,
+              -3.2454
+            ],
+            [
+              -79.8335,
+              -3.2438
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,387 @@
+{
+  "id": "parcela_colta_3",
+  "nombre": "Parcela 3 (Caso Borde) — Ladera Alta Colta (> 25 % pendiente)",
+  "region": "Sierra Alta (Ladera)",
+  "ubicacion_texto": "Ladera alta de Colta, Chimborazo (3.180 m, pendiente 28 %)",
+  "geometria": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -78.7652,
+          -1.712
+        ],
+        [
+          -78.764,
+          -1.712
+        ],
+        [
+          -78.764,
+          -1.7131
+        ],
+        [
+          -78.7652,
+          -1.7131
+        ],
+        [
+          -78.7652,
+          -1.712
+        ]
+      ]
+    ]
+  },
+  "area_ha": 1.2,
+  "centroide": {
+    "lat": -1.7125,
+    "lon": -78.7646
+  },
+  "terreno": {
+    "elev_m": 3180,
+    "pendiente_pct": 28.0,
+    "pendiente_max_pct": 35.0,
+    "orientacion": "E"
+  },
+  "clima_mensual": [
+    {
+      "mes": 1,
+      "nombre_mes": "Ene",
+      "P_mm": 58,
+      "ET0_mm": 86,
+      "Tmin_abs": 1.8,
+      "Tmed": 11.4
+    },
+    {
+      "mes": 2,
+      "nombre_mes": "Feb",
+      "P_mm": 72,
+      "ET0_mm": 82,
+      "Tmin_abs": 2.2,
+      "Tmed": 11.6
+    },
+    {
+      "mes": 3,
+      "nombre_mes": "Mar",
+      "P_mm": 86,
+      "ET0_mm": 88,
+      "Tmin_abs": 2.1,
+      "Tmed": 11.7
+    },
+    {
+      "mes": 4,
+      "nombre_mes": "Abr",
+      "P_mm": 90,
+      "ET0_mm": 84,
+      "Tmin_abs": 1.9,
+      "Tmed": 11.5
+    },
+    {
+      "mes": 5,
+      "nombre_mes": "May",
+      "P_mm": 55,
+      "ET0_mm": 82,
+      "Tmin_abs": 0.9,
+      "Tmed": 11.1
+    },
+    {
+      "mes": 6,
+      "nombre_mes": "Jun",
+      "P_mm": 30,
+      "ET0_mm": 79,
+      "Tmin_abs": -0.4,
+      "Tmed": 10.2
+    },
+    {
+      "mes": 7,
+      "nombre_mes": "Jul",
+      "P_mm": 19,
+      "ET0_mm": 83,
+      "Tmin_abs": -1.2,
+      "Tmed": 9.8
+    },
+    {
+      "mes": 8,
+      "nombre_mes": "Ago",
+      "P_mm": 22,
+      "ET0_mm": 90,
+      "Tmin_abs": -0.9,
+      "Tmed": 10.1
+    },
+    {
+      "mes": 9,
+      "nombre_mes": "Sep",
+      "P_mm": 40,
+      "ET0_mm": 93,
+      "Tmin_abs": 0.4,
+      "Tmed": 10.8
+    },
+    {
+      "mes": 10,
+      "nombre_mes": "Oct",
+      "P_mm": 74,
+      "ET0_mm": 95,
+      "Tmin_abs": 1.4,
+      "Tmed": 11.4
+    },
+    {
+      "mes": 11,
+      "nombre_mes": "Nov",
+      "P_mm": 78,
+      "ET0_mm": 91,
+      "Tmin_abs": 0.2,
+      "Tmed": 11.5
+    },
+    {
+      "mes": 12,
+      "nombre_mes": "Dic",
+      "P_mm": 64,
+      "ET0_mm": 89,
+      "Tmin_abs": 1.5,
+      "Tmed": 11.4
+    }
+  ],
+  "anomalia": {
+    "fuente": "GPM IMERG + SMAP L4",
+    "res_km": 10,
+    "pct": -18,
+    "ventana": "ago–oct 2026",
+    "mensaje": "Su zona viene 18 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
+  },
+  "suelo": {
+    "fuente": "SoilGrids 250 m",
+    "textura": "Franco",
+    "arcilla_pct": 21.0,
+    "arena_pct": 45.0,
+    "ph": 5.6,
+    "soc_pct": 4.1,
+    "n_gkg": 2.4,
+    "es_andisol": true,
+    "editado_por_usuario": false
+  },
+  "ndvi_mensual": [
+    {
+      "mes": "2023-11",
+      "ndvi": 0.34,
+      "ndti": 0.11,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2023-12",
+      "ndvi": 0.58,
+      "ndti": 0.08,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-01",
+      "ndvi": 0.72,
+      "ndti": 0.06,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-02",
+      "ndvi": 0.76,
+      "ndti": 0.05,
+      "n_obs": 1,
+      "interpolado": true
+    },
+    {
+      "mes": "2024-03",
+      "ndvi": 0.68,
+      "ndti": 0.07,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-04",
+      "ndvi": 0.45,
+      "ndti": 0.12,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-05",
+      "ndvi": 0.24,
+      "ndti": 0.16,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-06",
+      "ndvi": 0.21,
+      "ndti": 0.15,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-07",
+      "ndvi": 0.19,
+      "ndti": 0.11,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-08",
+      "ndvi": 0.18,
+      "ndti": 0.09,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-09",
+      "ndvi": 0.22,
+      "ndti": 0.08,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-10",
+      "ndvi": 0.31,
+      "ndti": 0.1,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-11",
+      "ndvi": 0.56,
+      "ndti": 0.07,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-12",
+      "ndvi": 0.69,
+      "ndti": 0.06,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-01",
+      "ndvi": 0.74,
+      "ndti": 0.05,
+      "n_obs": 1,
+      "interpolado": true
+    },
+    {
+      "mes": "2025-02",
+      "ndvi": 0.71,
+      "ndti": 0.06,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-03",
+      "ndvi": 0.59,
+      "ndti": 0.08,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-04",
+      "ndvi": 0.33,
+      "ndti": 0.14,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-05",
+      "ndvi": 0.22,
+      "ndti": 0.15,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-06",
+      "ndvi": 0.2,
+      "ndti": 0.12,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-07",
+      "ndvi": 0.19,
+      "ndti": 0.1,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-08",
+      "ndvi": 0.18,
+      "ndti": 0.08,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-09",
+      "ndvi": 0.21,
+      "ndti": 0.08,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-10",
+      "ndvi": 0.27,
+      "ndti": 0.09,
+      "n_obs": 2,
+      "interpolado": false
+    }
+  ],
+  "historia_inferida": [
+    {
+      "anio": 2023,
+      "ciclos": 0,
+      "meses_cultivo": [
+        12
+      ],
+      "meses_desnudo": [],
+      "meses_residuo": []
+    },
+    {
+      "anio": 2024,
+      "ciclos": 2,
+      "meses_cultivo": [
+        1,
+        2,
+        3,
+        11,
+        12
+      ],
+      "meses_desnudo": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "meses_residuo": [
+        5,
+        6
+      ]
+    },
+    {
+      "anio": 2025,
+      "ciclos": 1,
+      "meses_cultivo": [
+        1,
+        2,
+        3
+      ],
+      "meses_desnudo": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "meses_residuo": [
+        5
+      ]
+    }
+  ],
+  "historia_declarada": [
+    "papa",
+    "cebada"
+  ],
+  "nematodo_declarado": false
+}

@@ -1,0 +1,42 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "parcela_chimborazo_1",
+        "nombre": "Parcela 1 — Sierra (Licto, Chimborazo)",
+        "area_ha": 1.8,
+        "elev_m": 2950,
+        "pendiente_pct": 14.0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.6132,
+              -1.7842
+            ],
+            [
+              -78.6118,
+              -1.7842
+            ],
+            [
+              -78.6118,
+              -1.7854
+            ],
+            [
+              -78.6132,
+              -1.7854
+            ],
+            [
+              -78.6132,
+              -1.7842
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

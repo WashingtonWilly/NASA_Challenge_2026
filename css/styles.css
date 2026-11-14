@@ -1,0 +1,1235 @@
+/* ==========================================================================
+   AllpaWiñay / KawsaySuyu — DSS de Rotación de Cultivos con Datos NASA
+   NASA Space Apps Challenge 2026 — Riobamba, Ecuador
+   Diseño centrado en el agricultor (Daylight-First High Contrast Field UI)
+   ========================================================================== */
+
+:root {
+  /* Superficies cálidas de alto contraste bajo luz solar */
+  --bg-canvas: #F5F2EB;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #FAF8F4;
+  --bg-subtle: #EDE8DF;
+  --bg-glass: rgba(255, 255, 255, 0.92);
+
+  /* Tipografía de alta legibilidad */
+  --text-primary: #16261C;
+  --text-secondary: #3E5245;
+  --text-muted: #64766A;
+
+  /* Acentos agrícolas y telemetría NASA */
+  --accent-primary: #236B38;
+  --accent-primary-hover: #195229;
+  --accent-primary-soft: #E6F3EA;
+  --accent-terracotta: #B85418;
+  --accent-terracotta-soft: #FCEEE6;
+  --accent-nasa: #0B3D91;
+  --accent-nasa-soft: #E7EFFC;
+
+  /* Semáforo agronómico */
+  --sem-verde-bg: #E6F6EC;
+  --sem-verde-border: #2B8A44;
+  --sem-verde-text: #155727;
+
+  --sem-amarillo-bg: #FFF6E0;
+  --sem-amarillo-border: #D98A00;
+  --sem-amarillo-text: #7A4B00;
+
+  --sem-rojo-bg: #FDECEC;
+  --sem-rojo-border: #C92A2A;
+  --sem-rojo-text: #841717;
+
+  /* Bordes y sombras */
+  --border-subtle: #DCD5C7;
+  --border-strong: #BFB5A2;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 2px 6px rgba(22, 38, 28, 0.06);
+  --shadow-md: 0 6px 20px rgba(22, 38, 28, 0.09);
+  --shadow-lg: 0 12px 32px rgba(22, 38, 28, 0.14);
+
+  /* Fuentes */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular-nums {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Barra Superior (Top Header)
+   ========================================================================== */
+.top-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent-primary), #154723);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+  box-shadow: 0 3px 10px rgba(35, 107, 56, 0.25);
+  flex-shrink: 0;
+}
+
+.brand-titles h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge-nasa {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--accent-nasa);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.brand-subtitle {
+  margin: 2px 0 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.step-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.step-pill {
+  text-decoration: none;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: all 0.18s ease;
+}
+
+.step-pill:hover {
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+}
+
+.btn-cientifico {
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--accent-nasa);
+  background: var(--accent-nasa-soft);
+  color: var(--accent-nasa);
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.18s ease;
+}
+
+.btn-cientifico:hover {
+  background: var(--accent-nasa);
+  color: #fff;
+}
+
+/* ==========================================================================
+   Banner Permanente de Anomalía Climática NASA (GPM + SMAP)
+   ========================================================================== */
+.anomaly-banner {
+  max-width: 1440px;
+  margin: 16px auto 0;
+  padding: 0 24px;
+}
+
+.anomaly-card {
+  background: var(--sem-amarillo-bg);
+  border: 1.5px solid var(--sem-amarillo-border);
+  border-left-width: 6px;
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.anomaly-card.anomaly-normal {
+  background: var(--accent-nasa-soft);
+  border-color: var(--accent-nasa);
+}
+
+.anomaly-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.anomaly-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.anomaly-text strong {
+  display: block;
+  font-size: 0.96rem;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.anomaly-text p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.anomaly-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.anomaly-pill {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Contenedor Principal y Secciones por Paso
+   ========================================================================== */
+.main-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.step-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.step-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+}
+
+.step-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--accent-primary);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-title-group h2 {
+  margin: 0;
+  font-size: 1.32rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.step-title-group p {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   PASO 1: Mi Terreno (Mapa Satelital + Resumen Biofísico)
+   ========================================================================== */
+.parcela-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.parcela-selector-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.parcela-btn {
+  min-height: 46px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.16s ease;
+}
+
+.parcela-btn:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-soft);
+}
+
+.parcela-btn.active {
+  background: var(--accent-primary);
+  color: #fff;
+  border-color: var(--accent-primary);
+  box-shadow: 0 3px 10px rgba(35, 107, 56, 0.25);
+}
+
+.terreno-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.map-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.map-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: var(--bg-elevated);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.84rem;
+}
+
+.map-container {
+  width: 100%;
+  height: 410px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-strong);
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.terreno-telemetry {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.telemetry-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.kpi-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.kpi-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.kpi-source-tag {
+  font-size: 0.68rem;
+  background: var(--accent-nasa-soft);
+  color: var(--accent-nasa);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.kpi-value {
+  margin-top: 6px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.kpi-sub {
+  margin-top: 3px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.vulnerability-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.vulnerability-card h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vuln-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vuln-badge {
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vuln-badge.alto {
+  background: var(--sem-rojo-bg);
+  color: var(--sem-rojo-text);
+  border: 1px solid var(--sem-rojo-border);
+}
+
+.vuln-badge.medio {
+  background: var(--sem-amarillo-bg);
+  color: var(--sem-amarillo-text);
+  border: 1px solid var(--sem-amarillo-border);
+}
+
+.vuln-badge.bajo {
+  background: var(--sem-verde-bg);
+  color: var(--sem-verde-text);
+  border: 1px solid var(--sem-verde-border);
+}
+
+/* ==========================================================================
+   PASO 2: Mi Suelo, Historial y Prioridades
+   ========================================================================== */
+.paso2-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 24px;
+}
+
+.panel-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.panel-card-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.soil-origin-badge {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-nasa-soft);
+  color: var(--accent-nasa);
+}
+
+.soil-origin-badge.editado {
+  background: var(--accent-terracotta-soft);
+  color: var(--accent-terracotta);
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field-group label {
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.field-input,
+.field-select {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-strong);
+  background: #fff;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.field-input:focus,
+.field-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(35, 107, 56, 0.18);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+
+/* Sliders de Prioridades del Agricultor */
+.sliders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.slider-item {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.slider-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.slider-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slider-weight-badge {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--accent-primary-soft);
+  color: var(--accent-primary);
+}
+
+.range-slider {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+
+.slider-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.scenario-box {
+  background: var(--accent-terracotta-soft);
+  border: 1px solid rgba(184, 84, 24, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+/* ==========================================================================
+   PASO 3: Comparativa de Rotaciones (Tarjetas + Explicabilidad NASA 5 Puntos)
+   ========================================================================== */
+.engine-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.rotations-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.rotation-card {
+  background: var(--bg-surface);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  position: relative;
+}
+
+.rotation-card.rank-1 {
+  border-color: var(--sem-verde-border);
+  box-shadow: var(--shadow-md);
+}
+
+.rotation-card.actual-card {
+  border-color: var(--sem-rojo-border);
+  background: #FFFAFA;
+}
+
+.rotation-card.selected-for-chart {
+  outline: 3px solid var(--accent-nasa);
+  outline-offset: 2px;
+}
+
+.rot-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rot-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rot-strategy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.rot-strategy-badge.verde {
+  background: var(--sem-verde-bg);
+  color: var(--sem-verde-text);
+  border: 1px solid var(--sem-verde-border);
+}
+
+.rot-strategy-badge.amarillo {
+  background: var(--sem-amarillo-bg);
+  color: var(--sem-amarillo-text);
+  border: 1px solid var(--sem-amarillo-border);
+}
+
+.rot-strategy-badge.rojo {
+  background: var(--sem-rojo-bg);
+  color: var(--sem-rojo-text);
+  border: 1px solid var(--sem-rojo-border);
+}
+
+.rot-card-title {
+  margin: 4px 0 0;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.irr-score-badge {
+  text-align: right;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  min-width: 92px;
+  flex-shrink: 0;
+}
+
+.irr-score-num {
+  font-family: var(--font-mono);
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.irr-score-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* Línea de Tiempo de 3 Años dentro de cada tarjeta */
+.timeline-3y {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: var(--bg-elevated);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.year-node {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+
+.year-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.crop-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.crop-family-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.crop-meta-mini {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Barras de Sub-índices y Métricas Traducidas al Agricultor */
+.subindices-bars {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.subbar-item {
+  background: var(--bg-elevated);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.subbar-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.subbar-track {
+  width: 100%;
+  height: 7px;
+  background: #E0DBD1;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.subbar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent-primary);
+}
+
+.subbar-fill.agua { background: #1971C2; }
+.subbar-fill.nitrogeno { background: #2B8A3E; }
+.subbar-fill.mos { background: #86592D; }
+.subbar-fill.rent { background: #D97706; }
+
+.subbar-translation {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  margin-top: 5px;
+}
+
+/* Acordeón de las 5 Dimensiones Oficiales NASA */
+.explain-5-box {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.explain-summary-text {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  margin: 0;
+  background: var(--bg-elevated);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--accent-primary);
+}
+
+.rotation-card.actual-card .explain-summary-text {
+  border-left-color: var(--sem-rojo-border);
+  background: var(--sem-rojo-bg);
+}
+
+.explain-details {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  overflow: hidden;
+}
+
+.explain-details summary {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--accent-nasa);
+  background: var(--bg-elevated);
+  user-select: none;
+}
+
+.explain-details-body {
+  padding: 12px 14px;
+  font-size: 0.84rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.explain-block h4 {
+  margin: 0 0 4px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.explain-block ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-secondary);
+}
+
+.explain-block li {
+  margin-bottom: 4px;
+}
+
+.card-footer-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.btn-ver-grafico {
+  width: 100%;
+  min-height: 42px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--accent-nasa);
+  background: #fff;
+  color: var(--accent-nasa);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.btn-ver-grafico:hover,
+.rotation-card.selected-for-chart .btn-ver-grafico {
+  background: var(--accent-nasa);
+  color: #fff;
+}
+
+/* ==========================================================================
+   Gráficos Interactivos (Balance Hídrico 36m + Historial Satelital HLS)
+   ========================================================================== */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.chart-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart-card h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+.chart-card p {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.chart-canvas-wrap {
+  position: relative;
+  height: 290px;
+  width: 100%;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+}
+
+/* ==========================================================================
+   Inspector de Cultivos Vetados (Semáforo Rojo con Razón Exacta)
+   ========================================================================== */
+.vetados-section {
+  margin-top: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+}
+
+.vetados-section h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.vetados-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.vetado-item {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--sem-rojo-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.84rem;
+}
+
+.vetado-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.vetado-reason {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ==========================================================================
+   Modal Científico para el Jurado ("Ver cómo lo calculamos")
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(15, 28, 20, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-backdrop[hidden] {
+  display: none !important;
+}
+
+.modal-dialog {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  max-width: 960px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  background: var(--accent-nasa);
+  color: #fff;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 10;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.btn-close-modal {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sci-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.sci-table th,
+.sci-table td {
+  border: 1px solid var(--border-subtle);
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.sci-table th {
+  background: var(--bg-elevated);
+  font-weight: 800;
+}
+
+.formula-card {
+  background: var(--bg-elevated);
+  border-left: 4px solid var(--accent-nasa);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   Responsividad Móvil y Tableta (Campo)
+   ========================================================================== */
+@media (max-width: 1080px) {
+  .terreno-grid,
+  .paso2-grid,
+  .rotations-grid,
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .header-inner {
+    padding: 10px 16px;
+  }
+  .main-container {
+    padding: 14px 14px 48px;
+  }
+  .step-section {
+    padding: 16px;
+  }
+  .telemetry-kpis,
+  .form-grid-3,
+  .form-grid-2,
+  .timeline-3y,
+  .subindices-bars {
+    grid-template-columns: 1fr;
+  }
+}
