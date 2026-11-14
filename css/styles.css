@@ -4,35 +4,29 @@
    ========================================================================== */
 
 :root {
-  --papel: #EEF3E8;
-  --papel-claro: #F7FAF3;
-  --campo: #FFFFFF;
-  --banda: #E1ECD8;
-  --tinta: #1F2A1D;
-  --texto-2: #4A5446;
-  --gris: #5F6B58;
-  --oliva: #2E7D32;
-  --tierra: #6D4C41;
-  --tierra-hover: #5A3D34;
-  --borde: #D3DECA;
-  --curva: #B9C9AD;
-  --texto-nav: #F4F8EF;
-  --subrayado-nav: #F9A825;
-  --ok: #2E7D32;
-  --ok-bg: #E3F0DF;
+  --papel: #EFEADC;
+  --papel-claro: #F7F3E8;
+  --campo: #FBF8F0;
+  --banda: #E4DDCB;
+  --tinta: #2B2A22;
+  --texto-2: #5A5440;
+  --gris: #6B6450;
+  --oliva: #3E4A1E;
+  --tierra: #A6512B;
+  --tierra-hover: #8C4322;
+  --borde: #D6CDB4;
+  --curva: #C9BFA2;
+  --texto-nav: #F4EFE2;
+  --subrayado-nav: #D9A178;
+  --ok: #4F6B1F;
+  --ok-bg: #E6EAD3;
   --alerta: #B7791F;
-  --alerta-bg: #FBEFCF;
+  --alerta-bg: #F4E6C8;
   --riesgo: #9B2C1F;
   --riesgo-bg: #F2D9D2;
   --fuente: 'Public Sans', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --radio: 4px;
-  /* Paleta del logo RotaSat */
-  --verde-rotasat: #2E7D32;
-  --verde-oscuro: #1B5E20;
-  --tierra-rotasat: #6D4C41;
-  --sol: #F9A825;
-  --cielo: #1565C0;
 }
 
 *, *::before, *::after {
@@ -99,9 +93,7 @@ body {
   justify-content: center;
   padding: 22px 16px 18px;
   border-bottom: 1px solid var(--borde);
-  background:
-    radial-gradient(circle at 50% 0%, rgba(21, 101, 192, 0.07), transparent 65%),
-    linear-gradient(180deg, #FFFFFF 0%, var(--papel-claro) 100%);
+  background: linear-gradient(180deg, var(--campo) 0%, var(--papel-claro) 100%);
 }
 
 .sidebar-brand::after {
@@ -109,11 +101,11 @@ body {
   position: absolute;
   left: 50%;
   bottom: -1px;
-  width: 64px;
+  width: 56px;
   height: 3px;
   transform: translateX(-50%);
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--verde-rotasat), var(--sol), var(--cielo));
+  background: var(--tierra);
 }
 
 .sidebar-logo {
@@ -127,9 +119,9 @@ body {
 }
 
 .sidebar-logo:focus-visible {
-  outline: 2px solid var(--cielo);
+  outline: 2px solid var(--tierra);
   outline-offset: 4px;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .sidebar-logo-img {
@@ -141,7 +133,7 @@ body {
 }
 
 .sidebar-logo:hover .sidebar-logo-img {
-  transform: translateY(-2px) scale(1.03);
+  transform: translateY(-2px);
 }
 
 .sidebar-logo-nombre {
@@ -149,11 +141,11 @@ body {
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.01em;
-  color: var(--verde-rotasat);
+  color: var(--oliva);
 }
 
 .sidebar-logo-nombre span {
-  color: var(--cielo);
+  color: var(--tierra);
 }
 
 .sidebar-logo-lema {
@@ -167,13 +159,13 @@ body {
 .sidebar-logo-evento {
   margin-top: 8px;
   padding: 3px 10px;
+  border: 1px solid var(--borde);
   border-radius: 999px;
+  background: var(--banda);
+  color: var(--oliva);
   font-size: 10.5px;
   font-weight: 500;
   letter-spacing: 0.03em;
-  color: var(--tierra-rotasat);
-  background: #FDF3D7;
-  border: 1px solid #F3D98C;
 }
 
 .sidebar-mobile-toggle {
@@ -186,9 +178,9 @@ body {
   width: 38px;
   height: 38px;
   border: 1px solid var(--borde);
-  border-radius: 6px;
-  background: #FFFFFF;
-  color: var(--verde-rotasat);
+  border-radius: var(--radio);
+  background: var(--papel);
+  color: var(--tinta);
   cursor: pointer;
 }
 
@@ -263,7 +255,7 @@ body {
 
 .sidebar-item.activo {
   background-color: var(--banda);
-  border-left-color: var(--sol);
+  border-left-color: #6B3A24;
   font-weight: 700;
   color: var(--tinta);
 }
@@ -283,7 +275,7 @@ body {
 }
 
 .sidebar-item.activo .sidebar-item-left .icono {
-  color: var(--oliva);
+  color: #6B3A24;
 }
 
 .sidebar-item-text {
@@ -327,7 +319,7 @@ body {
 }
 
 .sidebar-badge-status.bajo {
-  background-color: var(--banda);
+  background-color: #E3EAD8;
   color: var(--oliva);
 }
 
@@ -626,8 +618,8 @@ nav.nav-principal a.nav-link:hover {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--verde-rotasat);
-  color: #FFFFFF;
+  background: var(--tierra);
+  color: #FBF6EA;
   border: 0;
   border-radius: var(--radio);
   padding: 10px 16px;
@@ -637,12 +629,12 @@ nav.nav-principal a.nav-link:hover {
 }
 
 .btn:hover {
-  background: var(--verde-oscuro);
-  color: #FFFFFF;
+  background: var(--tierra-hover);
+  color: #FBF6EA;
 }
 
 .btn .icono {
-  color: var(--sol);
+  color: #FBF6EA;
 }
 
 .btn-sec {
@@ -921,7 +913,7 @@ input[type="radio"] {
   margin: 0;
   font-size: 0.98rem;
   font-weight: 700;
-  color: var(--cielo);
+  color: #1B365D;
 }
 
 .btn-geo {
@@ -929,8 +921,8 @@ input[type="radio"] {
   align-items: center;
   gap: 6px;
   background: #FFFFFF;
-  color: var(--cielo);
-  border: 1px solid var(--cielo);
+  color: #1B365D;
+  border: 1px solid #1B365D;
   border-radius: 6px;
   padding: 6px 12px;
   font-family: var(--fuente);
@@ -946,7 +938,7 @@ input[type="radio"] {
 .icono-geo {
   width: 16px;
   height: 16px;
-  color: var(--cielo);
+  color: #1B365D;
   flex-shrink: 0;
 }
 
@@ -971,13 +963,13 @@ input[type="radio"] {
 }
 
 .location-search-input:focus {
-  outline: 2px solid var(--cielo);
+  outline: 2px solid #1B365D;
   outline-offset: 1px;
 }
 
 .btn-buscar {
   flex: 1 1 25%;
-  background: var(--cielo);
+  background: #1B365D;
   color: #FFFFFF;
   border: 0;
   border-radius: 6px;
@@ -991,7 +983,7 @@ input[type="radio"] {
 }
 
 .btn-buscar:hover {
-  background: #0D47A1;
+  background: #132847;
 }
 
 .location-status {
@@ -1649,7 +1641,7 @@ th.num {
    Pie de página
    ========================================================================== */
 footer {
-  background: var(--verde-oscuro);
+  background: var(--oliva);
   color: var(--texto-nav);
   font-size: 0.85rem;
   padding: 32px 0;
@@ -1798,9 +1790,9 @@ footer a:hover {
 .estado-datos-vivo {
   margin-top: 10px;
   padding: 10px 14px;
-  border: 1px solid var(--borde);
+  border: 1px solid #D6CDB4;
   border-radius: 10px;
-  background: var(--papel-claro);
+  background: #FBF8F0;
   font-size: 0.85rem;
 }
 .estado-datos-vivo ul { margin: 6px 0 0; padding-left: 4px; list-style: none; }
@@ -1809,5 +1801,5 @@ footer a:hover {
 /* Parcela activa: nombre y si tiene historial satelital */
 .parcela-activa { margin-top: 10px; font-size: 0.9rem; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
 .pill-sat { font-size: 0.78rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; border: 1px solid; }
-.pill-sat.ok { background: #E3F0DF; color: #1B5E20; border-color: #8BC48F; }
+.pill-sat.ok { background: #E8F1DD; color: #3E5A1E; border-color: #9DB873; }
 .pill-sat.warn { background: #FBF3DD; color: #7A4F12; border-color: #D6B46A; }
