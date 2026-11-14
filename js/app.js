@@ -12,7 +12,7 @@
     catalogo: null,
     parcelasOriginales: {},
     parcelasActivas: {},
-    parcelaActualId: 'parcela_chimborazo_1',
+    parcelaActualId: 'parcela_licto',
     sliders: {
       agua: 3,
       suelo: 3,
@@ -109,12 +109,11 @@
     }
     return Promise.all([
       fetch('data/cultivos.json').then(r => r.json()),
-      fetch('data/parcelas/parcela_chimborazo_1.json').then(r => r.json()),
-      fetch('data/parcelas/parcela_el_oro_2.json').then(r => r.json()),
-      fetch('data/parcelas/parcela_colta_3.json').then(r => r.json())
-    ]).then(([cat, p1, p2, p3]) => {
+      fetch('data/parcelas/parcela_licto.json').then(r => r.json()),
+      fetch('data/parcelas/parcela_guano.json').then(r => r.json())
+    ]).then(([cat, p1, p2]) => {
       state.catalogo = cat;
-      [p1, p2, p3].forEach(p => {
+      [p1, p2].forEach(p => {
         state.parcelasOriginales[p.id] = clonar(p);
         state.parcelasActivas[p.id] = clonar(p);
       });
@@ -208,7 +207,17 @@
         state.drawnItems.addLayer(layer);
 
         const latlngs = layer.getLatLngs()[0] || [];
-        const lote = crearLoteDibujado(obtenerParcelaActual(), latlngs, layer.getBounds().getCenter());
+        const centro = layer.getBounds().getCenter();
+        const dentro = parcelaQueContiene(centro.lat, centro.lng);
+        if (dentro) {
+          // El lote cae en una parcela con historial satelital de AppEEARS: se usa esa, con su NDVI real
+          seleccionarParcelaPorId(dentro);
+          const pd = obtenerParcelaActual();
+          pd.area_ha = calcularAreaPoligonoHa(latlngs);
+          actualizarTodo();
+          return;
+        }
+        const lote = crearLoteDibujado(obtenerParcelaActual(), latlngs, centro);
         state.parcelasActivas[lote.id] = lote;
         state.parcelasOriginales[lote.id] = clonar(lote);
         state.parcelaActualId = lote.id;
@@ -243,6 +252,49 @@
    * Lote dibujado por el usuario: parte de la parcela de demo seleccionada solo como respaldo
    * y marca TODO como pendiente hasta que respondan los datos en vivo (js/datos_vivo.js).
    */
+  /** Devuelve el id de la parcela precalculada (con historial satelital) que contiene el punto, o null. */
+  function parcelaQueContiene(lat, lon) {
+    for (const [id, p] of Object.entries(state.parcelasOriginales)) {
+      if (id === 'lote_dibujado' || !p.geometria || !p.geometria.coordinates) continue;
+      const anillo = p.geometria.coordinates[0] || [];
+      let dentro = false;
+      for (let i = 0, j = anillo.length - 1; i < anillo.length; j = i++) {
+        const [xi, yi] = anillo[i], [xj, yj] = anillo[j];
+        if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) dentro = !dentro;
+      }
+      if (dentro) return id;
+      // tolerancia: a menos de 150 m del centroide también cuenta (el lote dibujado puede ser más grande)
+      const c = p.centroide || {};
+      if (typeof c.lat === 'number') {
+        const dx = (lon - c.lon) * 111320 * Math.cos(lat * Math.PI / 180), dy = (lat - c.lat) * 111320;
+        if (Math.hypot(dx, dy) < 150) return id;
+      }
+    }
+    return null;
+  }
+
+  /** Crea un lote nuevo en un punto cualquiera (sin dibujar) y pide sus datos en vivo. */
+  function abrirLoteEnPunto(lat, lon, ladoM) {
+    const dentro = parcelaQueContiene(lat, lon);
+    if (dentro) { seleccionarParcelaPorId(dentro); return; }
+    const lado = ladoM || 140;
+    const dlat = lado / 2 / 111320, dlon = lado / 2 / (111320 * Math.cos(lat * Math.PI / 180));
+    const latlngs = [
+      { lat: lat + dlat, lng: lon - dlon }, { lat: lat + dlat, lng: lon + dlon },
+      { lat: lat - dlat, lng: lon + dlon }, { lat: lat - dlat, lng: lon - dlon }
+    ];
+    const lote = crearLoteDibujado(obtenerParcelaActual(), latlngs, { lat, lng: lon });
+    state.parcelasActivas[lote.id] = lote;
+    state.parcelasOriginales[lote.id] = clonar(lote);
+    state.parcelaActualId = lote.id;
+    state.rotacionSeleccionadaGraficoId = 'recomendada_1';
+    sincronizarControlesPaso2ConParcela();
+    dibujarPoligonoParcelaActual(true);
+    actualizarTodo();
+    const capa = state.drawnItems && state.drawnItems.getLayers()[0];
+    cargarDatosLoteEnVivo(lote, capa || null);
+  }
+
   function crearLoteDibujado(base, latlngs, center) {
     const lat = Number(center.lat.toFixed(5)), lon = Number(center.lng.toFixed(5));
     const lote = clonar(base);
@@ -265,6 +317,8 @@
     lote.suelo = Object.assign({}, lote.suelo, { fuente: 'EJEMPLO (consultando SoilGrids…)', editado_por_usuario: false });
     lote.ndvi_mensual = [];
     lote.historia_inferida = [];
+    lote.historia_declarada = ['', ''];
+    lote.nematodo_declarado = false;
     delete lote.smap;
     return lote;
   }
@@ -427,7 +481,21 @@
   /**
    * Renderiza la ficha biofísica y el semáforo de vulnerabilidades del Paso 1
    */
+  function renderizarParcelaActiva(parcela) {
+    const el = document.getElementById('parcela-activa');
+    if (!el) return;
+    const conSat = (parcela.ndvi_mensual || []).length > 0 && !esEjemplo(parcela, 'ndvi');
+    const esDemo = parcela.id !== 'lote_dibujado';
+    const etiqueta = conSat
+      ? '<span class="pill-sat ok">🛰️ Con historial satelital (HLS vía AppEEARS)</span>'
+      : (esDemo
+        ? '<span class="pill-sat warn">🛰️ Parcela de demo · historial satelital pendiente de AppEEARS</span>'
+        : '<span class="pill-sat warn">📡 Lote nuevo · clima, suelo y relieve en vivo · sin historial satelital</span>');
+    el.innerHTML = `<strong>${parcela.nombre}</strong> <span class="unidad">· ${parcela.ubicacion_texto || ''}</span> ${etiqueta}`;
+  }
+
   function renderizarPaso1Terreno(parcela) {
+    renderizarParcelaActiva(parcela);
     marcarFuente('tag-elev', parcela, 'terreno');
     marcarFuente('tag-pend', parcela, 'terreno');
     marcarFuente('tag-clima', parcela, 'clima');
@@ -1092,7 +1160,8 @@
           const lat = Number(data[0].lat);
           const lon = Number(data[0].lon);
           if (state.map) state.map.setView([lat, lon], 14);
-          setStatus(`Ubicación encontrada: ${parr}, ${canton} (${prov}).`);
+          abrirLoteEnPunto(lat, lon);
+          setStatus(`Ubicación encontrada: ${parr}, ${canton} (${prov}). Lote nuevo con datos en vivo; sin historial satelital.`);
           return;
         }
       } catch (e) {
@@ -1176,7 +1245,10 @@
         const lat = Number(coordMatch[1]);
         const lon = Number(coordMatch[2]);
         if (state.map) state.map.setView([lat, lon], 15);
-        setStatus('Ubicación encontrada.');
+        abrirLoteEnPunto(lat, lon);
+        setStatus(parcelaQueContiene(lat, lon)
+          ? 'Ubicación encontrada: parcela con historial satelital de AppEEARS.'
+          : 'Ubicación encontrada. Lote nuevo: datos de clima, suelo y relieve en vivo; sin historial satelital.');
         return;
       }
 
@@ -1200,7 +1272,8 @@
           const lat = Number(data[0].lat);
           const lon = Number(data[0].lon);
           if (state.map) state.map.setView([lat, lon], 15);
-          setStatus('Ubicación encontrada.');
+          abrirLoteEnPunto(lat, lon);
+          setStatus('Ubicación encontrada. Lote nuevo con datos en vivo; sin historial satelital.');
         } else {
           setStatus('No se encontraron resultados para esa dirección.');
         }
@@ -1237,7 +1310,8 @@
             if (inpBuscar) {
               inpBuscar.value = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
             }
-            setStatus('Ubicación encontrada.');
+            abrirLoteEnPunto(latitude, longitude);
+            setStatus('Ubicación encontrada. Lote en su posición con datos en vivo; sin historial satelital.');
           },
           () => {
             setStatus('No se pudo acceder a la ubicación actual.');

@@ -33,10 +33,11 @@ NASA_Challenge_2026/
 ├── data/
 │   ├── cultivos.json                 # 22 cultivos (Sierra y Costa) y 10 reglas de pausa por familia botánica
 │   ├── parcelas/                     # JSON unificados listos para el motor agronómico
-│   │   ├── parcela_chimborazo_1.json # Sierra: Licto/Guamote (2950 m, pend. 14%, historia papa-papa)
-│   │   ├── parcela_el_oro_2.json     # Costa: El Guabo/Santa Rosa (28 m, pend. 4%, historia maíz-arroz)
-│   │   └── parcela_colta_3.json      # Caso borde: Colta (3180 m, pend. 28% > 25% + riesgo de helada)
-│   └── geojson/                      # Polígonos GeoJSON de las 3 parcelas demostrativas
+│   │   ├── parcela_licto.json        # Licto, Riobamba (-1.8014, -78.6119): historial satelital vía AppEEARS
+│   │   └── parcela_guano.json        # San Andrés, Guano (-1.6375, -78.5878): historial satelital vía AppEEARS
+│   ├── appeears/                     # CSV de AppEEARS (HLS, SMAP, NASADEM) de las 2 parcelas
+│   ├── crudos/                       # Copias de las descargas de NASA POWER y SoilGrids
+│   └── geojson/                      # Polígonos GeoJSON de las 2 parcelas demostrativas
 └── scripts/
     ├── power.py                      # Consulta NASA POWER + Radiación extraterrestre Ra + ET0 Hargreaves
     ├── dem.py                        # Cálculo de elevación, pendiente media/máxima y orientación (SRTM 30 m)
@@ -70,7 +71,17 @@ Al terminar imprime el **estado de los datos** de cada parcela. Todo lo que siga
 también queda marcado así en la app (campo `fuente` y `estado_datos`): **no se presenta como dato satelital**.
 La app también muestra la etiqueta **EJEMPLO** junto a cada fuente (clima, terreno, NDVI) mientras el dato no sea real.
 
-### Lote dibujado por el usuario (cualquier parcela del Ecuador)
+### Dos niveles de datos
+| | Parcelas de demo (Licto y Guano) | Cualquier otro punto del Ecuador |
+| --- | --- | --- |
+| Clima y anomalía NASA POWER | descargados y guardados en `data/crudos/` | en vivo desde el navegador |
+| Suelo SoilGrids | descargado | en vivo |
+| Altitud y pendiente | NASADEM vía AppEEARS | SRTM 30 m en vivo (3 servicios en cascada) |
+| **Historial satelital NDVI/NDTI (HLS) y humedad SMAP** | **sí, vía AppEEARS** | **no**: la app lo dice ("sin historial satelital") y nunca lo inventa |
+
+Si el punto buscado o el lote dibujado cae dentro de una de las 2 parcelas de demo (o a menos de 150 m de su centro), la app abre esa parcela con su historial satelital real.
+
+### Lote dibujado o buscado (cualquier parcela del Ecuador)
 Al dibujar un polígono en el mapa, `js/datos_vivo.js` consulta en vivo desde el navegador
 **NASA POWER** (clima 2015–2024 y anomalía de lluvia), **NASA SRTM 30 m** vía OpenTopoData (altitud,
 pendiente y orientación con 5 puntos) e **ISRIC SoilGrids** (suelo). El recuadro bajo el mapa muestra qué
@@ -89,9 +100,9 @@ requiere un pedido a AppEEARS y no se consulta en vivo.
 node scripts/test_cordura.js
 ```
 Verifica que:
-- En **Chimborazo (2,950 m, historia `papa–papa`)**, ninguna de las 3 rotaciones incluya papa (pausa de Solanáceas de 3–4 años), la estrategia #1 inicie con una leguminosa andina (`Chocho`), se active el multiplicador `×1.3` por anomalía GPM `< -15%`, y el cálculo tome `< 100 ms` (~32 ms).
-- En **El Oro (28 m, historia `maíz–arroz`)**, no aparezcan cultivos serranos, todas las estrategias incluyan leguminosa tropical (`Soya`, `Maní` o `Caupí`), y se detecte la ventana seca de verano.
-- En **Colta (3,180 m, pendiente `28% > 25%` + helada)**, se veten todos los cultivos de labranza intensiva o sensibles al frío, recomendando únicamente coberturas y granos andinos resistentes (`Chocho`, `Quinua`, `Vicia`, `Avena forrajera`, `Cebada`).
+- En **Licto (historia `papa–papa`)**, ninguna de las 3 rotaciones incluya papa (pausa de Solanáceas de 3–4 años), la estrategia #1 inicie con una leguminosa andina (`Chocho`), el multiplicador `×1.3` de agua se active solo si la anomalía de lluvia real es < −15 %, y el cálculo tome `< 100 ms`.
+- En un **caso sintético de Costa (28 m, historia `maíz–arroz`)**, no aparezcan cultivos serranos y todas las estrategias incluyan leguminosa tropical (`Soya`, `Maní` o `Caupí`).
+- En un **caso sintético de ladera (3 180 m, pendiente `28 %` + helada)**, solo se recomienden coberturas y granos andinos resistentes.
 
 ### 2. Regenerar los paquetes de datos satelitales de las parcelas
 ```bash
