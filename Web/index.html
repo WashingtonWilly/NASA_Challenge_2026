@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente de Rotación de Cultivos</title>
+    <!-- Tailwind CSS para diseño responsivo sin pesar mucho -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet para el Mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js para los gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans p-4 md:p-8">
+
+    <!-- Tarjeta de Anomalía Climática (Siempre visible) -->
+    <div class="max-w-4xl mx-auto mb-6 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow-sm">
+        <p class="font-bold">🌤️ Alerta Climática Regional</p>
+        <p class="text-sm">Su zona viene 18% más seca que un año normal (lluvias ago-oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua.</p>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-green-700 mb-8 text-center">Asistente de Cultivos y Suelo</h1>
+
+        <!-- PASO 1: Mi Terreno -->
+        <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-bold border-b pb-2 mb-4 text-green-600">Paso 1: Mi Terreno</h2>
+            <p class="mb-4 text-sm text-gray-600">Dibuje su parcela o seleccione un lote de ejemplo para analizar.</p>
+            <div id="mapa-parcela" class="h-64 w-full bg-gray-200 rounded border-2 border-dashed border-gray-400 flex items-center justify-center">
+                <!-- Aquí Leaflet cargará el mapa -->
+                <span class="text-gray-500">Cargando mapa satelital...</span>
+            </div>
+            <div class="mt-4 flex gap-4">
+                <button class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 text-sm">Dibujar mi terreno</button>
+                <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded shadow hover:bg-gray-300 text-sm">Cargar Parcela 1 (Sierra)</button>
+            </div>
+        </section>
+
+        <!-- PASO 2: Mi Suelo y Prioridades -->
+        <section class="bg-white p-6 rounded-lg shadow-md mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h2 class="text-xl font-bold border-b pb-2 mb-4 text-green-600">Paso 2: Mi Suelo</h2>
+                <div class="bg-yellow-50 p-4 rounded border border-yellow-200 mb-4">
+                    <p class="text-xs text-yellow-700 mb-2">⚠️ Dato estimado desde satélite (250 m). Si tiene un análisis de suelo, cámbielo aquí.</p>
+                    <label class="block text-sm font-bold mb-1">Textura del suelo:</label>
+                    <select class="w-full p-2 border rounded mb-3 bg-white">
+                        <option>Franco (Tierra negra ideal)</option>
+                        <option>Arenoso (Filtra rápido)</option>
+                        <option>Arcilloso (Retiene mucha agua)</option>
+                    </select>
+                    
+                    <label class="block text-sm font-bold mb-1">Lo que sembró antes (Satélite detectó):</label>
+                    <input type="text" value="Papa (2024), Papa (2025)" class="w-full p-2 border rounded bg-white" />
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold border-b pb-2 mb-4 text-green-600">Mis Prioridades</h2>
+                <p class="text-sm text-gray-600 mb-4">Mueva las barras según lo que más le interese esta temporada:</p>
+                
+                <label class="block text-sm font-bold mb-1">💧 Ahorrar agua</label>
+                <input type="range" min="0" max="100" value="70" class="w-full mb-4">
+
+                <label class="block text-sm font-bold mb-1">🌱 Mejorar el suelo</label>
+                <input type="range" min="0" max="100" value="60" class="w-full mb-4">
+
+                <label class="block text-sm font-bold mb-1">💰 Ganar más</label>
+                <input type="range" min="0" max="100" value="50" class="w-full">
+            </div>
+        </section>
+
+        <!-- PASO 3: Mis Rotaciones (Tarjetas Semáforo) -->
+        <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-bold border-b pb-2 mb-4 text-green-600">Paso 3: Mis Rotaciones</h2>
+            
+            <!-- Rotación Actual (Semáforo Rojo) -->
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-2xl">🔴</span>
+                    <h3 class="font-bold text-red-700">Si sigue sembrando lo mismo: Papa ➔ Papa ➔ Papa</h3>
+                </div>
+                <p class="text-sm text-red-800">No recomendamos papa este año: ya hubo papa dos años seguidos y las plagas del suelo siguen vivas.</p>
+            </div>
+
+            <!-- Rotación Recomendada 1 (Semáforo Verde) -->
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded mb-6 shadow-sm">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-2xl">🟢</span>
+                    <h3 class="font-bold text-green-800 text-lg">Opción 1: Chocho ➔ Cebada ➔ Quinua</h3>
+                </div>
+                <p class="text-sm text-green-700 font-bold mb-3">Buena rotación: ahorra agua y deja abono para el siguiente cultivo.</p>
+                
+                <!-- Insignias Rol Ecológico -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">🌿 Fijador de nitrógeno</span>
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded">⛏️ Descompacta el suelo</span>
+                    <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded">❄️ Resiste heladas</span>
+                </div>
+
+                <!-- Cifras Agricultor -->
+                <div class="grid grid-cols-3 gap-2 text-center bg-white p-3 rounded border mb-4">
+                    <div><span class="block text-xl font-bold text-blue-600">38%</span><span class="text-xs">Menos agua</span></div>
+                    <div><span class="block text-xl font-bold text-green-600">+50kg</span><span class="text-xs">Abono (N/ha)</span></div>
+                    <div><span class="block text-xl font-bold text-amber-700">+6.0t</span><span class="text-xs">Materia orgánica</span></div>
+                </div>
+
+                <!-- Evidencias y Riesgos -->
+                <ul class="text-sm text-gray-700 list-disc pl-5 space-y-1">
+                    <li><b>Por qué se sugiere:</b> Corta el ciclo de plagas tras 2 años de papa (detectado por satélite) y aprovecha lluvias de oct-dic (NASA POWER).</li>
+                    <li><b>Beneficio al suelo:</b> Aporta 50 kg de nitrógeno por hectárea y 6 toneladas de rastrojo.</li>
+                    <li><b>Qué validar en campo:</b> Confirmar pH del suelo y presencia de nematodos con un técnico local.</li>
+                </ul>
+            </div>
+
+            <!-- Gráfico de Vulnerabilidad -->
+            <div class="mt-8 border-t pt-6">
+                <h3 class="font-bold mb-4">Lluvia vs Necesidad de Agua (Próximos 3 años)</h3>
+                <div class="relative h-64 w-full">
+                    <canvas id="vulnerabilityChart"></canvas>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 text-center">Fondo gris indica meses con suelo desnudo (Riesgo de erosión).</p>
+            </div>
+        </section>
+
+        <!-- Botón para Jueces -->
+        <div class="text-center mb-8">
+            <button class="text-sm text-gray-500 underline hover:text-gray-800">Ver cómo lo calculamos (Panel Técnico)</button>
+        </div>
+
+    </div>
+
+</body>
+</html>
