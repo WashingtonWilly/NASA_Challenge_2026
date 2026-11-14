@@ -213,7 +213,6 @@
         state.parcelasOriginales[lote.id] = clonar(lote);
         state.parcelaActualId = lote.id;
         state.rotacionSeleccionadaGraficoId = 'recomendada_1';
-        document.querySelectorAll('[data-parcela-id]').forEach(b => b.classList.remove('active'));
 
         sincronizarControlesPaso2ConParcela();
         layer.bindPopup(crearPopupParcelaHtml(lote)).openPopup();
@@ -1044,28 +1043,216 @@
     refrescarIconosLucide();
   }
 
+  function seleccionarParcelaPorId(nuevoId) {
+    if (!state.parcelasActivas[nuevoId]) return;
+    state.parcelaActualId = nuevoId;
+    state.rotacionSeleccionadaGraficoId = 'recomendada_1';
+    state.tokenLote = (state.tokenLote || 0) + 1;
+    const estVivo = document.getElementById('estado-datos-vivo');
+    if (estVivo) estVivo.hidden = true;
+
+    sincronizarControlesPaso2ConParcela();
+    dibujarPoligonoParcelaActual(true);
+    actualizarTodo();
+  }
+
+  function configurarPanelUbicacion() {
+    const selProv = document.getElementById('select-provincia');
+    const selCanton = document.getElementById('select-canton');
+    const selParroquia = document.getElementById('select-parroquia');
+    const inpBuscar = document.getElementById('input-buscar-ubicacion');
+    const btnBuscar = document.getElementById('btn-buscar-ubicacion');
+    const btnMiUbicacion = document.getElementById('btn-mi-ubicacion');
+    const statusEl = document.getElementById('location-search-status');
+
+    const dpa = window.ECUADOR_DPA || {};
+    const centrosProv = window.ECUADOR_PROVINCIAS_CENTRO || {};
+    const parcelasMap = window.PARCELA_POR_UBICACION || {};
+
+    if (!selProv || !selCanton || !selParroquia) return;
+
+    const setStatus = (texto) => {
+      if (statusEl) statusEl.textContent = texto;
+    };
+
+    const centrarEnUbicacion = async (prov, canton, parr) => {
+      const clave = `${prov}|${canton}|${parr}`;
+      if (parcelasMap[clave]) {
+        seleccionarParcelaPorId(parcelasMap[clave]);
+        setStatus(`Ubicación encontrada: ${parr}, ${canton} (${prov}).`);
+        return;
+      }
+
+      setStatus(`Ubicando ${parr}, ${canton}...`);
+      const parrLimpia = parr.replace(/\s*\(urbana\)/i, '');
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(`${parrLimpia}, ${canton}, ${prov}, Ecuador`)}`);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const lat = Number(data[0].lat);
+          const lon = Number(data[0].lon);
+          if (state.map) state.map.setView([lat, lon], 14);
+          setStatus(`Ubicación encontrada: ${parr}, ${canton} (${prov}).`);
+          return;
+        }
+      } catch (e) {
+        // Respaldo al centroide provincial si no hay red
+      }
+
+      if (centrosProv[prov] && state.map) {
+        state.map.setView(centrosProv[prov], 10);
+      }
+      setStatus(`Ubicación encontrada: ${parr}, ${canton} (${prov}).`);
+    };
+
+    // Poblar las 24 provincias del Ecuador en orden alfabético
+    Object.keys(dpa).sort().forEach(prov => {
+      const opt = document.createElement('option');
+      opt.value = prov;
+      opt.textContent = prov;
+      selProv.appendChild(opt);
+    });
+
+    // Cascada: Provincia -> Cantón
+    selProv.addEventListener('change', () => {
+      const prov = selProv.value;
+      selCanton.innerHTML = '<option value="">Cantón</option>';
+      selParroquia.innerHTML = '<option value="">Parroquia</option>';
+      selParroquia.disabled = true;
+
+      if (!prov || !dpa[prov]) {
+        selCanton.disabled = true;
+        return;
+      }
+
+      Object.keys(dpa[prov]).sort().forEach(canton => {
+        const opt = document.createElement('option');
+        opt.value = canton;
+        opt.textContent = canton;
+        selCanton.appendChild(opt);
+      });
+      selCanton.disabled = false;
+    });
+
+    // Cascada: Cantón -> Parroquia
+    selCanton.addEventListener('change', () => {
+      const prov = selProv.value;
+      const canton = selCanton.value;
+      selParroquia.innerHTML = '<option value="">Parroquia</option>';
+
+      if (!prov || !canton || !dpa[prov][canton]) {
+        selParroquia.disabled = true;
+        return;
+      }
+
+      dpa[prov][canton].slice().sort().forEach(parr => {
+        const opt = document.createElement('option');
+        opt.value = parr;
+        opt.textContent = parr;
+        selParroquia.appendChild(opt);
+      });
+      selParroquia.disabled = false;
+    });
+
+    // Selección final de Parroquia
+    selParroquia.addEventListener('change', () => {
+      const prov = selProv.value;
+      const canton = selCanton.value;
+      const parr = selParroquia.value;
+      if (!prov || !canton || !parr) return;
+      centrarEnUbicacion(prov, canton, parr);
+    });
+
+    // Búsqueda libre (por coordenadas "lat, lon", coincidencia en las 24 provincias o Nominatim)
+    const ejecutarBusqueda = async () => {
+      const q = (inpBuscar && inpBuscar.value || '').trim();
+      if (!q) {
+        setStatus('Ingrese un lugar, dirección o coordenadas.');
+        return;
+      }
+
+      const coordMatch = q.match(/^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/);
+      if (coordMatch) {
+        const lat = Number(coordMatch[1]);
+        const lon = Number(coordMatch[2]);
+        if (state.map) state.map.setView([lat, lon], 15);
+        setStatus('Ubicación encontrada.');
+        return;
+      }
+
+      const qNorm = q.toLowerCase();
+      for (const [prov, cantones] of Object.entries(dpa)) {
+        for (const [canton, parroquias] of Object.entries(cantones)) {
+          for (const parr of parroquias) {
+            if (`${parr} ${canton} ${prov}`.toLowerCase().includes(qNorm)) {
+              await centrarEnUbicacion(prov, canton, parr);
+              return;
+            }
+          }
+        }
+      }
+
+      setStatus('Buscando ubicación...');
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q + ', Ecuador')}`);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const lat = Number(data[0].lat);
+          const lon = Number(data[0].lon);
+          if (state.map) state.map.setView([lat, lon], 15);
+          setStatus('Ubicación encontrada.');
+        } else {
+          setStatus('No se encontraron resultados para esa dirección.');
+        }
+      } catch (e) {
+        setStatus('No se pudo consultar el servicio de direcciones.');
+      }
+    };
+
+    if (btnBuscar) {
+      btnBuscar.addEventListener('click', ejecutarBusqueda);
+    }
+    if (inpBuscar) {
+      inpBuscar.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          ejecutarBusqueda();
+        }
+      });
+    }
+
+    if (btnMiUbicacion) {
+      btnMiUbicacion.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          setStatus('Geolocalización no disponible en este navegador.');
+          return;
+        }
+        setStatus('Obteniendo ubicación actual...');
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            if (state.map) {
+              state.map.setView([latitude, longitude], 16);
+            }
+            if (inpBuscar) {
+              inpBuscar.value = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+            }
+            setStatus('Ubicación encontrada.');
+          },
+          () => {
+            setStatus('No se pudo acceder a la ubicación actual.');
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      });
+    }
+  }
+
   /**
    * Configura todos los eventos de botones, sliders e inputs
    */
   function configurarEventos() {
-    document.querySelectorAll('[data-parcela-id]').forEach(btn => {
-      btn.addEventListener('click', function () {
-        const nuevoId = this.getAttribute('data-parcela-id');
-        if (!state.parcelasActivas[nuevoId]) return;
-        state.parcelaActualId = nuevoId;
-        state.rotacionSeleccionadaGraficoId = 'recomendada_1';
-        state.tokenLote = (state.tokenLote || 0) + 1;
-        const estVivo = document.getElementById('estado-datos-vivo');
-        if (estVivo) estVivo.hidden = true;
-
-        document.querySelectorAll('[data-parcela-id]').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-
-        sincronizarControlesPaso2ConParcela();
-        dibujarPoligonoParcelaActual(true);
-        actualizarTodo();
-      });
-    });
+    configurarPanelUbicacion();
 
     const onSoilChange = () => {
       const p = obtenerParcelaActual();

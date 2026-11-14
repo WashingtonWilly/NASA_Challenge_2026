@@ -529,44 +529,159 @@ input[type="radio"] {
 }
 
 /* ==========================================================================
-   Paso 1: Mi terreno (selector de parcelas, mapa y tarjeta de datos)
+   Paso 1: Panel de búsqueda y filtrado de ubicaciones
    ========================================================================== */
-.parcela-selector-bar {
+.location-control-panel {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.location-card {
+  background: var(--papel-claro);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.location-search-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
 }
 
-.parcela-selector-label {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--gris);
-  margin-right: 4px;
+.location-search-title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #1B365D;
 }
 
-.parcela-btn {
-  background: transparent;
-  color: var(--oliva);
-  border: 1px solid var(--oliva);
-  border-radius: var(--radio);
-  padding: 8px 12px;
-  font: 600 0.85rem var(--fuente);
-  cursor: pointer;
+.btn-geo {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  background: #FFFFFF;
+  color: #1B365D;
+  border: 1px solid #1B365D;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: var(--fuente);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.parcela-btn:hover {
-  background: var(--papel-claro);
+.btn-geo:hover {
+  background: #EEF2F7;
 }
 
-.parcela-btn.active {
-  background: var(--oliva);
-  color: var(--texto-nav);
-  border-color: var(--oliva);
+.icono-geo {
+  width: 16px;
+  height: 16px;
+  color: #1B365D;
+  flex-shrink: 0;
+}
+
+.location-search-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+.location-search-input {
+  flex: 3 1 75%;
+  min-width: 0;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: var(--fuente);
+  font-size: 0.9rem;
+  color: var(--tinta);
+  min-height: 40px;
+}
+
+.location-search-input:focus {
+  outline: 2px solid #1B365D;
+  outline-offset: 1px;
+}
+
+.btn-buscar {
+  flex: 1 1 25%;
+  background: #1B365D;
+  color: #FFFFFF;
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: var(--fuente);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+.btn-buscar:hover {
+  background: #132847;
+}
+
+.location-status {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--gris);
+}
+
+.cascade-selects {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.select-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.cascade-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #FFFFFF;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: 8px 36px 8px 12px;
+  font-family: var(--fuente);
+  font-size: 0.9rem;
+  color: var(--tinta);
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.cascade-select:disabled {
+  background: var(--campo);
+  color: var(--gris);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--gris);
+  pointer-events: none;
 }
 
 .terreno-grid {
@@ -1217,6 +1332,7 @@ footer a:hover {
 
   .hero .contenedor,
   .pasos,
+  .location-control-panel,
   .terreno-grid,
   .paso2-grid,
   .rotations-grid,

@@ -135,17 +135,56 @@
         <p>Seleccione una parcela demostrativa de Sierra o Costa, o dibuje los linderos de su lote directamente sobre el mapa satelital.</p>
       </div>
 
-      <div class="parcela-selector-bar" role="group" aria-label="Selector de parcelas demostrativas">
-        <span class="parcela-selector-label">Parcelas precalculadas:</span>
-        <button type="button" class="parcela-btn active" data-parcela-id="parcela_chimborazo_1">
-          Parcela 1: Sierra — Licto / Guamote (2 950 m · Papa–Papa)
-        </button>
-        <button type="button" class="parcela-btn" data-parcela-id="parcela_el_oro_2">
-          Parcela 2: Costa — El Guabo / Santa Rosa (28 m · Maíz–Arroz)
-        </button>
-        <button type="button" class="parcela-btn" data-parcela-id="parcela_colta_3">
-          Parcela 3: Ladera fuerte Colta (3 180 m · Pendiente 28 %)
-        </button>
+      <div class="location-control-panel" role="region" aria-label="Panel de búsqueda y filtrado de ubicaciones">
+        <!-- Primer Bloque: Búsqueda Libre -->
+        <div class="location-card">
+          <div class="location-search-header">
+            <h3 class="location-search-title">Buscar lugar o dirección</h3>
+            <button type="button" id="btn-mi-ubicacion" class="btn-geo">
+              <i data-lucide="locate-fixed" class="icono-geo"></i>
+              <span>Mi ubicación</span>
+            </button>
+          </div>
+
+          <div class="location-search-row">
+            <input
+              type="text"
+              id="input-buscar-ubicacion"
+              class="location-search-input"
+              placeholder="Ej. Licto, Chimborazo o -1.80, -78.60"
+              aria-label="Buscar lugar o dirección"
+            />
+            <button type="button" id="btn-buscar-ubicacion" class="btn-buscar">Buscar</button>
+          </div>
+
+          <p id="location-search-status" class="location-status">Ubicación encontrada.</p>
+        </div>
+
+        <!-- Segundo Bloque: Filtros en Cascada -->
+        <div class="location-card">
+          <div class="cascade-selects">
+            <div class="select-wrap">
+              <select id="select-provincia" class="cascade-select" aria-label="Provincia">
+                <option value="">Provincia</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-chevron"></i>
+            </div>
+
+            <div class="select-wrap">
+              <select id="select-canton" class="cascade-select" aria-label="Cantón" disabled>
+                <option value="">Cantón</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-chevron"></i>
+            </div>
+
+            <div class="select-wrap">
+              <select id="select-parroquia" class="cascade-select" aria-label="Parroquia" disabled>
+                <option value="">Parroquia</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-chevron"></i>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="terreno-grid">
@@ -519,6 +558,7 @@
   <script src="js/irr.js"></script>
   <script src="js/motor.js"></script>
   <script src="js/datos_vivo.js"></script>
+  <script src="js/ecuador_dpa.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
