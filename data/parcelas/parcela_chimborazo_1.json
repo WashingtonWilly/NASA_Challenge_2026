@@ -45,117 +45,120 @@
     {
       "mes": 1,
       "nombre_mes": "Ene",
-      "P_mm": 54,
-      "ET0_mm": 92,
-      "Tmin_abs": 3.4,
-      "Tmed": 13.4
+      "P_mm": 135.5,
+      "ET0_mm": 96.3,
+      "Tmin_abs": 4.3,
+      "Tmed": 12.1
     },
     {
       "mes": 2,
       "nombre_mes": "Feb",
-      "P_mm": 68,
-      "ET0_mm": 86,
-      "Tmin_abs": 3.8,
-      "Tmed": 13.5
+      "P_mm": 146.0,
+      "ET0_mm": 87.9,
+      "Tmin_abs": 5.8,
+      "Tmed": 12.3
     },
     {
       "mes": 3,
       "nombre_mes": "Mar",
-      "P_mm": 82,
-      "ET0_mm": 94,
-      "Tmin_abs": 3.9,
-      "Tmed": 13.6
+      "P_mm": 173.0,
+      "ET0_mm": 95.6,
+      "Tmin_abs": 5.7,
+      "Tmed": 12.2
     },
     {
       "mes": 4,
       "nombre_mes": "Abr",
-      "P_mm": 88,
-      "ET0_mm": 89,
-      "Tmin_abs": 3.6,
-      "Tmed": 13.5
+      "P_mm": 194.2,
+      "ET0_mm": 88.7,
+      "Tmin_abs": 5.1,
+      "Tmed": 12.1
     },
     {
       "mes": 5,
       "nombre_mes": "May",
-      "P_mm": 58,
-      "ET0_mm": 87,
-      "Tmin_abs": 2.8,
-      "Tmed": 13.1
+      "P_mm": 166.9,
+      "ET0_mm": 87.3,
+      "Tmin_abs": 4.2,
+      "Tmed": 11.8
     },
     {
       "mes": 6,
       "nombre_mes": "Jun",
-      "P_mm": 32,
-      "ET0_mm": 84,
-      "Tmin_abs": 1.5,
-      "Tmed": 12.2
+      "P_mm": 155.0,
+      "ET0_mm": 79.8,
+      "Tmin_abs": 2.5,
+      "Tmed": 10.7
     },
     {
       "mes": 7,
       "nombre_mes": "Jul",
-      "P_mm": 21,
-      "ET0_mm": 88,
-      "Tmin_abs": 0.8,
-      "Tmed": 11.8
+      "P_mm": 99.7,
+      "ET0_mm": 84.7,
+      "Tmin_abs": 1.7,
+      "Tmed": 10.4
     },
     {
       "mes": 8,
       "nombre_mes": "Ago",
-      "P_mm": 24,
-      "ET0_mm": 96,
-      "Tmin_abs": 0.6,
-      "Tmed": 12.1
+      "P_mm": 99.5,
+      "ET0_mm": 94.8,
+      "Tmin_abs": 1.9,
+      "Tmed": 10.6
     },
     {
       "mes": 9,
       "nombre_mes": "Sep",
-      "P_mm": 42,
-      "ET0_mm": 99,
-      "Tmin_abs": 1.8,
-      "Tmed": 12.8
+      "P_mm": 65.8,
+      "ET0_mm": 100.4,
+      "Tmin_abs": 1.6,
+      "Tmed": 11.2
     },
     {
       "mes": 10,
       "nombre_mes": "Oct",
-      "P_mm": 76,
-      "ET0_mm": 101,
-      "Tmin_abs": 2.9,
-      "Tmed": 13.4
+      "P_mm": 118.9,
+      "ET0_mm": 104.4,
+      "Tmin_abs": 3.4,
+      "Tmed": 12.0
     },
     {
       "mes": 11,
       "nombre_mes": "Nov",
-      "P_mm": 79,
-      "ET0_mm": 96,
-      "Tmin_abs": 2.5,
-      "Tmed": 13.5
+      "P_mm": 120.3,
+      "ET0_mm": 96.5,
+      "Tmin_abs": 5.3,
+      "Tmed": 12.2
     },
     {
       "mes": 12,
       "nombre_mes": "Dic",
-      "P_mm": 62,
-      "ET0_mm": 94,
-      "Tmin_abs": 3.1,
-      "Tmed": 13.4
+      "P_mm": 139.3,
+      "ET0_mm": 97.2,
+      "Tmin_abs": 4.2,
+      "Tmed": 12.2
     }
   ],
   "anomalia": {
-    "fuente": "EJEMPLO (dato provisional, falta dato real)",
-    "res_km": 10,
-    "pct": -18,
+    "fuente": "NASA POWER · PRECTOTCORR",
+    "res_km": 50,
+    "pct": 120,
     "ventana": "ago–oct 2026",
-    "mensaje": "EJEMPLO: Su zona viene 18 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
+    "lluvia_reciente_mm": 611,
+    "lluvia_normal_mm": 278,
+    "anios_referencia": "2001–2025",
+    "mensaje": "Su zona viene 120 % más lluviosa que un año normal (ago–oct 2026: 611 mm frente a 278 mm de promedio, NASA POWER, ~50 km). Suelo saturado: revise drenajes, evite labranza con el suelo mojado y vigile hongos (lancha, pudriciones) antes de sembrar."
   },
   "suelo": {
-    "fuente": "EJEMPLO (dato provisional, falta dato real)",
+    "fuente": "ISRIC SoilGrids 250 m (0–30 cm)",
     "textura": "Franco",
-    "arcilla_pct": 24.0,
-    "arena_pct": 41.0,
-    "ph": 5.9,
-    "soc_pct": 3.4,
-    "n_gkg": 2.1,
-    "es_andisol": true,
-    "editado_por_usuario": false
+    "arcilla_pct": 22.2,
+    "arena_pct": 40.8,
+    "ph": 6.0,
+    "soc_pct": 6.66,
+    "n_gkg": 4.59,
+    "editado_por_usuario": false,
+    "es_andisol": true
   },
   "ndvi_mensual": [
     {
@@ -385,9 +388,9 @@
   ],
   "nematodo_declarado": false,
   "estado_datos": {
-    "clima": "EJEMPLO (dato provisional, falta dato real)",
-    "anomalia": "EJEMPLO (dato provisional, falta dato real)",
-    "suelo": "EJEMPLO (dato provisional, falta dato real)",
+    "clima": "NASA POWER 2015–2024 (diario, AG); T corregida +0.2 °C por altitud (celda a 2983.94 m)",
+    "anomalia": "NASA POWER PRECTOTCORR, ago–oct 2026 vs 2001–2025",
+    "suelo": "ISRIC SoilGrids 250 m (0–30 cm)",
     "ndvi": "EJEMPLO (dato provisional, falta dato real)",
     "smap": "sin dato",
     "terreno": "EJEMPLO (verificar con NASADEM 30 m)"

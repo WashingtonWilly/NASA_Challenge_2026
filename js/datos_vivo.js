@@ -103,7 +103,8 @@
       anios_referencia: `2001–${anioFin - 1}`,
       mensaje: `Su zona viene ${Math.abs(pct)} % ${pct < 0 ? 'más seca' : 'más lluviosa'} que un año normal (${txt}: ` +
         `${Math.round(reciente)} mm frente a ${Math.round(normal)} mm de promedio, NASA POWER, ~50 km).` +
-        (pct < -15 ? ' Por eso damos más peso al ahorro de agua.' : '')
+        (pct < -15 ? ' Por eso damos más peso al ahorro de agua.' : '') +
+        (pct > 50 ? ' Suelo saturado: revise drenajes, evite labranza con el suelo mojado y vigile hongos (lancha, pudriciones) antes de sembrar.' : '')
     };
   }
 
@@ -171,23 +172,55 @@
     const d = 0.0005; // ~55 m
     const pts = [[lat, lon], [lat + d, lon], [lat - d, lon], [lat, lon + d], [lat, lon - d]];
 
-    const pTerreno = fetchJson('https://api.opentopodata.org/v1/srtm30m?locations=' +
-      pts.map(p => p[0].toFixed(5) + ',' + p[1].toFixed(5)).join('|'), 20000)
-      .then(j => procesarTerreno(j, pts)).catch(() => null)
-      .then(r => { avisar('terreno', !!r); return r; });
+    // Elevación SRTM 30 m: tres servicios en cascada (todos sirven el SRTM de la NASA);
+    // si ninguno responde, al menos la altitud de la celda de NASA POWER.
+    const locs = pts.map(p => p[0].toFixed(5) + ',' + p[1].toFixed(5)).join('|');
+    const locs2 = pts.map(p => p[0].toFixed(5) + ',' + p[1].toFixed(5)).join(',');
+    const fuentesElev = [
+      ['OpenTopoData (SRTM 30 m)', () => fetchJson('https://api.opentopodata.org/v1/srtm30m?locations=' + locs, 15000)
+        .then(j => procesarTerreno(j, pts))],
+      ['Open-Elevation (SRTM)', () => fetchJson('https://api.open-elevation.com/api/v1/lookup?locations=' + locs, 15000)
+        .then(j => procesarTerreno(j, pts))],
+      ['Open-Meteo (Copernicus 90 m)', () => fetchJson('https://api.open-meteo.com/v1/elevation?latitude=' +
+        pts.map(p => p[0].toFixed(5)).join(',') + '&longitude=' + pts.map(p => p[1].toFixed(5)).join(','), 15000)
+        .then(j => procesarTerreno({ results: (j.elevation || []).map(z => ({ elevation: z })) }, pts))]
+    ];
+    const pTerreno = (async () => {
+      for (const [nombre, pedir] of fuentesElev) {
+        try {
+          const r = await pedir();
+          if (r) { r.fuente = nombre; avisar('terreno', true); return r; }
+        } catch (e) { /* siguiente servicio */ }
+      }
+      avisar('terreno', false);
+      return null;
+    })();
     const pClimaRaw = fetchJson(`${base}&parameters=T2M_MAX,T2M_MIN,T2M,PRECTOTCORR&latitude=${la}&longitude=${lo}&start=20150101&end=20241231`, 60000)
       .catch(() => null);
     const pAnom = fetchJson(`${base}&parameters=PRECTOTCORR&latitude=${la}&longitude=${lo}&start=20010101&end=${yyyymmdd(new Date())}`, 60000)
       .then(procesarAnomalia).catch(() => null)
       .then(r => { avisar('anomalia', !!r); return r; });
-    const q = `lon=${lo}&lat=${la}&depth=0-5cm&depth=5-15cm&depth=15-30cm&value=mean` +
+    const qSuelo = (la2, lo2) => `lon=${lo2}&lat=${la2}&depth=0-5cm&depth=5-15cm&depth=15-30cm&value=mean` +
       ['clay', 'sand', 'silt', 'phh2o', 'soc', 'nitrogen'].map(p => '&property=' + p).join('');
-    const pSuelo = fetchJson('https://rest.isric.org/soilgrids/v2.0/properties/query?' + q, 30000)
-      .then(procesarSuelo).catch(() => null)
-      .then(r => { avisar('suelo', !!r); return r; });
+    const pedirSuelo = (la2, lo2) => fetchJson('https://rest.isric.org/soilgrids/v2.0/properties/query?' + qSuelo(la2, lo2), 30000)
+      .then(procesarSuelo).catch(() => null);
+    // Si el píxel exacto no tiene dato (ríos, zonas urbanas), prueba los 4 vecinos a ~250 m
+    const pSuelo = pedirSuelo(la, lo).then(async r => {
+      if (r) return r;
+      const dd = 0.0025;
+      for (const [dla, dlo] of [[dd, 0], [-dd, 0], [0, dd], [0, -dd]]) {
+        const v = await pedirSuelo((lat + dla).toFixed(4), (lon + dlo).toFixed(4));
+        if (v) { v.fuente += ', píxel vecino a ~250 m'; return v; }
+      }
+      return null;
+    }).then(r => { avisar('suelo', !!r); return r; });
 
-    const terreno = await pTerreno;
+    let terreno = await pTerreno;
     const climaRaw = await pClimaRaw;
+    if (!terreno && climaRaw && climaRaw.geometry && typeof (climaRaw.geometry.coordinates || [])[2] === 'number') {
+      // Sin servicio de elevación: altitud aproximada de la celda POWER (~50 km); pendiente desconocida
+      terreno = { elev_m: Math.round(climaRaw.geometry.coordinates[2]), fuente: 'celda NASA POWER (~50 km), aproximada', aproximado: true };
+    }
     let clima = null;
     try { clima = climaRaw ? procesarClima(climaRaw, lat, terreno ? terreno.elev_m : null) : null; } catch (e) { clima = null; }
     avisar('clima', !!clima);
