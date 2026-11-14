@@ -150,15 +150,15 @@
     "mensaje": "Su zona viene 120 % más lluviosa que un año normal (ago–oct 2026: 611 mm frente a 278 mm de promedio, NASA POWER, ~50 km). Suelo saturado: revise drenajes, evite labranza con el suelo mojado y vigile hongos (lancha, pudriciones) antes de sembrar."
   },
   "suelo": {
-    "fuente": "EJEMPLO (dato provisional, falta dato real)",
+    "fuente": "ISRIC SoilGrids 250 m (0–30 cm)",
     "textura": "Franco",
-    "arcilla_pct": 22.0,
-    "arena_pct": 41.0,
-    "ph": 6.0,
-    "soc_pct": 3.0,
-    "n_gkg": 2.0,
-    "es_andisol": true,
-    "editado_por_usuario": false
+    "arcilla_pct": 21.1,
+    "arena_pct": 42.7,
+    "ph": 6.3,
+    "soc_pct": 4.11,
+    "n_gkg": 3.76,
+    "editado_por_usuario": false,
+    "es_andisol": true
   },
   "ndvi_mensual": [
     {
@@ -390,7 +390,7 @@
   "estado_datos": {
     "clima": "NASA POWER 2015–2024 (diario, AG); T corregida +0.6 °C por altitud (celda a 2983.94 m)",
     "anomalia": "NASA POWER PRECTOTCORR, ago–oct 2026 vs 2001–2025",
-    "suelo": "EJEMPLO (dato provisional, falta dato real)",
+    "suelo": "ISRIC SoilGrids 250 m (0–30 cm)",
     "ndvi": "EJEMPLO (dato provisional, falta dato real)",
     "smap": "sin dato",
     "terreno": "EJEMPLO (verificar con NASADEM 30 m)"
