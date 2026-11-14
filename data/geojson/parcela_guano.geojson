@@ -1,0 +1,42 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "parcela_guano",
+        "nombre": "Parcela 2 — Guano / San Andrés (Chimborazo)",
+        "area_ha": 2.0,
+        "elev_m": 2850,
+        "pendiente_pct": 8.0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.58843,
+              -1.63687
+            ],
+            [
+              -78.58717,
+              -1.63687
+            ],
+            [
+              -78.58717,
+              -1.63813
+            ],
+            [
+              -78.58843,
+              -1.63813
+            ],
+            [
+              -78.58843,
+              -1.63687
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1663,3 +1663,9 @@ footer a:hover {
 }
 .estado-datos-vivo ul { margin: 6px 0 0; padding-left: 4px; list-style: none; }
 .estado-datos-vivo li { margin: 2px 0; }
+
+/* Parcela activa: nombre y si tiene historial satelital */
+.parcela-activa { margin-top: 10px; font-size: 0.9rem; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.pill-sat { font-size: 0.78rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; border: 1px solid; }
+.pill-sat.ok { background: #E8F1DD; color: #3E5A1E; border-color: #9DB873; }
+.pill-sat.warn { background: #FBF3DD; color: #7A4F12; border-color: #D6B46A; }

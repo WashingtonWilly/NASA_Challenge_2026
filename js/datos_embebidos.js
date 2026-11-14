@@ -958,47 +958,47 @@ window.CATALOGO_CULTIVOS = {
 };
 
 window.PARCELAS_DEMO = {
-  "parcela_chimborazo_1": {
-    "id": "parcela_chimborazo_1",
-    "nombre": "Parcela 1 — Sierra (Licto, Chimborazo)",
+  "parcela_licto": {
+    "id": "parcela_licto",
+    "nombre": "Parcela 1 — Licto (Riobamba, Chimborazo)",
     "region": "Sierra",
-    "ubicacion_texto": "Comunidad Tunshi / Licto, Riobamba, Chimborazo",
+    "ubicacion_texto": "Licto, Riobamba, Chimborazo",
     "geometria": {
       "type": "Polygon",
       "coordinates": [
         [
           [
-            -78.6132,
-            -1.7842
+            -78.61253,
+            -1.80077
           ],
           [
-            -78.6118,
-            -1.7842
+            -78.61127,
+            -1.80077
           ],
           [
-            -78.6118,
-            -1.7854
+            -78.61127,
+            -1.80203
           ],
           [
-            -78.6132,
-            -1.7854
+            -78.61253,
+            -1.80203
           ],
           [
-            -78.6132,
-            -1.7842
+            -78.61253,
+            -1.80077
           ]
         ]
       ]
     },
-    "area_ha": 1.8,
+    "area_ha": 2.0,
     "centroide": {
-      "lat": -1.7848,
-      "lon": -78.6125
+      "lat": -1.8014,
+      "lon": -78.6119
     },
     "terreno": {
-      "elev_m": 2950,
-      "pendiente_pct": 14.0,
-      "pendiente_max_pct": 22.0,
+      "elev_m": 2900,
+      "pendiente_pct": 12.0,
+      "pendiente_max_pct": 18.0,
       "orientacion": "SE"
     },
     "clima_mensual": [
@@ -1006,97 +1006,97 @@ window.PARCELAS_DEMO = {
         "mes": 1,
         "nombre_mes": "Ene",
         "P_mm": 135.5,
-        "ET0_mm": 96.3,
-        "Tmin_abs": 4.3,
-        "Tmed": 12.1
+        "ET0_mm": 97.3,
+        "Tmin_abs": 4.6,
+        "Tmed": 12.4
       },
       {
         "mes": 2,
         "nombre_mes": "Feb",
         "P_mm": 146.0,
-        "ET0_mm": 87.9,
-        "Tmin_abs": 5.8,
-        "Tmed": 12.3
+        "ET0_mm": 88.9,
+        "Tmin_abs": 6.1,
+        "Tmed": 12.7
       },
       {
         "mes": 3,
         "nombre_mes": "Mar",
         "P_mm": 173.0,
-        "ET0_mm": 95.6,
-        "Tmin_abs": 5.7,
-        "Tmed": 12.2
+        "ET0_mm": 96.7,
+        "Tmin_abs": 6.0,
+        "Tmed": 12.5
       },
       {
         "mes": 4,
         "nombre_mes": "Abr",
         "P_mm": 194.2,
-        "ET0_mm": 88.7,
-        "Tmin_abs": 5.1,
-        "Tmed": 12.1
+        "ET0_mm": 89.7,
+        "Tmin_abs": 5.4,
+        "Tmed": 12.4
       },
       {
         "mes": 5,
         "nombre_mes": "May",
         "P_mm": 166.9,
-        "ET0_mm": 87.3,
-        "Tmin_abs": 4.2,
-        "Tmed": 11.8
+        "ET0_mm": 88.3,
+        "Tmin_abs": 4.6,
+        "Tmed": 12.1
       },
       {
         "mes": 6,
         "nombre_mes": "Jun",
         "P_mm": 155.0,
-        "ET0_mm": 79.8,
-        "Tmin_abs": 2.5,
-        "Tmed": 10.7
+        "ET0_mm": 80.7,
+        "Tmin_abs": 2.8,
+        "Tmed": 11.1
       },
       {
         "mes": 7,
         "nombre_mes": "Jul",
         "P_mm": 99.7,
-        "ET0_mm": 84.7,
-        "Tmin_abs": 1.7,
-        "Tmed": 10.4
+        "ET0_mm": 85.7,
+        "Tmin_abs": 2.0,
+        "Tmed": 10.7
       },
       {
         "mes": 8,
         "nombre_mes": "Ago",
         "P_mm": 99.5,
-        "ET0_mm": 94.8,
-        "Tmin_abs": 1.9,
-        "Tmed": 10.6
+        "ET0_mm": 95.8,
+        "Tmin_abs": 2.3,
+        "Tmed": 11.0
       },
       {
         "mes": 9,
         "nombre_mes": "Sep",
         "P_mm": 65.8,
-        "ET0_mm": 100.4,
-        "Tmin_abs": 1.6,
-        "Tmed": 11.2
+        "ET0_mm": 101.6,
+        "Tmin_abs": 1.9,
+        "Tmed": 11.5
       },
       {
         "mes": 10,
         "nombre_mes": "Oct",
         "P_mm": 118.9,
-        "ET0_mm": 104.4,
-        "Tmin_abs": 3.4,
-        "Tmed": 12.0
+        "ET0_mm": 105.6,
+        "Tmin_abs": 3.7,
+        "Tmed": 12.3
       },
       {
         "mes": 11,
         "nombre_mes": "Nov",
         "P_mm": 120.3,
-        "ET0_mm": 96.5,
-        "Tmin_abs": 5.3,
-        "Tmed": 12.2
+        "ET0_mm": 97.5,
+        "Tmin_abs": 5.6,
+        "Tmed": 12.5
       },
       {
         "mes": 12,
         "nombre_mes": "Dic",
         "P_mm": 139.3,
-        "ET0_mm": 97.2,
-        "Tmin_abs": 4.2,
-        "Tmed": 12.2
+        "ET0_mm": 98.3,
+        "Tmin_abs": 4.6,
+        "Tmed": 12.6
       }
     ],
     "anomalia": {
@@ -1112,11 +1112,11 @@ window.PARCELAS_DEMO = {
     "suelo": {
       "fuente": "ISRIC SoilGrids 250 m (0–30 cm)",
       "textura": "Franco",
-      "arcilla_pct": 22.2,
-      "arena_pct": 40.8,
-      "ph": 6.0,
-      "soc_pct": 6.66,
-      "n_gkg": 4.59,
+      "arcilla_pct": 21.1,
+      "arena_pct": 42.7,
+      "ph": 6.3,
+      "soc_pct": 4.11,
+      "n_gkg": 3.76,
       "editado_por_usuario": false,
       "es_andisol": true
     },
@@ -1348,7 +1348,7 @@ window.PARCELAS_DEMO = {
     ],
     "nematodo_declarado": false,
     "estado_datos": {
-      "clima": "NASA POWER 2015–2024 (diario, AG); T corregida +0.2 °C por altitud (celda a 2983.94 m)",
+      "clima": "NASA POWER 2015–2024 (diario, AG); T corregida +0.6 °C por altitud (celda a 2983.94 m)",
       "anomalia": "NASA POWER PRECTOTCORR, ago–oct 2026 vs 2001–2025",
       "suelo": "ISRIC SoilGrids 250 m (0–30 cm)",
       "ndvi": "EJEMPLO (dato provisional, falta dato real)",
@@ -1356,547 +1356,145 @@ window.PARCELAS_DEMO = {
       "terreno": "EJEMPLO (verificar con NASADEM 30 m)"
     }
   },
-  "parcela_el_oro_2": {
-    "id": "parcela_el_oro_2",
-    "nombre": "Parcela 2 — Costa (El Guabo, El Oro)",
-    "region": "Costa",
-    "ubicacion_texto": "Sector Río Bonito / El Guabo, El Oro (Zona de ciclo corto)",
+  "parcela_guano": {
+    "id": "parcela_guano",
+    "nombre": "Parcela 2 — Guano / San Andrés (Chimborazo)",
+    "region": "Sierra",
+    "ubicacion_texto": "San Andrés, Guano, Chimborazo",
     "geometria": {
       "type": "Polygon",
       "coordinates": [
         [
           [
-            -79.8335,
-            -3.2438
+            -78.58843,
+            -1.63687
           ],
           [
-            -79.8315,
-            -3.2438
+            -78.58717,
+            -1.63687
           ],
           [
-            -79.8315,
-            -3.2454
+            -78.58717,
+            -1.63813
           ],
           [
-            -79.8335,
-            -3.2454
+            -78.58843,
+            -1.63813
           ],
           [
-            -79.8335,
-            -3.2438
+            -78.58843,
+            -1.63687
           ]
         ]
       ]
     },
-    "area_ha": 3.5,
+    "area_ha": 2.0,
     "centroide": {
-      "lat": -3.2446,
-      "lon": -79.8325
+      "lat": -1.6375,
+      "lon": -78.5878
     },
     "terreno": {
-      "elev_m": 28,
-      "pendiente_pct": 4.0,
-      "pendiente_max_pct": 7.0,
-      "orientacion": "O"
-    },
-    "clima_mensual": [
-      {
-        "mes": 1,
-        "nombre_mes": "Ene",
-        "P_mm": 77.6,
-        "ET0_mm": 120.1,
-        "Tmin_abs": 22.6,
-        "Tmed": 26.7
-      },
-      {
-        "mes": 2,
-        "nombre_mes": "Feb",
-        "P_mm": 126.7,
-        "ET0_mm": 104.0,
-        "Tmin_abs": 23.0,
-        "Tmed": 27.0
-      },
-      {
-        "mes": 3,
-        "nombre_mes": "Mar",
-        "P_mm": 158.5,
-        "ET0_mm": 107.1,
-        "Tmin_abs": 23.3,
-        "Tmed": 26.9
-      },
-      {
-        "mes": 4,
-        "nombre_mes": "Abr",
-        "P_mm": 94.4,
-        "ET0_mm": 107.0,
-        "Tmin_abs": 22.7,
-        "Tmed": 26.9
-      },
-      {
-        "mes": 5,
-        "nombre_mes": "May",
-        "P_mm": 46.4,
-        "ET0_mm": 111.5,
-        "Tmin_abs": 22.3,
-        "Tmed": 26.9
-      },
-      {
-        "mes": 6,
-        "nombre_mes": "Jun",
-        "P_mm": 22.5,
-        "ET0_mm": 108.8,
-        "Tmin_abs": 20.9,
-        "Tmed": 26.3
-      },
-      {
-        "mes": 7,
-        "nombre_mes": "Jul",
-        "P_mm": 12.0,
-        "ET0_mm": 119.5,
-        "Tmin_abs": 21.0,
-        "Tmed": 26.0
-      },
-      {
-        "mes": 8,
-        "nombre_mes": "Ago",
-        "P_mm": 6.0,
-        "ET0_mm": 129.8,
-        "Tmin_abs": 20.5,
-        "Tmed": 25.9
-      },
-      {
-        "mes": 9,
-        "nombre_mes": "Sep",
-        "P_mm": 8.2,
-        "ET0_mm": 132.1,
-        "Tmin_abs": 20.9,
-        "Tmed": 25.9
-      },
-      {
-        "mes": 10,
-        "nombre_mes": "Oct",
-        "P_mm": 17.5,
-        "ET0_mm": 131.1,
-        "Tmin_abs": 21.2,
-        "Tmed": 25.8
-      },
-      {
-        "mes": 11,
-        "nombre_mes": "Nov",
-        "P_mm": 21.7,
-        "ET0_mm": 120.0,
-        "Tmin_abs": 21.0,
-        "Tmed": 25.4
-      },
-      {
-        "mes": 12,
-        "nombre_mes": "Dic",
-        "P_mm": 39.7,
-        "ET0_mm": 121.1,
-        "Tmin_abs": 21.7,
-        "Tmed": 26.2
-      }
-    ],
-    "anomalia": {
-      "fuente": "NASA POWER · PRECTOTCORR",
-      "res_km": 50,
-      "pct": 2523,
-      "ventana": "ago–oct 2026",
-      "lluvia_reciente_mm": 759,
-      "lluvia_normal_mm": 29,
-      "anios_referencia": "2001–2025",
-      "mensaje": "Su zona viene 2523 % más lluviosa que un año normal (ago–oct 2026: 759 mm frente a 29 mm de promedio, NASA POWER, ~50 km). Suelo saturado: revise drenajes, evite labranza con el suelo mojado y vigile hongos (lancha, pudriciones) antes de sembrar."
-    },
-    "suelo": {
-      "fuente": "EJEMPLO (dato provisional, falta dato real)",
-      "textura": "Franco",
-      "arcilla_pct": 28.0,
-      "arena_pct": 36.0,
-      "ph": 6.3,
-      "soc_pct": 1.8,
-      "n_gkg": 1.4,
-      "es_andisol": false,
-      "editado_por_usuario": false
-    },
-    "ndvi_mensual": [
-      {
-        "mes": "2023-11",
-        "ndvi": 0.22,
-        "ndti": 0.17,
-        "n_obs": 3,
-        "interpolado": false
-      },
-      {
-        "mes": "2023-12",
-        "ndvi": 0.42,
-        "ndti": 0.12,
-        "n_obs": 2,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-01",
-        "ndvi": 0.68,
-        "ndti": 0.07,
-        "n_obs": 2,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-02",
-        "ndvi": 0.77,
-        "ndti": 0.05,
-        "n_obs": 2,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-03",
-        "ndvi": 0.71,
-        "ndti": 0.06,
-        "n_obs": 2,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-04",
-        "ndvi": 0.49,
-        "ndti": 0.15,
-        "n_obs": 3,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-05",
-        "ndvi": 0.26,
-        "ndti": 0.19,
-        "n_obs": 3,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-06",
-        "ndvi": 0.21,
-        "ndti": 0.16,
-        "n_obs": 4,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-07",
-        "ndvi": 0.19,
-        "ndti": 0.14,
-        "n_obs": 4,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-08",
-        "ndvi": 0.18,
-        "ndti": 0.12,
-        "n_obs": 4,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-09",
-        "ndvi": 0.19,
-        "ndti": 0.11,
-        "n_obs": 3,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-10",
-        "ndvi": 0.21,
-        "ndti": 0.1,
-        "n_obs": 3,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-11",
-        "ndvi": 0.23,
-        "ndti": 0.11,
-        "n_obs": 3,
-        "interpolado": false
-      },
-      {
-        "mes": "2024-12",
-        "ndvi": 0.48,
-        "ndti": 0.09,
-        "n_obs": 2,
-        "interpolado": false
-      },
-      {
-        "mes": "2025-01",
-        "ndvi": 0.73,
-        "ndti": 0.05,
-        "n_obs": 2,
-        "interpolado": false
-      },
-      {
-        "mes": "2025-02",
-        "ndvi": 0.79,
-        "ndti": 0.04,
-        "n_obs": 1,
-        "interpolado": true
-      },
-      {
-        "mes": "2025-03",
-        "ndvi": 0.75,
-        "ndti": 0.05,
-        "n_obs": 2,
-        "interpolado": false
-      },
-      {
-        "mes": "2025-04",
-        "ndvi": 0.58,
-        "ndti": 0.09,
-        "n_obs": 3,
-        "interpolado": false
-      },
-      {
-        "mes": "2025-05",
-        "ndvi": 0.29,
-        "ndti": 0.18,
-        "n_obs": 3,
-        "interpolado": false
-      },
-      {
-        "mes": "2025-06",
-        "ndvi": 0.22,
-        "ndti": 0.16,
-        "n_obs": 3,
-        "interpolado": false
-      },
-      {
-        "mes": "2025-07",
-        "ndvi": 0.2,
-        "ndti": 0.13,
-        "n_obs": 4,
-        "interpolado": false
-      },
-      {
-        "mes": "2025-08",
-        "ndvi": 0.19,
-        "ndti": 0.11,
-        "n_obs": 4,
-        "interpolado": false
-      },
-      {
-        "mes": "2025-09",
-        "ndvi": 0.18,
-        "ndti": 0.1,
-        "n_obs": 3,
-        "interpolado": false
-      },
-      {
-        "mes": "2025-10",
-        "ndvi": 0.2,
-        "ndti": 0.1,
-        "n_obs": 3,
-        "interpolado": false
-      }
-    ],
-    "historia_inferida": [
-      {
-        "anio": 2023,
-        "ciclos": 0,
-        "meses_cultivo": [],
-        "meses_desnudo": [
-          11
-        ],
-        "meses_residuo": [
-          11
-        ]
-      },
-      {
-        "anio": 2024,
-        "ciclos": 1,
-        "meses_cultivo": [
-          1,
-          2,
-          3
-        ],
-        "meses_desnudo": [
-          6,
-          7,
-          8,
-          9,
-          10,
-          11
-        ],
-        "meses_residuo": [
-          5,
-          6,
-          7
-        ]
-      },
-      {
-        "anio": 2025,
-        "ciclos": 1,
-        "meses_cultivo": [
-          1,
-          2,
-          3,
-          4
-        ],
-        "meses_desnudo": [
-          6,
-          7,
-          8,
-          9,
-          10
-        ],
-        "meses_residuo": [
-          5,
-          6
-        ]
-      }
-    ],
-    "historia_declarada": [
-      "maiz_duro",
-      "arroz"
-    ],
-    "nematodo_declarado": false,
-    "estado_datos": {
-      "clima": "NASA POWER 2015–2024 (diario, AG); T corregida +1.8 °C por altitud (celda a 299.67 m)",
-      "anomalia": "NASA POWER PRECTOTCORR, ago–oct 2026 vs 2001–2025",
-      "suelo": "EJEMPLO (dato provisional, falta dato real)",
-      "ndvi": "EJEMPLO (dato provisional, falta dato real)",
-      "smap": "sin dato",
-      "terreno": "EJEMPLO (verificar con NASADEM 30 m)"
-    }
-  },
-  "parcela_colta_3": {
-    "id": "parcela_colta_3",
-    "nombre": "Parcela 3 (Caso Borde) — Ladera Alta Colta (> 25 % pendiente)",
-    "region": "Sierra Alta (Ladera)",
-    "ubicacion_texto": "Ladera alta de Colta, Chimborazo (3.180 m, pendiente 28 %)",
-    "geometria": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            -78.7652,
-            -1.712
-          ],
-          [
-            -78.764,
-            -1.712
-          ],
-          [
-            -78.764,
-            -1.7131
-          ],
-          [
-            -78.7652,
-            -1.7131
-          ],
-          [
-            -78.7652,
-            -1.712
-          ]
-        ]
-      ]
-    },
-    "area_ha": 1.2,
-    "centroide": {
-      "lat": -1.7125,
-      "lon": -78.7646
-    },
-    "terreno": {
-      "elev_m": 3180,
-      "pendiente_pct": 28.0,
-      "pendiente_max_pct": 35.0,
-      "orientacion": "E"
+      "elev_m": 2850,
+      "pendiente_pct": 8.0,
+      "pendiente_max_pct": 14.0,
+      "orientacion": "S"
     },
     "clima_mensual": [
       {
         "mes": 1,
         "nombre_mes": "Ene",
         "P_mm": 148.6,
-        "ET0_mm": 89.5,
-        "Tmin_abs": 2.5,
-        "Tmed": 10.4
+        "ET0_mm": 96.2,
+        "Tmin_abs": 4.6,
+        "Tmed": 12.5
       },
       {
         "mes": 2,
         "nombre_mes": "Feb",
         "P_mm": 153.0,
-        "ET0_mm": 82.1,
-        "Tmin_abs": 4.1,
-        "Tmed": 10.7
+        "ET0_mm": 88.3,
+        "Tmin_abs": 6.2,
+        "Tmed": 12.8
       },
       {
         "mes": 3,
         "nombre_mes": "Mar",
         "P_mm": 183.5,
-        "ET0_mm": 89.4,
-        "Tmin_abs": 3.8,
-        "Tmed": 10.5
+        "ET0_mm": 96.2,
+        "Tmin_abs": 6.0,
+        "Tmed": 12.6
       },
       {
         "mes": 4,
         "nombre_mes": "Abr",
         "P_mm": 198.3,
-        "ET0_mm": 83.5,
-        "Tmin_abs": 3.9,
-        "Tmed": 10.5
+        "ET0_mm": 89.9,
+        "Tmin_abs": 6.0,
+        "Tmed": 12.6
       },
       {
         "mes": 5,
         "nombre_mes": "May",
         "P_mm": 167.3,
-        "ET0_mm": 82.5,
-        "Tmin_abs": 2.6,
-        "Tmed": 10.3
+        "ET0_mm": 88.9,
+        "Tmin_abs": 4.7,
+        "Tmed": 12.4
       },
       {
         "mes": 6,
         "nombre_mes": "Jun",
         "P_mm": 157.4,
-        "ET0_mm": 75.5,
-        "Tmin_abs": 1.1,
-        "Tmed": 9.2
+        "ET0_mm": 81.6,
+        "Tmin_abs": 3.2,
+        "Tmed": 11.3
       },
       {
         "mes": 7,
         "nombre_mes": "Jul",
         "P_mm": 99.3,
-        "ET0_mm": 80.1,
-        "Tmin_abs": 0.6,
-        "Tmed": 8.9
+        "ET0_mm": 86.6,
+        "Tmin_abs": 2.8,
+        "Tmed": 11.0
       },
       {
         "mes": 8,
         "nombre_mes": "Ago",
         "P_mm": 94.4,
-        "ET0_mm": 89.4,
-        "Tmin_abs": 0.3,
-        "Tmed": 9.1
+        "ET0_mm": 96.6,
+        "Tmin_abs": 2.5,
+        "Tmed": 11.3
       },
       {
         "mes": 9,
         "nombre_mes": "Sep",
         "P_mm": 63.5,
-        "ET0_mm": 95.2,
-        "Tmin_abs": 0.5,
-        "Tmed": 9.7
+        "ET0_mm": 102.6,
+        "Tmin_abs": 2.7,
+        "Tmed": 11.8
       },
       {
         "mes": 10,
         "nombre_mes": "Oct",
         "P_mm": 121.2,
-        "ET0_mm": 98.4,
-        "Tmin_abs": 2.1,
-        "Tmed": 10.5
+        "ET0_mm": 105.9,
+        "Tmin_abs": 4.2,
+        "Tmed": 12.6
       },
       {
         "mes": 11,
         "nombre_mes": "Nov",
         "P_mm": 120.7,
-        "ET0_mm": 89.9,
-        "Tmin_abs": 3.2,
-        "Tmed": 10.5
+        "ET0_mm": 96.6,
+        "Tmin_abs": 5.3,
+        "Tmed": 12.7
       },
       {
         "mes": 12,
         "nombre_mes": "Dic",
         "P_mm": 141.4,
-        "ET0_mm": 90.5,
-        "Tmin_abs": 2.9,
-        "Tmed": 10.6
+        "ET0_mm": 97.2,
+        "Tmin_abs": 5.0,
+        "Tmed": 12.7
       }
     ],
     "anomalia": {
@@ -1912,11 +1510,11 @@ window.PARCELAS_DEMO = {
     "suelo": {
       "fuente": "ISRIC SoilGrids 250 m (0–30 cm)",
       "textura": "Franco",
-      "arcilla_pct": 21.5,
-      "arena_pct": 44.9,
-      "ph": 6.2,
-      "soc_pct": 4.62,
-      "n_gkg": 3.83,
+      "arcilla_pct": 21.7,
+      "arena_pct": 41.9,
+      "ph": 6.0,
+      "soc_pct": 4.34,
+      "n_gkg": 3.1,
       "editado_por_usuario": false,
       "es_andisol": true
     },
@@ -2143,12 +1741,12 @@ window.PARCELAS_DEMO = {
       }
     ],
     "historia_declarada": [
-      "papa",
-      "cebada"
+      "maiz_suave",
+      "papa"
     ],
     "nematodo_declarado": false,
     "estado_datos": {
-      "clima": "NASA POWER 2015–2024 (diario, AG); T corregida -1.1 °C por altitud (celda a 3003.46 m)",
+      "clima": "NASA POWER 2015–2024 (diario, AG); T corregida +1.0 °C por altitud (celda a 3003.46 m)",
       "anomalia": "NASA POWER PRECTOTCORR, ago–oct 2026 vs 2001–2025",
       "suelo": "ISRIC SoilGrids 250 m (0–30 cm)",
       "ndvi": "EJEMPLO (dato provisional, falta dato real)",

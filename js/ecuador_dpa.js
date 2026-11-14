@@ -306,12 +306,8 @@
 
   // Vínculos directos a las parcelas demostrativas precalculadas
   const PARCELA_POR_UBICACION = {
-    'CHIMBORAZO|Riobamba|Licto': 'parcela_chimborazo_1',
-    'CHIMBORAZO|Guamote|Guamote': 'parcela_chimborazo_1',
-    'EL ORO|El Guabo|El Guabo': 'parcela_el_oro_2',
-    'EL ORO|Santa Rosa|Santa Rosa': 'parcela_el_oro_2',
-    'CHIMBORAZO|Colta|Villa La Unión (Cajabamba)': 'parcela_colta_3',
-    'CHIMBORAZO|Colta|Sicalpa': 'parcela_colta_3'
+    'CHIMBORAZO|Riobamba|Licto': 'parcela_licto',
+    'CHIMBORAZO|Guano|San Andrés': 'parcela_guano'
   };
 
   root.ECUADOR_DPA = ECUADOR_DPA;

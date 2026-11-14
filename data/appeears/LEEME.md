@@ -1,7 +1,7 @@
 # CSV de AppEEARS
 
-## Pedido (Point Sample)
-- **Coordenadas:** subir `puntos_pedido2.csv` (centro de cada parcela + 4 vecinos a ~55 m para la pendiente).
+## Pedido (Point Sample) — nombre sugerido `allpawinay_sierra`
+- **Coordenadas:** subir `puntos_pedido2.csv` (centro de Licto y Guano + 4 vecinos a ~55 m para la pendiente).
 - **Fechas:** 11-01-2022 a 11-01-2025.
 - **Capas:**
   - HLSL30 (Land Surface Reflectance): B04, B05, B06, B07, Fmask

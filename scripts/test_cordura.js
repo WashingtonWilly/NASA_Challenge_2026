@@ -13,9 +13,23 @@ const Motor = require('../js/motor.js');
 const ROOT = path.resolve(__dirname, '..');
 const catalogo = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/cultivos.json'), 'utf-8'));
 
-const pChimborazo = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/parcelas/parcela_chimborazo_1.json'), 'utf-8'));
-const pElOro = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/parcelas/parcela_el_oro_2.json'), 'utf-8'));
-const pColta = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/parcelas/parcela_colta_3.json'), 'utf-8'));
+const pChimborazo = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/parcelas/parcela_licto.json'), 'utf-8'));
+const pGuano = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/parcelas/parcela_guano.json'), 'utf-8'));
+// Parcelas sintéticas para los casos borde (Costa y ladera > 25 %), sin depender de archivos
+const pElOro = Object.assign(JSON.parse(JSON.stringify(pChimborazo)), {
+  id: 'sintetica_costa', nombre: 'Caso sintético — Costa (El Oro, 28 m, maíz–arroz)',
+  terreno: { elev_m: 28, pendiente_pct: 4, pendiente_max_pct: 7, orientacion: 'O' },
+  historia_declarada: ['maiz_duro', 'arroz'],
+  clima_mensual: [145, 195, 180, 110, 42, 18, 14, 12, 15, 20, 25, 60].map((P, i) => ({
+    mes: i + 1, P_mm: P, ET0_mm: [122, 116, 126, 120, 112, 98, 96, 104, 110, 118, 118, 122][i], Tmin_abs: 19 + (i % 3), Tmed: 26
+  }))
+});
+const pColta = Object.assign(JSON.parse(JSON.stringify(pChimborazo)), {
+  id: 'sintetica_ladera', nombre: 'Caso sintético — Ladera alta (3 180 m, pendiente 28 %, helada)',
+  terreno: { elev_m: 3180, pendiente_pct: 28, pendiente_max_pct: 35, orientacion: 'E' },
+  historia_declarada: ['papa', 'cebada'],
+  clima_mensual: pChimborazo.clima_mensual.map(m => Object.assign({}, m, { Tmin_abs: m.Tmin_abs - 2.5 }))
+});
 
 const slidersNeutros = { agua: 3, suelo: 3, ganar: 3 };
 
