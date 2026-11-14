@@ -6,7 +6,8 @@ window.CATALOGO_CULTIVOS = {
     "fuentes": [
       "FAO-56 (Evapotranspiración del cultivo y coeficientes Kc)",
       "INIAP Ecuador (Guías técnicas de cultivos para Sierra y Costa: Estaciones Santa Catalina y Boliche)",
-      "MAG-SIPA Ecuador (Precios referenciales y márgenes brutos aproximados por hectárea)"
+      "MAG-SIPA Ecuador (Precios referenciales y márgenes brutos aproximados por hectárea)",
+      "SIPA-MAG, boletín de precios al productor dic 2025; ESPAC (INEC) 2024–2025 para rendimientos"
     ],
     "unidades": {
       "altitud": "m s.n.m.",
@@ -14,7 +15,7 @@ window.CATALOGO_CULTIVOS = {
       "residuo": "t MS/ha (toneladas de materia seca por hectárea)",
       "credito_n": "kg N/ha dejados para el cultivo siguiente",
       "extraccion_n": "kg N/ha extraídos por cosecha",
-      "margen_usd_ha": "USD/ha (margen bruto referencial MAG-SIPA)"
+      "margen_usd_ha": "USD/ha: rendimiento_t_ha × precio_usd_t − costo_usd_ha (ver campo fuente de cada cultivo)"
     }
   },
   "pausas_familia": {
@@ -112,10 +113,15 @@ window.CATALOGO_CULTIVOS = {
       "permite_pendiente_alta": false,
       "labranza_intensiva": true,
       "es_forrajero": false,
-      "rendimiento_qq_ha": 320,
-      "margen_usd_ha": 1850,
+      "rendimiento_qq_ha": 298,
+      "margen_usd_ha": 1436,
       "rol_ecologico": "Tubérculo comercial (alta exigencia de suelo)",
-      "explicacion_suelo": "Genera buen ingreso pero remueve intensamente el suelo; requiere descanso de 3–4 años para evitar nematodos y lancha."
+      "explicacion_suelo": "Genera buen ingreso pero remueve intensamente el suelo; requiere descanso de 3–4 años para evitar nematodos y lancha.",
+      "precio_usd_t": 407,
+      "rendimiento_t_ha": 13.5,
+      "costo_usd_ha": 4058,
+      "estado_economico": "oficial",
+      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (papa superchola, 18,47 USD/qq) | Rendimiento: ESPAC 2025 (INEC) | Costo: estimado (costo implícito en el margen anterior del equipo)"
     },
     {
       "id": "maiz_suave",
@@ -151,7 +157,12 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 110,
       "margen_usd_ha": 1350,
       "rol_ecologico": "Alto aporte de rastrojo y carbono",
-      "explicacion_suelo": "Sus raíces profundas exploran el subsuelo y deja 6 t/ha de caña que protegen la tierra o sirven de forraje."
+      "explicacion_suelo": "Sus raíces profundas exploran el subsuelo y deja 6 t/ha de caña que protegen la tierra o sirven de forraje.",
+      "precio_usd_t": 570,
+      "rendimiento_t_ha": 4.99,
+      "costo_usd_ha": 1494,
+      "estado_economico": "parcial",
+      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (choclo, 20,67 USD/saco de 80 lb) | Rendimiento: estimado | Costo: estimado (costo implícito en el margen anterior del equipo)"
     },
     {
       "id": "cebada",
@@ -188,7 +199,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 48,
       "margen_usd_ha": 780,
       "rol_ecologico": "Cereal rústico tolerante a sequía y heladas",
-      "explicacion_suelo": "Cubre rápido las laderas contra la erosión, resiste heladas y aprovecha muy bien el nitrógeno dejado por el chocho o el haba."
+      "explicacion_suelo": "Cubre rápido las laderas contra la erosión, resiste heladas y aprovecha muy bien el nitrógeno dejado por el chocho o el haba.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "trigo",
@@ -221,10 +234,15 @@ window.CATALOGO_CULTIVOS = {
       "permite_pendiente_alta": false,
       "labranza_intensiva": false,
       "es_forrajero": true,
-      "rendimiento_qq_ha": 52,
-      "margen_usd_ha": 840,
+      "rendimiento_qq_ha": 37,
+      "margen_usd_ha": 605,
       "rol_ecologico": "Formador de materia orgánica estable",
-      "explicacion_suelo": "Deja 4 t/ha de paja con alta relación carbono/nitrógeno que forma humus duradero cuando sigue a una leguminosa."
+      "explicacion_suelo": "Deja 4 t/ha de paja con alta relación carbono/nitrógeno que forma humus duradero cuando sigue a una leguminosa.",
+      "precio_usd_t": null,
+      "rendimiento_t_ha": 1.7,
+      "costo_usd_ha": null,
+      "estado_economico": "parcial",
+      "fuente": "Precio: estimado | Rendimiento: Promedio nacional (dato del equipo) | Costo: estimado"
     },
     {
       "id": "quinua",
@@ -260,7 +278,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 38,
       "margen_usd_ha": 1420,
       "rol_ecologico": "Tolerante a sequía, heladas y suelos andinos",
-      "explicacion_suelo": "Con bajo requerimiento hídrico (Kc medio 1.00) y raíz pivotante, rompe el ciclo de plagas de cereales y papa."
+      "explicacion_suelo": "Con bajo requerimiento hídrico (Kc medio 1.00) y raíz pivotante, rompe el ciclo de plagas de cereales y papa.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "chocho",
@@ -296,7 +316,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 32,
       "margen_usd_ha": 1280,
       "rol_ecologico": "Fijador de Nitrógeno (+50 kg/ha) y raíz descompactadora",
-      "explicacion_suelo": "Su raíz pivotante profunda rompe capas duras, fija 50 kg N/ha gratis del aire y sus alcaloides reducen nematodos del suelo."
+      "explicacion_suelo": "Su raíz pivotante profunda rompe capas duras, fija 50 kg N/ha gratis del aire y sus alcaloides reducen nematodos del suelo.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "haba",
@@ -333,7 +355,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 65,
       "margen_usd_ha": 1320,
       "rol_ecologico": "Fijador de Nitrógeno (+40 kg/ha) tolerante al frío",
-      "explicacion_suelo": "Enriquece el suelo con 40 kg N/ha de rápida liberación (baja relación C/N) ideal antes de sembrar cebada, trigo o quinua."
+      "explicacion_suelo": "Enriquece el suelo con 40 kg N/ha de rápida liberación (baja relación C/N) ideal antes de sembrar cebada, trigo o quinua.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "arveja",
@@ -368,9 +392,14 @@ window.CATALOGO_CULTIVOS = {
       "labranza_intensiva": false,
       "es_forrajero": true,
       "rendimiento_qq_ha": 55,
-      "margen_usd_ha": 1180,
+      "margen_usd_ha": 1176,
       "rol_ecologico": "Leguminosa de ciclo corto (+25 kg N/ha)",
-      "explicacion_suelo": "Cosecha en 3–4 meses ahorrando agua en campañas cortas y dejando +25 kg N/ha disponibles."
+      "explicacion_suelo": "Cosecha en 3–4 meses ahorrando agua en campañas cortas y dejando +25 kg N/ha disponibles.",
+      "precio_usd_t": 772,
+      "rendimiento_t_ha": 2.49,
+      "costo_usd_ha": 746,
+      "estado_economico": "parcial",
+      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (arveja tierna, 38,50 USD/bulto de 110 lb) | Rendimiento: estimado | Costo: estimado (costo implícito en el margen anterior del equipo)"
     },
     {
       "id": "frejol_arbustivo",
@@ -407,7 +436,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 35,
       "margen_usd_ha": 1150,
       "rol_ecologico": "Fijador rápido de Nitrógeno (+25 kg/ha)",
-      "explicacion_suelo": "Ideal para valles interandinos; aporta nitrógeno y requiere poca agua al final de su ciclo (Kc 0.35)."
+      "explicacion_suelo": "Ideal para valles interandinos; aporta nitrógeno y requiere poca agua al final de su ciclo (Kc 0.35).",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "brocoli",
@@ -444,7 +475,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 280,
       "margen_usd_ha": 1750,
       "rol_ecologico": "Biofumigante natural (glucosinolatos)",
-      "explicacion_suelo": "Sus residuos ayudan a reducir hongos de la papa, pero exige 4 años de pausa para evitar la hernia de las coles."
+      "explicacion_suelo": "Sus residuos ayudan a reducir hongos de la papa, pero exige 4 años de pausa para evitar la hernia de las coles.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "zanahoria",
@@ -481,7 +514,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 350,
       "margen_usd_ha": 1620,
       "rol_ecologico": "Hortaliza de raíz (alternativa comercial a la papa)",
-      "explicacion_suelo": "Rompe ciclos de plagas de Solanáceas y Poáceas, pero deja poco rastrojo y no debe sembrarse en pendientes > 25 %."
+      "explicacion_suelo": "Rompe ciclos de plagas de Solanáceas y Poáceas, pero deja poco rastrojo y no debe sembrarse en pendientes > 25 %.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "cebolla",
@@ -518,7 +553,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 310,
       "margen_usd_ha": 1680,
       "rol_ecologico": "Hortaliza de alto valor comercial",
-      "explicacion_suelo": "Sus compuestos azufrados reducen ciertos patógenos, pero aporta muy poca cobertura orgánica al suelo."
+      "explicacion_suelo": "Sus compuestos azufrados reducen ciertos patógenos, pero aporta muy poca cobertura orgánica al suelo.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "avena_forrajera",
@@ -555,7 +592,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 420,
       "margen_usd_ha": 920,
       "rol_ecologico": "Cobertura antierosión y alto valor forrajero",
-      "explicacion_suelo": "Amarra el suelo en laderas pronunciadas (> 25 %), aporta 5 t/ha de biomasa y alimenta al ganado en época seca."
+      "explicacion_suelo": "Amarra el suelo en laderas pronunciadas (> 25 %), aporta 5 t/ha de biomasa y alimenta al ganado en época seca.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "vicia",
@@ -592,7 +631,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 360,
       "margen_usd_ha": 890,
       "rol_ecologico": "Abono verde estrella (+70 kg N/ha y cobertura total)",
-      "explicacion_suelo": "Incorporada al suelo inyecta 70 kg N/ha y 1 t/ha de humus estable, regenerando lotes agotados por monocultivo."
+      "explicacion_suelo": "Incorporada al suelo inyecta 70 kg N/ha y 1 t/ha de humus estable, regenerando lotes agotados por monocultivo.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "arroz",
@@ -626,10 +667,15 @@ window.CATALOGO_CULTIVOS = {
       "permite_pendiente_alta": false,
       "labranza_intensiva": false,
       "es_forrajero": true,
-      "rendimiento_qq_ha": 135,
-      "margen_usd_ha": 1250,
+      "rendimiento_qq_ha": 123,
+      "margen_usd_ha": -468,
       "rol_ecologico": "Cereal de alta demanda hídrica (zonas bajas)",
-      "explicacion_suelo": "Aporta abundante tamo (5 t/ha), pero su alta demanda de agua exige rotarlo con soya o caupí en verano."
+      "explicacion_suelo": "Aporta abundante tamo (5 t/ha), pero su alta demanda de agua exige rotarlo con soya o caupí en verano.",
+      "precio_usd_t": 276,
+      "rendimiento_t_ha": 5.6,
+      "costo_usd_ha": 2014,
+      "estado_economico": "oficial",
+      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (arroz en cáscara, 25,02 USD/saca de 200 lb) | Rendimiento: ESPAC 2024 (INEC) | Costo: ECOTEC Agrodatos (Quijije 2019), arroz semitecnificado, Samborondón"
     },
     {
       "id": "maiz_duro",
@@ -663,10 +709,15 @@ window.CATALOGO_CULTIVOS = {
       "permite_pendiente_alta": false,
       "labranza_intensiva": false,
       "es_forrajero": true,
-      "rendimiento_qq_ha": 145,
-      "margen_usd_ha": 1310,
+      "rendimiento_qq_ha": 139,
+      "margen_usd_ha": 1197,
       "rol_ecologico": "Raíz profunda y máximo aporte de rastrojo (6 t/ha)",
-      "explicacion_suelo": "Su rastrojo protege el suelo costero de lluvias intensas, pero necesita una leguminosa previa para no agotar el nitrógeno."
+      "explicacion_suelo": "Su rastrojo protege el suelo costero de lluvias intensas, pero necesita una leguminosa previa para no agotar el nitrógeno.",
+      "precio_usd_t": 409,
+      "rendimiento_t_ha": 6.3,
+      "costo_usd_ha": 1380,
+      "estado_economico": "oficial",
+      "fuente": "Precio: Franja de precios oficial MAG 2026 (promedio 18,53 USD/qq) | Rendimiento: ESPAC 2024 (INEC) | Costo: estimado (costo implícito en el margen anterior del equipo)"
     },
     {
       "id": "soya",
@@ -703,7 +754,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 58,
       "margen_usd_ha": 1190,
       "rol_ecologico": "Fijador de Nitrógeno (+30 kg/ha) para rotación en Costa",
-      "explicacion_suelo": "Corta el ciclo de plagas del maíz y arroz, dejando +30 kg N/ha de rápida mineralización."
+      "explicacion_suelo": "Corta el ciclo de plagas del maíz y arroz, dejando +30 kg N/ha de rápida mineralización.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "mani",
@@ -740,7 +793,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 52,
       "margen_usd_ha": 1380,
       "rol_ecologico": "Leguminosa rústica fijadora de N (+25 kg/ha)",
-      "explicacion_suelo": "Cubre densamente el suelo reduciendo la evaporación, fija nitrógeno y deja follaje nutritivo."
+      "explicacion_suelo": "Cubre densamente el suelo reduciendo la evaporación, fija nitrógeno y deja follaje nutritivo.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "yuca",
@@ -774,9 +829,14 @@ window.CATALOGO_CULTIVOS = {
       "labranza_intensiva": false,
       "es_forrajero": false,
       "rendimiento_qq_ha": 290,
-      "margen_usd_ha": 1450,
+      "margen_usd_ha": 1448,
       "rol_ecologico": "Alta tolerancia a sequía (Kc medio 0.80)",
-      "explicacion_suelo": "Resiste meses secos con bajo consumo mensual de agua, aunque exige rotar después con leguminosas para reponer nutrientes."
+      "explicacion_suelo": "Resiste meses secos con bajo consumo mensual de agua, aunque exige rotar después con leguminosas para reponer nutrientes.",
+      "precio_usd_t": 296,
+      "rendimiento_t_ha": 13.15,
+      "costo_usd_ha": 2444,
+      "estado_economico": "parcial",
+      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (20,16 USD/funda de 150 lb) | Rendimiento: estimado | Costo: estimado (costo implícito en el margen anterior del equipo)"
     },
     {
       "id": "sandia",
@@ -812,7 +872,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 380,
       "margen_usd_ha": 1720,
       "rol_ecologico": "Ciclo corto de alto retorno económico",
-      "explicacion_suelo": "Diversifica ingresos en la campaña seca (C2), pero requiere 3 años de pausa para evitar Fusarium."
+      "explicacion_suelo": "Diversifica ingresos en la campaña seca (C2), pero requiere 3 años de pausa para evitar Fusarium.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "tomate_rinon",
@@ -850,7 +912,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 410,
       "margen_usd_ha": 1950,
       "rol_ecologico": "Hortaliza de alta rentabilidad (exige rotación estricta)",
-      "explicacion_suelo": "Comparte familia con la papa (Solanáceas); requiere 3–4 años sin repetir para evitar marchitez y nematodos."
+      "explicacion_suelo": "Comparte familia con la papa (Solanáceas); requiere 3–4 años sin repetir para evitar marchitez y nematodos.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     },
     {
       "id": "caupi",
@@ -886,7 +950,9 @@ window.CATALOGO_CULTIVOS = {
       "rendimiento_qq_ha": 34,
       "margen_usd_ha": 1080,
       "rol_ecologico": "Campeón contra la sequía en Costa (+25 kg N/ha en 80 días)",
-      "explicacion_suelo": "Su ciclo ultracorto (70–90 días) y bajo Kc final (0.35) permite cubrir el suelo en verano seco fijando nitrógeno."
+      "explicacion_suelo": "Su ciclo ultracorto (70–90 días) y bajo Kc final (0.35) permite cubrir el suelo en verano seco fijando nitrógeno.",
+      "estado_economico": "estimado",
+      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
     }
   ]
 };

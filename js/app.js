@@ -483,7 +483,7 @@
             <div class="crop-meta-mini">
               Raíz: ${c.raiz_tipo}<br/>
               Balance N: ${signoN}<br/>
-              Margen: <b>$${(c.margen_usd_ha || 0).toLocaleString()}/ha</b>
+              Margen: <b>$${(c.margen_usd_ha || 0).toLocaleString()}/ha</b>${c.estado_economico === 'oficial' ? '' : ' <span class="tag-ejemplo" title="' + (c.fuente || '') + '">estimado</span>'}
             </div>
           </div>
         `;
