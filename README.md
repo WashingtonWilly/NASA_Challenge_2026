@@ -39,7 +39,7 @@ NASA_Challenge_2026/
 │   ├── crudos/                       # Copias de las descargas de NASA POWER y SoilGrids
 │   └── geojson/                      # Polígonos GeoJSON de las 2 parcelas demostrativas
 └── scripts/
-    ├── power.py                      # Consulta NASA POWER + Radiación extraterrestre Ra + ET0 Hargreaves
+    ├── power.py                      # NASA POWER: clima, radiación solar, viento y humedad; ET0 Penman-Monteith FAO-56 (Hargreaves si faltan datos)
     ├── dem.py                        # Cálculo de elevación, pendiente media/máxima y orientación (SRTM 30 m)
     ├── soil.py                       # Consulta ISRIC SoilGrids v2.0 (0-30 cm) y conversión a unidades de campo
     ├── hls.py                        # Procesamiento HLS (Landsat 8/9 + Sentinel-2) NDVI, NDTI y suelo desnudo

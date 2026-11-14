@@ -367,6 +367,7 @@
     } else { p.estado_datos.terreno = falla; }
     if (r.clima) {
       p.clima_mensual = r.clima.meses;
+      p.clima_metodo_et0 = r.clima.metodoEt0;
       p.estado_datos.clima = `NASA POWER 2015–2024 (diario, AG); T corregida ${r.clima.dT >= 0 ? '+' : ''}${r.clima.dT.toFixed(1)} °C por altitud`;
     } else { p.estado_datos.clima = falla; }
     if (r.anomalia) {
@@ -528,6 +529,18 @@
 
     document.getElementById('kpi-clima-val').innerHTML = `${fmtMiles(lluviaEscenario)} <span class="unidad">mm/año</span>`;
     document.getElementById('kpi-clima-sub').innerHTML = `${fmtMiles(Math.round(et0Anual))} <span class="unidad">mm/año</span>`;
+    const conExtra = (parcela.clima_mensual || []).filter(m => m.Rs_MJ !== undefined);
+    const elExtra = document.getElementById('kpi-nasa-extra');
+    if (elExtra) {
+      if (conExtra.length === 12) {
+        const prom = k => conExtra.reduce((a, m) => a + m[k], 0) / 12;
+        elExtra.innerHTML = `${prom('Rs_MJ').toFixed(1)} <span class="unidad">MJ/m²·día</span> · ${prom('Viento_ms').toFixed(1)} <span class="unidad">m/s</span> · ${Math.round(prom('HR_pct'))} <span class="unidad">% HR</span>`;
+        elExtra.title = parcela.clima_metodo_et0 || '';
+      } else {
+        elExtra.innerHTML = '<span class="unidad">sin dato: ET₀ solo con temperatura (Hargreaves)</span>';
+        elExtra.title = parcela.clima_metodo_et0 || 'Hargreaves FAO-56';
+      }
+    }
 
     // Semáforo de vulnerabilidades con texto explícito ("Bajo", "Medio", "Alto")
     const vulnContainer = document.getElementById('vuln-badges-container');

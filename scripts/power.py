@@ -41,6 +41,34 @@ def et0_hargreaves_diario(lat_deg: float, doy: int, tmed: float, tmax: float, tm
     return max(0.0, 0.0023 * ra * (tmed + 17.8) * math.sqrt(rango_t))
 
 
+def _es_kpa(t: float) -> float:
+    """Presión de vapor de saturación (kPa) a temperatura t (°C). FAO-56 ec. 11."""
+    return 0.6108 * math.exp(17.27 * t / (t + 237.3))
+
+
+def et0_penman_monteith_diario(lat_deg: float, doy: int, tmed: float, tmax: float, tmin: float,
+                               rs_mj: float, u2: float, rh_pct: float, z_m: float) -> float:
+    """
+    ET0 FAO-56 Penman-Monteith diaria (mm/día) con radiación solar (Rs, MJ/m²/día),
+    viento a 2 m (u2, m/s) y humedad relativa (%) de NASA POWER; z_m = altitud de la parcela.
+    """
+    ra_mj = radiacion_extraterrestre_fao56(lat_deg, doy) / 0.408
+    pres = 101.3 * ((293.0 - 0.0065 * z_m) / 293.0) ** 5.26
+    gamma = 0.000665 * pres
+    delta = 4098.0 * _es_kpa(tmed) / (tmed + 237.3) ** 2
+    es = (_es_kpa(tmax) + _es_kpa(tmin)) / 2.0
+    ea = max(0.0, min(es, es * rh_pct / 100.0))
+    rns = (1.0 - 0.23) * rs_mj
+    rso = max(0.1, (0.75 + 2e-5 * z_m) * ra_mj)
+    rel = max(0.3, min(1.0, rs_mj / rso))
+    sigma = 4.903e-9  # MJ K^-4 m^-2 día^-1
+    rnl = sigma * (((tmax + 273.16) ** 4 + (tmin + 273.16) ** 4) / 2.0) * (0.34 - 0.14 * math.sqrt(ea)) * (1.35 * rel - 0.35)
+    rn = rns - rnl
+    num = 0.408 * delta * rn + gamma * (900.0 / (tmed + 273.0)) * max(0.0, u2) * (es - ea)
+    den = delta + gamma * (1.0 + 0.34 * max(0.0, u2))
+    return max(0.0, num / den)
+
+
 def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101", fin: str = "20241231",
                                  elev_parcela_m: float = None, cache: str = None, online: bool = True):
     """
@@ -50,7 +78,7 @@ def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101"
     Devuelve None si no hay conexión (el llamador decide qué hacer; nunca inventa datos).
     """
     params = urllib.parse.urlencode({
-        "parameters": "T2M_MAX,T2M_MIN,T2M,PRECTOTCORR",
+        "parameters": "T2M_MAX,T2M_MIN,T2M,PRECTOTCORR,ALLSKY_SFC_SW_DWN,WS2M,RH2M",
         "community": "AG",
         "latitude": round(lat, 4),
         "longitude": round(lon, 4),
@@ -71,8 +99,20 @@ def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101"
         tmin_d = param["T2M_MIN"]
         tmed_d = param["T2M"]
         prec_d = param["PRECTOTCORR"]
+        rs_d, u2_d, rh_d = param.get("ALLSKY_SFC_SW_DWN"), param.get("WS2M"), param.get("RH2M")
+        # Unidades de radiación: AG entrega MJ/m²/día; si viniera en kWh/m²/día se convierte (×3,6)
+        unidad_rs = (((data.get("parameters") or {}).get("ALLSKY_SFC_SW_DWN") or {}).get("units") or "MJ/m^2/day")
+        f_rs = 3.6 if "kw" in unidad_rs.lower() else 1.0
+        z_et0 = elev_parcela_m if elev_parcela_m is not None else (elev_celda or 0.0)
 
-        acum = {m: {"P": [], "ET0": [], "Tmin": [], "Tmed": []} for m in range(1, 13)}
+        def _ok(d, f):
+            v = d.get(f) if d else None
+            return v is not None and v > -999
+        n_dias = max(1, len(tmed_d))
+        n_pm = sum(1 for f in tmed_d if _ok(rs_d, f) and _ok(u2_d, f) and _ok(rh_d, f))
+        usar_pm = n_pm / n_dias >= 0.9
+
+        acum = {m: {"P": [], "ET0": [], "Tmin": [], "Tmed": [], "Rs": [], "U2": [], "RH": []} for m in range(1, 13)}
         anios_por_mes = {m: set() for m in range(1, 13)}
 
         for fecha_str, tmed in tmed_d.items():
@@ -84,7 +124,14 @@ def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101"
             tmed, tmax, tmin = tmed + dT, tmax + dT, tmin + dT
             dt = datetime.strptime(fecha_str, "%Y%m%d")
             doy = dt.timetuple().tm_yday
-            et0 = et0_hargreaves_diario(lat, doy, tmed, tmax, tmin)
+            if usar_pm and _ok(rs_d, fecha_str) and _ok(u2_d, fecha_str) and _ok(rh_d, fecha_str):
+                rs = rs_d[fecha_str] * f_rs
+                et0 = et0_penman_monteith_diario(lat, doy, tmed, tmax, tmin, rs, u2_d[fecha_str], rh_d[fecha_str], z_et0)
+                acum[dt.month]["Rs"].append(rs)
+                acum[dt.month]["U2"].append(u2_d[fecha_str])
+                acum[dt.month]["RH"].append(rh_d[fecha_str])
+            else:
+                et0 = et0_hargreaves_diario(lat, doy, tmed, tmax, tmin)
             m = dt.month
             anios_por_mes[m].add(dt.year)
             acum[m]["P"].append(prec)
@@ -104,8 +151,14 @@ def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101"
                 "Tmin_abs": round(min(acum[m]["Tmin"]), 1),
                 "Tmed": round(sum(acum[m]["Tmed"]) / max(1, len(acum[m]["Tmed"])), 1)
             })
+            if usar_pm and acum[m]["Rs"]:
+                salida[-1]["Rs_MJ"] = round(sum(acum[m]["Rs"]) / len(acum[m]["Rs"]), 1)
+                salida[-1]["Viento_ms"] = round(sum(acum[m]["U2"]) / len(acum[m]["U2"]), 1)
+                salida[-1]["HR_pct"] = round(sum(acum[m]["RH"]) / len(acum[m]["RH"]))
         return {"meses": salida, "elev_celda_m": elev_celda, "correccion_T_C": round(dT, 2),
-                "periodo": f"{inicio[:4]}–{fin[:4]}"}
+                "periodo": f"{inicio[:4]}–{fin[:4]}",
+                "metodo_et0": "Penman-Monteith FAO-56 (radiación, viento y humedad de NASA POWER)" if usar_pm
+                              else "Hargreaves FAO-56 (solo temperatura)"}
     except Exception:
         return None
 

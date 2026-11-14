@@ -175,7 +175,7 @@
     const est = parcela.estado_datos || {};
     const ej = campo => (typeof est[campo] === 'string' && est[campo].startsWith('EJEMPLO')) ? 'EJEMPLO, aún sin dato real — ' : '';
     const evidenciaNasa = [
-      `${ej('clima')}NASA POWER (climatología 10 años) + GPM IMERG / SMAP L4 (10 km): la lluvia efectiva cubre el ${bal.coberturaAguaPct}% de la demanda hídrica del plan (${bal.etcTotal} mm); considera la anomalía regional de ${anomaliaPct > 0 ? '+' : ''}${anomaliaPct}% en ${parcela.anomalia?.ventana || 'el último trimestre'}.`,
+      `${ej('clima')}NASA POWER (climatología 10 años; ET₀ ${parcela.clima_metodo_et0 && /Penman/.test(parcela.clima_metodo_et0) ? 'Penman-Monteith con radiación, viento y humedad' : 'Hargreaves con temperatura'}): la lluvia efectiva cubre el ${bal.coberturaAguaPct}% de la demanda hídrica del plan (${bal.etcTotal} mm); considera la anomalía regional de ${anomaliaPct > 0 ? '+' : ''}${anomaliaPct}% en ${parcela.anomalia?.ventana || 'el último trimestre'}.`,
       (parcela.ndvi_mensual || []).length
         ? `${ej('ndvi')}HLS Landsat 8/9 + Sentinel-2 (30 m): detectó ${mesesDesnudoHist} de ${totalMesesHist} meses (${pctDesnudoHist}%) con suelo descubierto (NDVI < 0.25); esta rotación sincroniza la cobertura vegetal con los picos de lluvia.`
         : `HLS Landsat 8/9 + Sentinel-2 (30 m): este lote todavía no tiene historial satelital (se pide a AppEEARS y tarda horas); la recomendación usa clima, suelo y altitud.`,
@@ -186,7 +186,7 @@
     const beneficios = [
       `Abono natural (Nitrógeno): aporta +${resIRR.detalles.nitrogeno.creditosKgHa} kg N/ha fijados por leguminosas (equivale a ahorrar ~${ahorroUreaSacos} sacos de urea de 50 kg/ha en 3 años), con balance neto de ${resIRR.detalles.nitrogeno.balanceNetoKgHa >= 0 ? '+' : ''}${resIRR.detalles.nitrogeno.balanceNetoKgHa} kg N/ha.`,
       `Vida y esponjosidad del suelo: deja ${resIRR.detalles.materiaOrganica.biomasaResiduoTHa} t/ha de rastrojo seco (${resIRR.detalles.materiaOrganica.humusEstableTHa} t/ha de humus estable) alternando raíces para romper el piso de arado.`,
-      `Agua e ingreso familiar: demanda ${bal.deficitTotal} mm de riego complementario en 3 años (${bal.coberturaAguaPct}% cubierto por lluvia) y proyecta un margen bruto medio de $${resIRR.detalles.rentabilidad.margenAnualPromedioUsdHa.toLocaleString()} USD/ha/año ($${resIRR.detalles.rentabilidad.margenTotalUsdHa.toLocaleString()} USD/ha en 3 años, ref. MAG-SIPA).`
+      `Agua e ingreso familiar: demanda ${bal.deficitTotal} mm de riego complementario en 3 años (≈ ${Math.round(bal.deficitTotal * 10000 / 3).toLocaleString('es-EC')} litros/ha por año; 1 mm = 10 000 L/ha) con ${bal.coberturaAguaPct}% cubierto por lluvia, y proyecta un margen bruto medio de $${resIRR.detalles.rentabilidad.margenAnualPromedioUsdHa.toLocaleString()} USD/ha/año ($${resIRR.detalles.rentabilidad.margenTotalUsdHa.toLocaleString()} USD/ha en 3 años, ref. MAG-SIPA).`
     ];
 
     const lagunasInfo = [
@@ -199,6 +199,14 @@
       riesgosLocales.push(`Déficit de agua en meses secos (${bal.mesesDeficitNombres.join(', ')}; déficit total ${bal.deficitTotal} mm en 3 años): confirmar turno de riego comunitario o ajustar fecha de siembra.`);
     } else {
       riesgosLocales.push(`Aunque la lluvia histórica cubre la demanda promedio, verificar el pronóstico estacional del INAMHI ante posibles veranillos a mitad de ciclo.`);
+    }
+    const phSuelo = Number(parcela.suelo && parcela.suelo.ph);
+    if (phSuelo && phSuelo < 5.5) {
+      riesgosLocales.push(`Suelo ácido (pH ${phSuelo}, ISRIC SoilGrids): puede limitar el calcio y fijar el fósforo; conviene un análisis de laboratorio antes de aplicar cal agrícola. No encale a ciegas: la papa tolera pH ácido.`);
+    } else if (phSuelo && phSuelo > 7.5) {
+      riesgosLocales.push(`Suelo alcalino (pH ${phSuelo}, ISRIC SoilGrids): puede bloquear hierro, zinc y fósforo; ayudan el abono orgánico y los residuos de cosecha. Confirme con análisis de laboratorio.`);
+    } else if (phSuelo) {
+      riesgosLocales.push(`pH del suelo ${phSuelo} (ISRIC SoilGrids, 250 m): dentro del rango favorable para la mayoría de cultivos de la rotación; no requiere encalado. Verifique con análisis local.`);
     }
     const tieneMesHelada = (parcela.clima_mensual || []).some(m => m.Tmin_abs < 1.5);
     if (tieneMesHelada) {

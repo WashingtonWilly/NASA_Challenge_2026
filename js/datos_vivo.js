@@ -42,6 +42,26 @@
     return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86400000);
   }
 
+  // ---------- FAO-56 Penman-Monteith (usa radiación, viento y humedad de NASA POWER) ----------
+  function esKpa(t) { return 0.6108 * Math.exp(17.27 * t / (t + 237.3)); }
+
+  function et0PenmanMonteith(lat, doy, tmed, tmax, tmin, rs, u2, rh, z) {
+    const raMj = raMm(lat, doy) / 0.408;
+    const pres = 101.3 * Math.pow((293 - 0.0065 * z) / 293, 5.26);
+    const gamma = 0.000665 * pres;
+    const delta = 4098 * esKpa(tmed) / Math.pow(tmed + 237.3, 2);
+    const es = (esKpa(tmax) + esKpa(tmin)) / 2;
+    const ea = Math.max(0, Math.min(es, es * rh / 100));
+    const rns = 0.77 * rs;
+    const rso = Math.max(0.1, (0.75 + 2e-5 * z) * raMj);
+    const rel = Math.max(0.3, Math.min(1, rs / rso));
+    const rnl = 4.903e-9 * ((Math.pow(tmax + 273.16, 4) + Math.pow(tmin + 273.16, 4)) / 2) *
+      (0.34 - 0.14 * Math.sqrt(ea)) * (1.35 * rel - 0.35);
+    const num = 0.408 * delta * (rns - rnl) + gamma * (900 / (tmed + 273)) * Math.max(0, u2) * (es - ea);
+    const den = delta + gamma * (1 + 0.34 * Math.max(0, u2));
+    return Math.max(0, num / den);
+  }
+
   // ---------- NASA POWER: clima mensual ----------
   function procesarClima(data, lat, elevParcela) {
     const par = data.properties.parameter;
@@ -49,29 +69,54 @@
     const elevCelda = typeof coords[2] === 'number' ? coords[2] : null;
     const dT = (elevCelda !== null && typeof elevParcela === 'number') ? -0.0065 * (elevParcela - elevCelda) : 0;
     const acum = {};
-    for (let m = 1; m <= 12; m++) acum[m] = { P: 0, ET0: 0, tmin: Infinity, tmed: 0, n: 0, anios: new Set() };
-    for (const f of Object.keys(par.T2M)) {
+    for (let m = 1; m <= 12; m++) acum[m] = { P: 0, ET0: 0, tmin: Infinity, tmed: 0, n: 0, anios: new Set(), rs: 0, u2: 0, rh: 0, npm: 0 };
+    // Radiación, viento y humedad: si faltan, se usa Hargreaves (solo temperatura)
+    const rsD = par.ALLSKY_SFC_SW_DWN, u2D = par.WS2M, rhD = par.RH2M;
+    const unidadRs = (((data.parameters || {}).ALLSKY_SFC_SW_DWN || {}).units || 'MJ/m^2/day');
+    const fRs = /kw/i.test(unidadRs) ? 3.6 : 1;
+    const zEt0 = typeof elevParcela === 'number' ? elevParcela : (elevCelda || 0);
+    const okV = (d, f) => d && d[f] !== undefined && d[f] !== null && d[f] > -999;
+    const claves = Object.keys(par.T2M);
+    const nPm = claves.filter(f => okV(rsD, f) && okV(u2D, f) && okV(rhD, f)).length;
+    const usarPm = claves.length > 0 && nPm / claves.length >= 0.9;
+    for (const f of claves) {
       const tmed = par.T2M[f], tmax = par.T2M_MAX[f], tmin = par.T2M_MIN[f], p = par.PRECTOTCORR[f];
       if ([tmed, tmax, tmin, p].some(v => v === undefined || v <= -999)) continue;
       const y = +f.slice(0, 4), m = +f.slice(4, 6), d = +f.slice(6, 8);
       const tm = tmed + dT, tx = tmax + dT, tn = tmin + dT;
-      const et0 = Math.max(0, 0.0023 * raMm(lat, diaDelAnio(y, m, d)) * (tm + 17.8) * Math.sqrt(Math.max(0, tx - tn)));
+      const doy = diaDelAnio(y, m, d);
       const a = acum[m];
+      let et0;
+      if (usarPm && okV(rsD, f) && okV(u2D, f) && okV(rhD, f)) {
+        const rs = rsD[f] * fRs;
+        et0 = et0PenmanMonteith(lat, doy, tm, tx, tn, rs, u2D[f], rhD[f], zEt0);
+        a.rs += rs; a.u2 += u2D[f]; a.rh += rhD[f]; a.npm++;
+      } else {
+        et0 = Math.max(0, 0.0023 * raMm(lat, doy) * (tm + 17.8) * Math.sqrt(Math.max(0, tx - tn)));
+      }
       a.P += p; a.ET0 += et0; a.tmin = Math.min(a.tmin, tn); a.tmed += tm; a.n++; a.anios.add(y);
     }
     const meses = [];
     for (let m = 1; m <= 12; m++) {
       const a = acum[m], na = Math.max(1, a.anios.size);
       if (!a.n) return null;
-      meses.push({
+      const fila = {
         mes: m, nombre_mes: NOMBRES_MES[m - 1],
         P_mm: Math.round(a.P / na * 10) / 10,
         ET0_mm: Math.round(a.ET0 / na * 10) / 10,
         Tmin_abs: Math.round(a.tmin * 10) / 10,
         Tmed: Math.round(a.tmed / a.n * 10) / 10
-      });
+      };
+      if (usarPm && a.npm) {
+        fila.Rs_MJ = Math.round(a.rs / a.npm * 10) / 10;
+        fila.Viento_ms = Math.round(a.u2 / a.npm * 10) / 10;
+        fila.HR_pct = Math.round(a.rh / a.npm);
+      }
+      meses.push(fila);
     }
-    return { meses, elevCelda, dT };
+    const metodoEt0 = usarPm ? 'Penman-Monteith FAO-56 (radiación, viento y humedad de NASA POWER)'
+                             : 'Hargreaves FAO-56 (solo temperatura)';
+    return { meses, elevCelda, dT, metodoEt0 };
   }
 
   // ---------- NASA POWER: anomalía de lluvia (últimos 3 meses completos) ----------
@@ -195,7 +240,7 @@
       avisar('terreno', false);
       return null;
     })();
-    const pClimaRaw = fetchJson(`${base}&parameters=T2M_MAX,T2M_MIN,T2M,PRECTOTCORR&latitude=${la}&longitude=${lo}&start=20150101&end=20241231`, 60000)
+    const pClimaRaw = fetchJson(`${base}&parameters=T2M_MAX,T2M_MIN,T2M,PRECTOTCORR,ALLSKY_SFC_SW_DWN,WS2M,RH2M&latitude=${la}&longitude=${lo}&start=20150101&end=20241231`, 60000)
       .catch(() => null);
     const pAnom = fetchJson(`${base}&parameters=PRECTOTCORR&latitude=${la}&longitude=${lo}&start=20010101&end=${yyyymmdd(new Date())}`, 60000)
       .then(procesarAnomalia).catch(() => null)
