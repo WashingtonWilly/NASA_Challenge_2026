@@ -1452,7 +1452,25 @@
         Object.keys(state.parcelasOriginales).forEach(id => {
           state.parcelasActivas[id] = clonar(state.parcelasOriginales[id]);
         });
+        state.sliders = { agua: 3, suelo: 3, ganar: 3 };
         state.opciones.escenarioLluviaPct = 0;
+        state.opciones.retiraForraje = false;
+        state.opciones.priorizarForraje = false;
+
+        const sliderAgua = document.getElementById('slider-agua');
+        const sliderSuelo = document.getElementById('slider-suelo');
+        const sliderGanar = document.getElementById('slider-ganar');
+        const sliderEsc = document.getElementById('slider-escenario-lluvia');
+        const badgeEsc = document.getElementById('badge-escenario-lluvia');
+        const chkForraje = document.getElementById('check-retira-forraje');
+
+        if (sliderAgua) sliderAgua.value = '3';
+        if (sliderSuelo) sliderSuelo.value = '3';
+        if (sliderGanar) sliderGanar.value = '3';
+        if (sliderEsc) sliderEsc.value = '0';
+        if (badgeEsc) badgeEsc.textContent = '0 % (climatología normal)';
+        if (chkForraje) chkForraje.checked = false;
+
         sincronizarControlesPaso2ConParcela();
         actualizarTodo();
         dibujarPoligonoParcelaActual(true);
