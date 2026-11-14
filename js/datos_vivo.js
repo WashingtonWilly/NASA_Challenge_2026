@@ -103,7 +103,8 @@
       anios_referencia: `2001–${anioFin - 1}`,
       mensaje: `Su zona viene ${Math.abs(pct)} % ${pct < 0 ? 'más seca' : 'más lluviosa'} que un año normal (${txt}: ` +
         `${Math.round(reciente)} mm frente a ${Math.round(normal)} mm de promedio, NASA POWER, ~50 km).` +
-        (pct < -15 ? ' Por eso damos más peso al ahorro de agua.' : '')
+        (pct < -15 ? ' Por eso damos más peso al ahorro de agua.' : '') +
+        (pct > 50 ? ' Suelo saturado: revise drenajes, evite labranza con el suelo mojado y vigile hongos (lancha, pudriciones) antes de sembrar.' : '')
     };
   }
 
@@ -180,11 +181,20 @@
     const pAnom = fetchJson(`${base}&parameters=PRECTOTCORR&latitude=${la}&longitude=${lo}&start=20010101&end=${yyyymmdd(new Date())}`, 60000)
       .then(procesarAnomalia).catch(() => null)
       .then(r => { avisar('anomalia', !!r); return r; });
-    const q = `lon=${lo}&lat=${la}&depth=0-5cm&depth=5-15cm&depth=15-30cm&value=mean` +
+    const qSuelo = (la2, lo2) => `lon=${lo2}&lat=${la2}&depth=0-5cm&depth=5-15cm&depth=15-30cm&value=mean` +
       ['clay', 'sand', 'silt', 'phh2o', 'soc', 'nitrogen'].map(p => '&property=' + p).join('');
-    const pSuelo = fetchJson('https://rest.isric.org/soilgrids/v2.0/properties/query?' + q, 30000)
-      .then(procesarSuelo).catch(() => null)
-      .then(r => { avisar('suelo', !!r); return r; });
+    const pedirSuelo = (la2, lo2) => fetchJson('https://rest.isric.org/soilgrids/v2.0/properties/query?' + qSuelo(la2, lo2), 30000)
+      .then(procesarSuelo).catch(() => null);
+    // Si el píxel exacto no tiene dato (ríos, zonas urbanas), prueba los 4 vecinos a ~250 m
+    const pSuelo = pedirSuelo(la, lo).then(async r => {
+      if (r) return r;
+      const dd = 0.0025;
+      for (const [dla, dlo] of [[dd, 0], [-dd, 0], [0, dd], [0, -dd]]) {
+        const v = await pedirSuelo((lat + dla).toFixed(4), (lon + dlo).toFixed(4));
+        if (v) { v.fuente += ', píxel vecino a ~250 m'; return v; }
+      }
+      return null;
+    }).then(r => { avisar('suelo', !!r); return r; });
 
     const terreno = await pTerreno;
     const climaRaw = await pClimaRaw;

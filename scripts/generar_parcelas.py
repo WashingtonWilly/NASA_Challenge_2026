@@ -28,7 +28,7 @@ import os
 import sys
 from hls import inferir_historia_desde_ndvi
 from power import obtener_clima_mensual_power, anomalia_lluvia_power
-from soil import consultar_soilgrids
+from soil import consultar_soilgrids_con_vecinos
 from appeears import leer_carpeta, serie_ndvi_parcela, smap_parcela, terreno_parcela
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -312,12 +312,12 @@ def enriquecer_con_datos_reales(p, obs_hls, obs_smap, obs_dem=(), online=True):
         if anom:
             p["anomalia"] = anom
             estado["anomalia"] = f"NASA POWER PRECTOTCORR, {anom['ventana']} vs {anom['anios_referencia']}"
-        suelo = consultar_soilgrids(lat, lon, cache=os.path.join(crudos, f"soilgrids_{p['id']}.json"), online=online)
+        suelo = consultar_soilgrids_con_vecinos(lat, lon, cache=os.path.join(crudos, f"soilgrids_{p['id']}.json"), online=online)
         if suelo:
             # Andisol: suelos volcánicos andinos (Sierra) con carbono orgánico alto
             suelo["es_andisol"] = p["region"].startswith("Sierra") and suelo["soc_pct"] >= 2.0
             p["suelo"] = suelo
-            estado["suelo"] = "ISRIC SoilGrids 250 m (0–30 cm)"
+            estado["suelo"] = suelo["fuente"]
 
     serie = serie_ndvi_parcela(obs_hls, lat, lon)
     if serie:

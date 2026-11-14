@@ -21,6 +21,27 @@ def clasificar_textura(arcilla_pct: float, arena_pct: float) -> str:
     return "Franco"
 
 
+def consultar_soilgrids_con_vecinos(lat: float, lon: float, cache: str = None, online: bool = True, paso: float = 0.0025):
+    """
+    SoilGrids devuelve null en algunos píxeles (ríos, zonas urbanas, bordes de mosaico).
+    Si el punto central no tiene dato, prueba los 4 vecinos a ~250 m (un píxel) y luego a ~500 m.
+    Devuelve el dato con una nota de a qué distancia se tomó.
+    """
+    r = consultar_soilgrids(lat, lon, cache, online)
+    if r:
+        return r
+    for mult in (1, 2):
+        d = paso * mult
+        for i, (dlat, dlon) in enumerate([(d, 0), (-d, 0), (0, d), (0, -d)]):
+            c = cache.replace(".json", f"_v{mult}{i}.json") if cache else None
+            r = consultar_soilgrids(lat + dlat, lon + dlon, c, online)
+            if r:
+                r["fuente"] = f"ISRIC SoilGrids 250 m (0–30 cm), píxel vecino a ~{int(mult * 250)} m (sin dato en el punto exacto)"
+                r["desplazado_m"] = int(mult * 250)
+                return r
+    return None
+
+
 def consultar_soilgrids(lat: float, lon: float, cache: str = None, online: bool = True):
     base_url = "https://rest.isric.org/soilgrids/v2.0/properties/query"
     query = urllib.parse.urlencode([

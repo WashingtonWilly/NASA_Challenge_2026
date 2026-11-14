@@ -50,7 +50,11 @@ const leguminosasAndinas = new Set(['chocho', 'haba', 'vicia', 'frejol', 'arveja
 const iniciaConLeguminosa = leguminosasAndinas.has(res1.recomendadas[0].cultivos[0].id);
 assert(iniciaConLeguminosa, `La rotación #1 inicia en el Año 1 con una leguminosa andina (${res1.recomendadas[0].cultivos[0].nombre}) para recuperar N.`);
 assert(res1.tiempoCalculoMs < 100, `Cálculo instantáneo en navegador (< 100 ms): ${res1.tiempoCalculoMs} ms.`);
-assert(res1.pesosAplicados.ajusteSequiaAplicado === true, 'Se activó automáticamente el multiplicador x1.3 de peso de agua por anomalía GPM < -15%.');
+const anomChimb = (pChimborazo.anomalia && typeof pChimborazo.anomalia.pct === 'number') ? pChimborazo.anomalia.pct : 0;
+assert(res1.pesosAplicados.ajusteSequiaAplicado === (anomChimb < -15),
+  anomChimb < -15
+    ? 'Se activó automáticamente el multiplicador x1.3 de peso de agua por anomalía de lluvia < -15%.'
+    : `Con anomalía de lluvia de ${anomChimb > 0 ? '+' : ''}${anomChimb}% (no es sequía) el multiplicador x1.3 queda desactivado, como corresponde.`);
 
 // 2. Prueba El Oro
 console.log(`\n▶ 2. Evaluando: ${pElOro.nombre}`);

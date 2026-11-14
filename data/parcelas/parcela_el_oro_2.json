@@ -45,106 +45,109 @@
     {
       "mes": 1,
       "nombre_mes": "Ene",
-      "P_mm": 145,
-      "ET0_mm": 122,
-      "Tmin_abs": 21.2,
-      "Tmed": 26.4
+      "P_mm": 77.6,
+      "ET0_mm": 120.1,
+      "Tmin_abs": 22.6,
+      "Tmed": 26.7
     },
     {
       "mes": 2,
       "nombre_mes": "Feb",
-      "P_mm": 195,
-      "ET0_mm": 116,
-      "Tmin_abs": 21.5,
-      "Tmed": 26.8
+      "P_mm": 126.7,
+      "ET0_mm": 104.0,
+      "Tmin_abs": 23.0,
+      "Tmed": 27.0
     },
     {
       "mes": 3,
       "nombre_mes": "Mar",
-      "P_mm": 180,
-      "ET0_mm": 126,
-      "Tmin_abs": 21.4,
+      "P_mm": 158.5,
+      "ET0_mm": 107.1,
+      "Tmin_abs": 23.3,
       "Tmed": 26.9
     },
     {
       "mes": 4,
       "nombre_mes": "Abr",
-      "P_mm": 110,
-      "ET0_mm": 120,
-      "Tmin_abs": 21.0,
-      "Tmed": 26.5
+      "P_mm": 94.4,
+      "ET0_mm": 107.0,
+      "Tmin_abs": 22.7,
+      "Tmed": 26.9
     },
     {
       "mes": 5,
       "nombre_mes": "May",
-      "P_mm": 42,
-      "ET0_mm": 112,
-      "Tmin_abs": 19.8,
-      "Tmed": 25.4
+      "P_mm": 46.4,
+      "ET0_mm": 111.5,
+      "Tmin_abs": 22.3,
+      "Tmed": 26.9
     },
     {
       "mes": 6,
       "nombre_mes": "Jun",
-      "P_mm": 18,
-      "ET0_mm": 98,
-      "Tmin_abs": 18.6,
-      "Tmed": 24.1
+      "P_mm": 22.5,
+      "ET0_mm": 108.8,
+      "Tmin_abs": 20.9,
+      "Tmed": 26.3
     },
     {
       "mes": 7,
       "nombre_mes": "Jul",
-      "P_mm": 14,
-      "ET0_mm": 96,
-      "Tmin_abs": 18.1,
-      "Tmed": 23.6
+      "P_mm": 12.0,
+      "ET0_mm": 119.5,
+      "Tmin_abs": 21.0,
+      "Tmed": 26.0
     },
     {
       "mes": 8,
       "nombre_mes": "Ago",
-      "P_mm": 12,
-      "ET0_mm": 102,
-      "Tmin_abs": 18.0,
-      "Tmed": 23.8
+      "P_mm": 6.0,
+      "ET0_mm": 129.8,
+      "Tmin_abs": 20.5,
+      "Tmed": 25.9
     },
     {
       "mes": 9,
       "nombre_mes": "Sep",
-      "P_mm": 15,
-      "ET0_mm": 108,
-      "Tmin_abs": 18.4,
-      "Tmed": 24.2
+      "P_mm": 8.2,
+      "ET0_mm": 132.1,
+      "Tmin_abs": 20.9,
+      "Tmed": 25.9
     },
     {
       "mes": 10,
       "nombre_mes": "Oct",
-      "P_mm": 19,
-      "ET0_mm": 114,
-      "Tmin_abs": 18.9,
-      "Tmed": 24.6
+      "P_mm": 17.5,
+      "ET0_mm": 131.1,
+      "Tmin_abs": 21.2,
+      "Tmed": 25.8
     },
     {
       "mes": 11,
       "nombre_mes": "Nov",
-      "P_mm": 24,
-      "ET0_mm": 118,
-      "Tmin_abs": 19.4,
-      "Tmed": 25.1
+      "P_mm": 21.7,
+      "ET0_mm": 120.0,
+      "Tmin_abs": 21.0,
+      "Tmed": 25.4
     },
     {
       "mes": 12,
       "nombre_mes": "Dic",
-      "P_mm": 58,
-      "ET0_mm": 124,
-      "Tmin_abs": 20.5,
-      "Tmed": 25.9
+      "P_mm": 39.7,
+      "ET0_mm": 121.1,
+      "Tmin_abs": 21.7,
+      "Tmed": 26.2
     }
   ],
   "anomalia": {
-    "fuente": "EJEMPLO (dato provisional, falta dato real)",
-    "res_km": 10,
-    "pct": -21,
+    "fuente": "NASA POWER · PRECTOTCORR",
+    "res_km": 50,
+    "pct": 2523,
     "ventana": "ago–oct 2026",
-    "mensaje": "EJEMPLO: Su zona viene 21 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
+    "lluvia_reciente_mm": 759,
+    "lluvia_normal_mm": 29,
+    "anios_referencia": "2001–2025",
+    "mensaje": "Su zona viene 2523 % más lluviosa que un año normal (ago–oct 2026: 759 mm frente a 29 mm de promedio, NASA POWER, ~50 km). Suelo saturado: revise drenajes, evite labranza con el suelo mojado y vigile hongos (lancha, pudriciones) antes de sembrar."
   },
   "suelo": {
     "fuente": "EJEMPLO (dato provisional, falta dato real)",
@@ -389,8 +392,8 @@
   ],
   "nematodo_declarado": false,
   "estado_datos": {
-    "clima": "EJEMPLO (dato provisional, falta dato real)",
-    "anomalia": "EJEMPLO (dato provisional, falta dato real)",
+    "clima": "NASA POWER 2015–2024 (diario, AG); T corregida +1.8 °C por altitud (celda a 299.67 m)",
+    "anomalia": "NASA POWER PRECTOTCORR, ago–oct 2026 vs 2001–2025",
     "suelo": "EJEMPLO (dato provisional, falta dato real)",
     "ndvi": "EJEMPLO (dato provisional, falta dato real)",
     "smap": "sin dato",

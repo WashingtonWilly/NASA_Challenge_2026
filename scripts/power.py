@@ -166,7 +166,9 @@ def anomalia_lluvia_power(lat: float, lon: float, meses: int = 3, hoy: datetime 
             "anios_referencia": f"2001–{anio_fin - 1}",
             "mensaje": (f"Su zona viene {abs(pct)} % {estado} que un año normal ({texto_ventana}: "
                         f"{round(reciente)} mm frente a {round(normal)} mm de promedio, NASA POWER, ~50 km)."
-                        + (" Por eso damos más peso al ahorro de agua." if pct < -15 else ""))
+                        + (" Por eso damos más peso al ahorro de agua." if pct < -15 else "")
+                        + (" Suelo saturado: revise drenajes, evite labranza con el suelo mojado y vigile hongos "
+                           "(lancha, pudriciones) antes de sembrar." if pct > 50 else ""))
         }
     except Exception:
         return None

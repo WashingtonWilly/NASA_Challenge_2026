@@ -370,17 +370,20 @@
     const stateBadgeEl = document.getElementById('anomaly-state-badge');
 
     const esSeco = anom.pct < -15 || state.opciones.escenarioLluviaPct <= -15;
+    const esHumedo = !esSeco && anom.pct > 50;
     const signo = anom.pct > 0 ? '+' : '';
 
     if (stateBadgeEl) {
-      stateBadgeEl.className = esSeco ? 'estado riesgo' : 'estado ok';
-      stateBadgeEl.textContent = esSeco ? 'Alto · Sequía' : 'Bajo · Normal';
+      stateBadgeEl.className = (esSeco || esHumedo) ? 'estado riesgo' : 'estado ok';
+      stateBadgeEl.textContent = esSeco ? 'Alto · Sequía' : (esHumedo ? 'Alto · Exceso de lluvia' : 'Bajo · Normal');
     }
 
     if (titleEl) {
       titleEl.textContent = esSeco
         ? `Anomalía de sequía (${signo}${anom.pct} % en ${anom.ventana})`
-        : `Monitoreo hidrológico (${signo}${anom.pct} % en ${anom.ventana})`;
+        : (esHumedo
+          ? `Anomalía de exceso de lluvia (${signo}${anom.pct} % en ${anom.ventana})`
+          : `Monitoreo hidrológico (${signo}${anom.pct} % en ${anom.ventana})`);
     }
     if (msgEl) {
       msgEl.textContent = anom.mensaje;
