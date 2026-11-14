@@ -1,134 +1,642 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente de Rotación de Cultivos</title>
-    <!-- Tailwind CSS para diseño responsivo sin pesar mucho -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Leaflet para el Mapa -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Chart.js para los gráficos -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RotaSat — Rotación de cultivos resiliente con datos NASA</title>
+<style>
+:root{
+  --bg:#f6f5f0; --card:#ffffff; --ink:#1d2421; --muted:#5d6a64; --line:#e3e1d8;
+  --green:#2f7d4f; --green-soft:#e4f1e8; --red:#b23b2e; --red-soft:#f8e6e3;
+  --blue:#2a6fb0; --orange:#d9822b; --accent:#0f5132;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+header{background:var(--accent);color:#fff;padding:18px 24px}
+header h1{margin:0;font-size:22px;letter-spacing:.2px}
+header p{margin:4px 0 0;opacity:.85;font-size:14px}
+main{max-width:1240px;margin:0 auto;padding:18px;display:grid;grid-template-columns:340px 1fr;gap:18px}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.panel h2{font-size:15px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.panel + .panel{margin-top:14px}
+label{display:block;font-size:13px;color:var(--muted);margin:8px 0 3px}
+input[type=number],input[type=text],select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:#fff;color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.seg{display:flex;gap:6px;margin-bottom:6px}
+.seg button{flex:1}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;color:var(--ink)}
+button.on,button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:default}
+.slider{display:grid;grid-template-columns:120px 1fr 22px;align-items:center;gap:8px;font-size:13px;margin:6px 0}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.note{font-size:12px;color:var(--muted);margin-top:6px}
+.src{display:inline-block;font-size:11px;padding:2px 7px;border-radius:99px;background:#eef0ec;color:var(--muted);margin-left:4px}
+.src.live{background:var(--green-soft);color:var(--green)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:1100px){.cards{grid-template-columns:1fr}}
+.card{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:border-color .15s}
+.card.sel{border-color:var(--green)}
+.card.current{background:var(--red-soft);border-color:#e9c4be;cursor:pointer;margin-bottom:12px}
+.card.current.sel{border-color:var(--red)}
+.card h3{margin:0 0 6px;font-size:14px;color:var(--muted);font-weight:600}
+.seq{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:4px 0 8px}
+.chip{padding:3px 9px;border-radius:99px;font-size:13px;font-weight:600;color:#fff}
+.arrow{color:var(--muted);font-size:12px}
+.irr{font-size:34px;font-weight:700;line-height:1}
+.irr small{font-size:13px;font-weight:500;color:var(--muted)}
+.bars{margin:8px 0}
+.bar{display:grid;grid-template-columns:92px 1fr 34px;gap:6px;align-items:center;font-size:12px;margin:3px 0}
+.bar .t{height:8px;background:#eceae3;border-radius:99px;overflow:hidden}
+.bar .f{height:100%;background:var(--green);border-radius:99px}
+.current .bar .f{background:var(--red)}
+.deltas{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.delta{background:var(--green-soft);border-radius:8px;padding:6px 8px;font-size:12px}
+.delta b{display:block;font-size:15px}
+.delta.bad{background:var(--red-soft)}
+ul.why{margin:6px 0 0;padding-left:18px;font-size:13px}
+ul.why li{margin:2px 0}
+ul.warn{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:#7a4a12}
+.viol{color:var(--red);font-size:13px;margin:4px 0 0;padding-left:18px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{padding:4px 5px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-2px}
+.msg{font-size:13px;padding:8px 10px;border-radius:8px;background:#fff7e6;color:#7a4a12;margin-top:8px;display:none}
+.msg.ok{background:var(--green-soft);color:var(--green)}
+.section-title{font-size:15px;margin:18px 0 8px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+svg text{font-family:inherit}
+footer{max-width:1240px;margin:0 auto;padding:0 18px 30px;font-size:12px;color:var(--muted)}
+details summary{cursor:pointer;color:var(--muted);font-size:13px}
+code{background:#f0eee7;padding:1px 4px;border-radius:4px;font-size:12px}
+</style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans p-4 md:p-8">
+<body>
+<header>
+  <h1>RotaSat · Rotación de cultivos resiliente</h1>
+  <p>Herramienta de soporte a la decisión con datos de observación de la Tierra de la NASA · NASA Space Apps Challenge 2026 · Riobamba</p>
+</header>
 
-    <!-- Tarjeta de Anomalía Climática (Siempre visible) -->
-    <div class="max-w-4xl mx-auto mb-6 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow-sm">
-        <p class="font-bold">🌤️ Alerta Climática Regional</p>
-        <p class="text-sm">Su zona viene 18% más seca que un año normal (lluvias ago-oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua.</p>
+<main>
+<aside>
+  <div class="panel">
+    <h2>1 · Parcela</h2>
+    <div class="seg">
+      <button id="bSierra" class="on">Sierra · Licto</button>
+      <button id="bCosta">Costa · El Guabo</button>
     </div>
-
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-green-700 mb-8 text-center">Asistente de Cultivos y Suelo</h1>
-
-        <!-- PASO 1: Mi Terreno -->
-        <section class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-xl font-bold border-b pb-2 mb-4 text-green-600">Paso 1: Mi Terreno</h2>
-            <p class="mb-4 text-sm text-gray-600">Dibuje su parcela o seleccione un lote de ejemplo para analizar.</p>
-            <div id="mapa-parcela" class="h-64 w-full bg-gray-200 rounded border-2 border-dashed border-gray-400 flex items-center justify-center">
-                <!-- Aquí Leaflet cargará el mapa -->
-                <span class="text-gray-500">Cargando mapa satelital...</span>
-            </div>
-            <div class="mt-4 flex gap-4">
-                <button class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 text-sm">Dibujar mi terreno</button>
-                <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded shadow hover:bg-gray-300 text-sm">Cargar Parcela 1 (Sierra)</button>
-            </div>
-        </section>
-
-        <!-- PASO 2: Mi Suelo y Prioridades -->
-        <section class="bg-white p-6 rounded-lg shadow-md mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <h2 class="text-xl font-bold border-b pb-2 mb-4 text-green-600">Paso 2: Mi Suelo</h2>
-                <div class="bg-yellow-50 p-4 rounded border border-yellow-200 mb-4">
-                    <p class="text-xs text-yellow-700 mb-2">⚠️ Dato estimado desde satélite (250 m). Si tiene un análisis de suelo, cámbielo aquí.</p>
-                    <label class="block text-sm font-bold mb-1">Textura del suelo:</label>
-                    <select class="w-full p-2 border rounded mb-3 bg-white">
-                        <option>Franco (Tierra negra ideal)</option>
-                        <option>Arenoso (Filtra rápido)</option>
-                        <option>Arcilloso (Retiene mucha agua)</option>
-                    </select>
-                    
-                    <label class="block text-sm font-bold mb-1">Lo que sembró antes (Satélite detectó):</label>
-                    <input type="text" value="Papa (2024), Papa (2025)" class="w-full p-2 border rounded bg-white" />
-                </div>
-            </div>
-
-            <div>
-                <h2 class="text-xl font-bold border-b pb-2 mb-4 text-green-600">Mis Prioridades</h2>
-                <p class="text-sm text-gray-600 mb-4">Mueva las barras según lo que más le interese esta temporada:</p>
-                
-                <label class="block text-sm font-bold mb-1">💧 Ahorrar agua</label>
-                <input type="range" min="0" max="100" value="70" class="w-full mb-4">
-
-                <label class="block text-sm font-bold mb-1">🌱 Mejorar el suelo</label>
-                <input type="range" min="0" max="100" value="60" class="w-full mb-4">
-
-                <label class="block text-sm font-bold mb-1">💰 Ganar más</label>
-                <input type="range" min="0" max="100" value="50" class="w-full">
-            </div>
-        </section>
-
-        <!-- PASO 3: Mis Rotaciones (Tarjetas Semáforo) -->
-        <section class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-xl font-bold border-b pb-2 mb-4 text-green-600">Paso 3: Mis Rotaciones</h2>
-            
-            <!-- Rotación Actual (Semáforo Rojo) -->
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">🔴</span>
-                    <h3 class="font-bold text-red-700">Si sigue sembrando lo mismo: Papa ➔ Papa ➔ Papa</h3>
-                </div>
-                <p class="text-sm text-red-800">No recomendamos papa este año: ya hubo papa dos años seguidos y las plagas del suelo siguen vivas.</p>
-            </div>
-
-            <!-- Rotación Recomendada 1 (Semáforo Verde) -->
-            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded mb-6 shadow-sm">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">🟢</span>
-                    <h3 class="font-bold text-green-800 text-lg">Opción 1: Chocho ➔ Cebada ➔ Quinua</h3>
-                </div>
-                <p class="text-sm text-green-700 font-bold mb-3">Buena rotación: ahorra agua y deja abono para el siguiente cultivo.</p>
-                
-                <!-- Insignias Rol Ecológico -->
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">🌿 Fijador de nitrógeno</span>
-                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded">⛏️ Descompacta el suelo</span>
-                    <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded">❄️ Resiste heladas</span>
-                </div>
-
-                <!-- Cifras Agricultor -->
-                <div class="grid grid-cols-3 gap-2 text-center bg-white p-3 rounded border mb-4">
-                    <div><span class="block text-xl font-bold text-blue-600">38%</span><span class="text-xs">Menos agua</span></div>
-                    <div><span class="block text-xl font-bold text-green-600">+50kg</span><span class="text-xs">Abono (N/ha)</span></div>
-                    <div><span class="block text-xl font-bold text-amber-700">+6.0t</span><span class="text-xs">Materia orgánica</span></div>
-                </div>
-
-                <!-- Evidencias y Riesgos -->
-                <ul class="text-sm text-gray-700 list-disc pl-5 space-y-1">
-                    <li><b>Por qué se sugiere:</b> Corta el ciclo de plagas tras 2 años de papa (detectado por satélite) y aprovecha lluvias de oct-dic (NASA POWER).</li>
-                    <li><b>Beneficio al suelo:</b> Aporta 50 kg de nitrógeno por hectárea y 6 toneladas de rastrojo.</li>
-                    <li><b>Qué validar en campo:</b> Confirmar pH del suelo y presencia de nematodos con un técnico local.</li>
-                </ul>
-            </div>
-
-            <!-- Gráfico de Vulnerabilidad -->
-            <div class="mt-8 border-t pt-6">
-                <h3 class="font-bold mb-4">Lluvia vs Necesidad de Agua (Próximos 3 años)</h3>
-                <div class="relative h-64 w-full">
-                    <canvas id="vulnerabilityChart"></canvas>
-                </div>
-                <p class="text-xs text-gray-500 mt-2 text-center">Fondo gris indica meses con suelo desnudo (Riesgo de erosión).</p>
-            </div>
-        </section>
-
-        <!-- Botón para Jueces -->
-        <div class="text-center mb-8">
-            <button class="text-sm text-gray-500 underline hover:text-gray-800">Ver cómo lo calculamos (Panel Técnico)</button>
-        </div>
-
+    <div class="row">
+      <div><label>Latitud</label><input type="number" id="lat" step="0.0001"></div>
+      <div><label>Longitud</label><input type="number" id="lon" step="0.0001"></div>
     </div>
+    <div class="row">
+      <div><label>Altitud (m) · SRTM</label><input type="number" id="alt"></div>
+      <div><label>Pendiente (%) · SRTM</label><input type="number" id="slope" step="0.5"></div>
+    </div>
+    <div class="note" id="mapLink"></div>
+    <label>Cargar <code>parcela.json</code> (salida del equipo de datos)</label>
+    <input type="file" id="fParcela" accept=".json,application/json">
+    <div class="msg" id="msgParcela"></div>
+  </div>
 
+  <div class="panel">
+    <h2>2 · Suelo <span class="src" id="soilSrc">por defecto · editar</span></h2>
+    <div class="row3">
+      <div><label>pH</label><input type="number" id="ph" step="0.1"></div>
+      <div><label>MO (%)</label><input type="number" id="mo" step="0.1"></div>
+      <div><label>Textura</label>
+        <select id="tex"><option>arenoso</option><option>franco arenoso</option><option>franco</option><option>franco arcilloso</option><option>arcilloso</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>Humedad radicular SMAP (m³/m³)</label><input type="number" id="smap" step="0.01"></div>
+      <div><label>¿Tiene riego?</label><select id="riego"><option value="0">No (secano)</option><option value="1">Sí</option></select></div>
+    </div>
+    <div class="note">SoilGrids (ISRIC, 250 m) para pH, MO y textura; SMAP L4 <code>sm_rootzone</code> desde AppEEARS.</div>
+  </div>
+
+  <div class="panel">
+    <h2>3 · Rotación actual del agricultor</h2>
+    <div class="row3">
+      <select id="cur0"></select><select id="cur1"></select><select id="cur2"></select>
+    </div>
+    <label>Mes de la próxima siembra</label>
+    <select id="start"></select>
+  </div>
+
+  <div class="panel">
+    <h2>4 · Prioridades del agricultor</h2>
+    <div class="slider"><span>💧 Ahorrar agua</span><input type="range" min="0" max="5" id="wA"><b id="vA"></b></div>
+    <div class="slider"><span>🌱 Nitrógeno</span><input type="range" min="0" max="5" id="wN"><b id="vN"></b></div>
+    <div class="slider"><span>🪱 Materia orgánica</span><input type="range" min="0" max="5" id="wM"><b id="vM"></b></div>
+    <div class="slider"><span>💵 Rentabilidad</span><input type="range" min="0" max="5" id="wR"><b id="vR"></b></div>
+  </div>
+
+  <div class="panel">
+    <h2>Clima mensual <span class="src" id="climSrc"></span></h2>
+    <button class="primary" id="bPower">Cargar NASA POWER en vivo</button>
+    <div class="msg" id="msgPower"></div>
+    <div style="overflow-x:auto;margin-top:8px"><table id="climTable"></table></div>
+    <div class="note">ET₀ por Hargreaves (FAO-56) con la radiación extraterrestre de la latitud. La temperatura de POWER (celdas de ~50 km) se corrige por altitud con −6,5 °C/km.</div>
+  </div>
+</aside>
+
+<section>
+  <div class="section-title">Diagnóstico de la rotación actual</div>
+  <div id="current"></div>
+
+  <div class="section-title">Las 3 rotaciones recomendadas (36 meses)</div>
+  <div class="cards" id="cards"></div>
+
+  <div class="panel" style="margin-top:14px">
+    <h2>Balance hídrico y calendario · <span id="chartTitle"></span></h2>
+    <div id="chart"></div>
+    <div class="legend">
+      <span><i style="background:#9cc3e6"></i>Lluvia efectiva (GPM/POWER)</span>
+      <span><i style="background:var(--orange)"></i>Demanda del cultivo ETc = ET₀·Kc</span>
+      <span><i style="background:#e7e3d6"></i>Suelo desnudo</span>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:14px">
+    <h2>Historia satelital de la parcela · HLS (Landsat + Sentinel-2)</h2>
+    <label>Subir el CSV de AppEEARS (HLSL30 / HLSS30, uno o varios archivos)</label>
+    <input type="file" id="fHls" accept=".csv,text/csv" multiple>
+    <div class="msg" id="msgHls"></div>
+    <div id="hlsChart"><p class="note">Aún sin datos. Cuando llegue el CSV de AppEEARS, súbalo aquí: la página calcula NDVI y NDTI, descarta nubes con Fmask y marca los meses en que el satélite vio suelo desnudo (NDVI &lt; 0,25).</p></div>
+  </div>
+
+  <div class="panel" style="margin-top:14px">
+    <h2>Para el pitch</h2>
+    <button id="bCopy">Copiar resumen de la recomendación</button>
+    <span class="note" id="copyOk"></span>
+    <details style="margin-top:10px"><summary>Cómo calcula el índice (IRR)</summary>
+      <p class="note">IRR = (w₁·I<sub>H2O</sub> + w₂·I<sub>N</sub> + w₃·I<sub>MOS</sub> + w₄·I<sub>Rent</sub>) / Σw × 100, con los pesos de las prioridades del agricultor.<br>
+      <b>I<sub>H2O</sub></b> = 1 − déficit / ETc, donde el déficit es max(0, ETc − (P<sub>ef</sub> + almacenamiento del suelo)) mes a mes. El suelo funciona como un tanque de agua útil según la textura (50–110 mm), que arranca con la humedad radicular de SMAP (Δθ). P<sub>ef</sub> usa el método USDA-SCS y se reduce por pendiente (escorrentía).<br>
+      <b>I<sub>N</sub></b> = fracción de la demanda de nitrógeno cubierta sin fertilizante: mineralización de la MO, crédito de leguminosas (reducido si pH &lt; 5,5) e inmovilización tras residuos de C/N alta.<br>
+      <b>I<sub>MOS</sub></b> = aporte de residuos según su C/N, alternancia de raíces y presencia de leguminosas, menos los meses de suelo desnudo y la labranza intensiva en pendiente.<br>
+      <b>I<sub>Rent</sub></b> = margen bruto de 36 meses (rendimiento × precio − costo − riego), con rendimiento reducido por déficit hídrico (FAO-33) y por heladas.<br>
+      <b>Vetos:</b> cultivo fuera de su piso altitudinal y pausa fitosanitaria por familia botánica, medida en campañas.<br>
+      <b>Secano:</b> solo se siembra en meses con P<sub>ef</sub> ≥ ⅓ de ET₀; si no, la parcela espera (y cuenta como suelo desnudo).</p>
+    </details>
+  </div>
+</section>
+</main>
+<footer>
+Datos: NASA POWER (clima, ET₀), NASADEM/SRTM (altitud y pendiente), HLS Landsat + Sentinel-2 (NDVI, NDTI), GPM IMERG (lluvia), SMAP L4 (humedad radicular), SoilGrids ISRIC (suelo), FAO-56 (Kc), FAO GAEZ (aptitud). Precios y rendimientos referenciales por verificar con MAG-SIPA e INIAP. El clima precargado es una referencia aproximada hasta cargar POWER.
+</footer>
+
+<script>
+// ===================== CATÁLOGO DE CULTIVOS =====================
+// ciclo en meses; kc [inicial, medio, final] FAO-56; N en kg/ha; residuo en t/ha;
+// rend t/ha, precio USD/t, costo USD/ha: valores referenciales (verificar con MAG-SIPA / INIAP).
+const CROPS = [
+ // --- Sierra ---
+ {id:"papa",nombre:"Papa",familia:"Solanáceas",raiz:"fasciculada",alt:[2600,3800],ciclo:5,kc:[.5,1.15,.75],demN:150,credN:0,res:1.5,cn:"medio",helada:false,labranza:true,rend:18,precio:300,costo:4000},
+ {id:"haba",nombre:"Haba",familia:"Fabáceas",raiz:"pivotante",alt:[2600,3600],ciclo:6,kc:[.5,1.15,1.1],demN:20,credN:40,res:2.5,cn:"bajo",helada:true,labranza:false,rend:6,precio:450,costo:1500},
+ {id:"chocho",nombre:"Chocho",familia:"Fabáceas",raiz:"pivotante",alt:[2600,3600],ciclo:7,kc:[.4,1.0,.5],demN:0,credN:50,res:3.5,cn:"bajo",helada:true,labranza:false,rend:1.2,precio:1500,costo:900},
+ {id:"cebada",nombre:"Cebada",familia:"Poáceas",raiz:"fasciculada",alt:[2600,3600],ciclo:5,kc:[.3,1.15,.25],demN:60,credN:0,res:4,cn:"alto",helada:true,labranza:false,rend:2.5,precio:400,costo:700},
+ {id:"quinua",nombre:"Quinua",familia:"Amarantáceas",raiz:"pivotante",alt:[2600,3600],ciclo:6,kc:[.5,1.0,.7],demN:80,credN:0,res:2.5,cn:"medio",helada:true,labranza:false,rend:1.5,precio:1300,costo:1000},
+ {id:"trigo",nombre:"Trigo",familia:"Poáceas",raiz:"fasciculada",alt:[2500,3400],ciclo:6,kc:[.3,1.15,.3],demN:80,credN:0,res:4,cn:"alto",helada:true,labranza:false,rend:2.5,precio:450,costo:800},
+ {id:"maiz_suave",nombre:"Maíz suave",familia:"Poáceas",raiz:"fasciculada",alt:[2200,3100],ciclo:7,kc:[.3,1.2,.6],demN:120,credN:0,res:5,cn:"alto",helada:false,labranza:false,rend:3,precio:600,costo:1200},
+ {id:"arveja",nombre:"Arveja",familia:"Fabáceas",raiz:"pivotante",alt:[2200,3200],ciclo:4,kc:[.5,1.15,1.1],demN:20,credN:30,res:2,cn:"bajo",helada:false,labranza:false,rend:4,precio:600,costo:1400},
+ {id:"melloco",nombre:"Melloco",familia:"Baseláceas",raiz:"fasciculada",alt:[2800,3600],ciclo:7,kc:[.5,1.1,.7],demN:80,credN:0,res:1.5,cn:"medio",helada:false,labranza:true,rend:8,precio:400,costo:1800},
+ {id:"avena_vicia",nombre:"Avena-vicia",familia:"Mezcla forrajera",raiz:"mixta",alt:[2400,3600],ciclo:5,kc:[.4,1.0,.9],demN:10,credN:35,res:6,cn:"medio",helada:true,labranza:false,rend:25,precio:40,costo:500},
+ {id:"zanahoria",nombre:"Zanahoria",familia:"Apiáceas",raiz:"pivotante",alt:[1500,3200],ciclo:4,kc:[.7,1.05,.95],demN:90,credN:0,res:1,cn:"bajo",helada:false,labranza:true,rend:25,precio:150,costo:2500},
+ // --- Costa ---
+ {id:"maiz_duro",nombre:"Maíz duro",familia:"Poáceas",raiz:"fasciculada",alt:[0,1500],ciclo:4,kc:[.3,1.2,.6],demN:150,credN:0,res:6,cn:"alto",helada:false,labranza:false,rend:6,precio:300,costo:1300},
+ {id:"arroz",nombre:"Arroz",familia:"Poáceas",raiz:"fasciculada",alt:[0,800],ciclo:4,kc:[1.05,1.2,.9],demN:120,credN:0,res:5,cn:"alto",helada:false,labranza:true,rend:5.5,precio:380,costo:1700,extraAgua:100},
+ {id:"soya",nombre:"Soya",familia:"Fabáceas",raiz:"pivotante",alt:[0,1200],ciclo:4,kc:[.4,1.15,.5],demN:0,credN:40,res:2.5,cn:"bajo",helada:false,labranza:false,rend:2.5,precio:500,costo:800},
+ {id:"caupi",nombre:"Fréjol caupí",familia:"Fabáceas",raiz:"pivotante",alt:[0,1500],ciclo:3,kc:[.4,1.05,.6],demN:0,credN:30,res:2,cn:"bajo",helada:false,labranza:false,rend:1.2,precio:1000,costo:700},
+ {id:"mani",nombre:"Maní",familia:"Fabáceas",raiz:"pivotante",alt:[0,1500],ciclo:4,kc:[.4,1.15,.6],demN:0,credN:30,res:2,cn:"bajo",helada:false,labranza:true,rend:2,precio:900,costo:1100},
+ {id:"yuca",nombre:"Yuca",familia:"Euforbiáceas",raiz:"pivotante",alt:[0,1800],ciclo:9,kc:[.3,.8,.3],demN:80,credN:0,res:3,cn:"medio",helada:false,labranza:true,rend:15,precio:200,costo:1500},
+ {id:"sandia",nombre:"Sandía",familia:"Cucurbitáceas",raiz:"pivotante",alt:[0,1200],ciclo:3,kc:[.4,1.0,.75],demN:100,credN:0,res:1,cn:"bajo",helada:false,labranza:false,rend:25,precio:150,costo:2000},
+ {id:"pimiento",nombre:"Pimiento",familia:"Solanáceas",raiz:"pivotante",alt:[0,1500],ciclo:5,kc:[.6,1.05,.9],demN:140,credN:0,res:1.5,cn:"medio",helada:false,labranza:true,rend:20,precio:300,costo:3500},
+ {id:"sorgo",nombre:"Sorgo",familia:"Poáceas",raiz:"fasciculada",alt:[0,1500],ciclo:4,kc:[.3,1.0,.55],demN:90,credN:0,res:6,cn:"alto",helada:false,labranza:false,rend:4,precio:280,costo:800},
+ {id:"canavalia",nombre:"Canavalia (abono verde)",familia:"Fabáceas",raiz:"pivotante",alt:[0,1500],ciclo:4,kc:[.4,1.0,.8],demN:0,credN:80,res:6,cn:"bajo",helada:false,labranza:false,rend:0,precio:0,costo:250},
+ {id:"zapallo",nombre:"Zapallo",familia:"Cucurbitáceas",raiz:"pivotante",alt:[0,2500],ciclo:4,kc:[.5,1.0,.8],demN:90,credN:0,res:2,cn:"medio",helada:false,labranza:false,rend:20,precio:150,costo:1600}
+];
+const BYID = Object.fromEntries(CROPS.map(c=>[c.id,c]));
+// Pausa fitosanitaria mínima, en campañas, antes de repetir la familia
+const PAUSA = {"Solanáceas":3,"Brasicáceas":4,"Apiáceas":3,"Amarilidáceas":3,"Cucurbitáceas":3,"Fabáceas":2,"Amarantáceas":2,"Euforbiáceas":2,"Baseláceas":2,"Poáceas":1,"Mezcla forrajera":1};
+const FAMCOLOR = {"Solanáceas":"#8e44ad","Fabáceas":"#2f7d4f","Poáceas":"#c58a1a","Amarantáceas":"#b5476b","Baseláceas":"#d35400","Mezcla forrajera":"#5b8c3a","Apiáceas":"#e67e22","Euforbiáceas":"#6d4c41","Cucurbitáceas":"#16a085","Amarilidáceas":"#7f8c8d","Brasicáceas":"#2c3e50"};
+const MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const DIAS = [31,28,31,30,31,30,31,31,30,31,30,31];
+
+// ===================== PARCELAS DE DEMO =====================
+// Clima: referencia aproximada (mm/mes y °C) que se reemplaza con NASA POWER al pulsar el botón.
+const PRESETS = {
+ sierra:{nombre:"Licto, Chimborazo",lat:-1.80,lon:-78.60,alt:2900,pendiente:12,
+   suelo:{ph:6.8,mo:2.0,textura:"franco arenoso"},smap:0.24,riego:1,actual:["papa","papa","maiz_suave"],inicio:9,
+   clima:{P:[40,55,70,65,45,25,15,12,25,50,45,40],
+          Tmax:[19.5,19.3,19.2,19.4,19.6,19.0,18.8,19.4,20.0,20.3,20.4,19.9],
+          Tmin:[7.5,7.8,7.9,7.9,7.4,6.5,5.8,5.7,6.3,7.0,7.2,7.4]}, fuenteClima:"referencia"},
+ costa:{nombre:"El Guabo, El Oro",lat:-3.24,lon:-79.83,alt:20,pendiente:2,
+   suelo:{ph:6.5,mo:1.8,textura:"franco arcilloso"},smap:0.28,riego:0,actual:["maiz_duro","maiz_duro","maiz_duro"],inicio:0,
+   clima:{P:[110,170,160,110,40,15,8,5,8,10,10,35],
+          Tmax:[30.5,31.0,31.2,30.8,29.5,28.0,27.0,27.0,27.5,27.8,28.5,29.8],
+          Tmin:[22.5,23.0,23.0,22.8,22.0,21.0,20.3,19.8,20.0,20.5,21.0,22.0]}, fuenteClima:"referencia"}
+};
+
+let P = structuredClone(PRESETS.sierra);
+let selected = 0;
+let lastResults = null;
+const $ = id => document.getElementById(id);
+
+// ===================== CLIMA Y AGUA =====================
+function raMm(latDeg, month){ // radiación extraterrestre FAO-56 ec. 21, en mm/día equivalentes
+  const J = [15,46,74,105,135,166,196,227,258,288,319,349][month];
+  const phi = latDeg*Math.PI/180, Gsc = 0.0820;
+  const dr = 1+0.033*Math.cos(2*Math.PI*J/365);
+  const d = 0.409*Math.sin(2*Math.PI*J/365-1.39);
+  const ws = Math.acos(Math.max(-1,Math.min(1,-Math.tan(phi)*Math.tan(d))));
+  const Ra = 24*60/Math.PI*Gsc*dr*(ws*Math.sin(phi)*Math.sin(d)+Math.cos(phi)*Math.cos(d)*Math.sin(ws));
+  return Ra*0.408;
+}
+function climate(){
+  const c = P.clima, out = {P:[],ET0:[],Tmin:[],Pef:[]};
+  for(let m=0;m<12;m++){
+    const tx=c.Tmax[m], tn=c.Tmin[m], tm=(tx+tn)/2;
+    const et0 = 0.0023*raMm(P.lat,m)*(tm+17.8)*Math.sqrt(Math.max(0,tx-tn))*DIAS[m];
+    const p = c.P[m];
+    let pef = p<250 ? p*(125-0.2*p)/125 : 125+0.1*p;            // USDA-SCS mensual
+    pef *= 1 - Math.min(0.3, P.pendiente/100);                   // escorrentía por pendiente
+    out.P.push(p); out.ET0.push(et0); out.Tmin.push(tn); out.Pef.push(Math.max(0,pef));
+  }
+  return out;
+}
+
+// ===================== MOTOR =====================
+function famViolations(seq, prevId){
+  // La rotación es cíclica: entre dos cultivos de la misma familia cuenta la menor separación en campañas.
+  const v = [], n = seq.length;
+  for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+    if(seq[i].familia!==seq[j].familia) continue;
+    const d = Math.min(j-i, n-(j-i)), need = PAUSA[seq[i].familia]||1;
+    if(need>d) v.push(`${seq[i].nombre} y ${seq[j].nombre} (${seq[i].familia}) quedan a ${d} campaña${d>1?"s":""}; necesitan ${need}`);
+  }
+  for(const c of seq){
+    const need = PAUSA[c.familia]||1;
+    if(seq.filter(x=>x.familia===c.familia).length===1 && need>n) v.push(`${c.nombre} vuelve cada ${n} campañas; ${c.familia} necesita ${need}`);
+  }
+  for(let i=0;i<n;i++){
+    const a=seq[i], b=seq[(i+1)%n];
+    if(a.id===b.id && !v.some(x=>x.startsWith("Monocultivo"))) v.push(`Monocultivo: ${a.nombre} se siembra campaña tras campaña`);
+  }
+  if(n>1 && new Set(seq.map(c=>c.familia)).size===1) v.push(`Toda la rotación es de una sola familia (${seq[0].familia})`);
+  if(prevId){
+    const pc = BYID[prevId];
+    if(pc && pc.familia===seq[0].familia && (PAUSA[pc.familia]||1)>1)
+      v.push(`${seq[0].nombre} viene justo después de ${pc.nombre}, misma familia (${pc.familia})`);
+  }
+  return [...new Set(v)];
+}
+function altOk(c){ return P.alt>=c.alt[0] && P.alt<=c.alt[1]; }
+
+function simulate(seq, clim, prevId){
+  const riego = +P.riego===1;
+  const cal = []; // 36 meses: {crop, pef, etc} o {crop:null}
+  let t=0, idx=0, prev = prevId?BYID[prevId]:null;
+  let sumEtc=0, sumDef=0, riegoMm=0, demN=0, fertN=0, humus=0, till=0, margin=0, alternancias=0, frost=false;
+  const phF = P.suelo.ph<5.5 ? 0.6 : 1;
+  const soilN = P.suelo.mo*20;                       // ~20 kg N/ha por campaña por cada 1 % de MO
+  const SMAX = {"arenoso":50,"franco arenoso":70,"franco":90,"franco arcilloso":100,"arcilloso":110}[P.suelo.textura]||80; // agua útil, mm
+  let S = Math.max(0,Math.min(1,(P.smap-0.10)/0.20))*SMAX;   // almacenamiento inicial a partir de SMAP (Δθ)
+  const bare = m=>{ S = Math.max(0, Math.min(SMAX, S + clim.Pef[m] - 0.3*clim.ET0[m])); };
+  const hcn = {alto:0.15, medio:0.10, bajo:0.07};
+  let guard=0;
+  while(t<36 && guard++<60){
+    const crop = seq[idx%seq.length];
+    // en secano solo se siembra en mes apto
+    let waited=0;
+    while(!riego && t<36 && clim.Pef[(P.inicio+t)%12] < clim.ET0[(P.inicio+t)%12]/3 && waited<12){
+      const m=(P.inicio+t)%12;
+      bare(m); cal.push({crop:null,m,pef:clim.Pef[m],etc:0}); t++; waited++;
+    }
+    if(t>=36) break;
+    let cEtc=0, cDef=0, months=0, cFrost=false;
+    for(let k=0;k<crop.ciclo && t<36;k++,t++){
+      const m=(P.inicio+t)%12, fr=(k+0.5)/crop.ciclo;
+      const kc = fr<0.25?crop.kc[0]:fr<0.75?crop.kc[1]:crop.kc[2];
+      const etc = clim.ET0[m]*kc + (crop.extraAgua||0);
+      const supply = clim.Pef[m] + S;
+      const def = Math.max(0, etc-supply);
+      S = riego ? SMAX*0.7 : Math.max(0, Math.min(SMAX, supply-etc));
+      cal.push({crop, m, pef:clim.Pef[m], etc});
+      cEtc+=etc; cDef+=def; months++;
+      if(clim.Tmin[m]<4 && !crop.helada) cFrost=true;
+    }
+    const frac = months/crop.ciclo;
+    sumEtc+=cEtc; sumDef+=cDef;
+    let yf = riego ? 1 : Math.max(0, 1 - (cEtc>0?cDef/cEtc:0));   // Ky = 1 (FAO-33)
+    if(cFrost){ yf*=0.85; frost=true; }
+    if(riego) riegoMm += cDef/0.7;
+    // nitrógeno
+    let disp = soilN;
+    if(prev){ disp += prev.credN*phF; if(prev.cn==="alto") disp -= 20; }
+    demN += crop.demN*frac; fertN += Math.max(0, crop.demN - disp)*frac;
+    // materia orgánica
+    humus += crop.res*hcn[crop.cn]*frac;
+    if(crop.labranza) till += 0.3*(1+P.pendiente/20)*frac;
+    if(prev && prev.raiz!==crop.raiz && prev.raiz!=="mixta" && crop.raiz!=="mixta") alternancias++;
+    margin += (crop.rend*yf*crop.precio - crop.costo)*frac;
+    prev = crop; idx++;
+    if(t<36){ const m=(P.inicio+t)%12; bare(m); cal.push({crop:null,m,pef:clim.Pef[m],etc:0}); t++; } // mes de preparación
+  }
+  while(cal.length<36){ const m=(P.inicio+cal.length)%12; cal.push({crop:null,m,pef:clim.Pef[m],etc:0}); }
+  cal.length=36;
+  const desnudo = cal.filter(x=>!x.crop).length;
+  const riegoCosto = riegoMm*10*0.03;                // m³/ha × USD 0,03/m³
+  margin -= riegoCosto;
+  const legum = seq.some(c=>c.credN>0);
+  return {
+    seq, cal, sumEtc, sumDef, riegoMm, demN, fertN, humus, till, margin, desnudo, alternancias, frost, legum,
+    iH2O: sumEtc>0 ? 1-sumDef/sumEtc : 1,
+    iN: demN>0 ? 1-fertN/demN : 1,
+    mosRaw: humus - 0.04*desnudo - till + 0.15*alternancias + (legum?0.2:0)
+  };
+}
+
+function run(){
+  const clim = climate();
+  const elig = CROPS.filter(altOk);
+  const actualSeq = P.actual.map(id=>BYID[id]);
+  const cur = simulate(actualSeq, clim, null);
+  cur.viol = famViolations(actualSeq, null);
+  actualSeq.forEach(c=>{ if(!altOk(c)) cur.viol.push(`${c.nombre} está fuera de su rango de altitud (${c.alt[0]}–${c.alt[1]} m)`); });
+  const prevId = P.actual[P.actual.length-1];
+  const cands = [];
+  for(const a of elig) for(const b of elig) for(const c of elig){
+    if(a===b||b===c||a===c) continue;
+    const seq=[a,b,c];
+    if(famViolations(seq, prevId).length) continue;
+    cands.push(simulate(seq, clim, prevId));
+  }
+  const pool = [cur, ...cands];
+  const norm = (k)=>{ const v=pool.map(r=>r[k]); const lo=Math.min(...v), hi=Math.max(...v);
+    pool.forEach(r=>r[k+"N"] = hi>lo ? (r[k]-lo)/(hi-lo) : 0.5); };
+  norm("mosRaw"); norm("margin");
+  const w = {A:+$("wA").value, N:+$("wN").value, M:+$("wM").value, R:+$("wR").value};
+  const sw = (w.A+w.N+w.M+w.R)||1;
+  pool.forEach(r=>{
+    r.iMOS = r.mosRawN; r.iRent = r.marginN;
+    r.irr = 100*(w.A*r.iH2O + w.N*r.iN + w.M*r.iMOS + w.R*r.iRent)/sw;
+  });
+  cands.sort((x,y)=>y.irr-x.irr);
+  const top=[];
+  for(const r of cands){
+    const ids = new Set(r.seq.map(c=>c.id));
+    if(top.every(t=>t.seq.filter(c=>ids.has(c.id)).length<=1)) top.push(r);
+    if(top.length===3) break;
+  }
+  for(const r of cands){ if(top.length>=3) break; if(!top.includes(r) && top.every(t=>t.seq.map(c=>c.id).sort().join()!==r.seq.map(c=>c.id).sort().join())) top.push(r); }
+  lastResults = {cur, top, clim, nCands:cands.length, nElig:elig.length};
+  render();
+}
+
+// ===================== TEXTOS =====================
+function whyList(r, cur){
+  const out=[];
+  const s=r.seq;
+  for(let i=0;i<s.length;i++){
+    const a=s[i], b=s[(i+1)%s.length];
+    if(a.credN>0 && b.demN>=80){ out.push(`${a.nombre} deja ~${Math.round(a.credN*(P.suelo.ph<5.5?.6:1))} kg N/ha para ${b.nombre}`); break; }
+  }
+  if(r.alternancias>=2) out.push(`Alterna raíz pivotante y fasciculada: explora capas distintas y descompacta`);
+  const cer = s.find(c=>c.cn==="alto");
+  if(cer) out.push(`${cer.nombre} deja ${cer.res} t/ha de rastrojo con C/N alta: cobertura que dura y forma materia orgánica`);
+  const fams=[...new Set(s.map(c=>c.familia))];
+  out.push(`${fams.length} familias botánicas distintas: corta el ciclo de plagas y enfermedades del suelo`);
+  if(r.iH2O>=0.8) out.push(`La lluvia cubre el ${Math.round(r.iH2O*100)} % de la demanda de agua del ciclo`);
+  return out.slice(0,4);
+}
+function warnList(r){
+  const w=[];
+  if($("soilSrc").textContent.includes("defecto")) w.push("Suelo con valores por defecto: confirmar pH y MO con SoilGrids o un análisis");
+  if(r.frost) w.push("Algún cultivo cae en meses con Tmin < 4 °C: confirmar riesgo de helada con el agricultor");
+  if(P.pendiente>15 && r.seq.some(c=>c.labranza)) w.push("Pendiente > 15 % con cultivo de labranza intensiva: sembrar en curvas de nivel");
+  if(P.suelo.ph<5.5 && r.legum) w.push("pH ácido: las leguminosas fijan menos nitrógeno; considerar encalado");
+  if(r.seq.some(c=>c.rend===0)) w.push("Incluye un abono verde sin cosecha: compensa en suelo, no en ingreso");
+  return w;
+}
+const fmt = (x,d=0)=>x.toLocaleString("es-EC",{maximumFractionDigits:d,minimumFractionDigits:d});
+function seqHtml(seq){ return seq.map(c=>`<span class="chip" style="background:${FAMCOLOR[c.familia]||"#555"}">${c.nombre}</span>`).join('<span class="arrow">→</span>')+'<span class="arrow">↺</span>'; }
+function barsHtml(r){
+  return `<div class="bars">${[["💧 Agua",r.iH2O],["🌱 Nitrógeno",r.iN],["🪱 Mat. orgánica",r.iMOS],["💵 Rentabilidad",r.iRent]]
+    .map(([n,v])=>`<div class="bar"><span>${n}</span><div class="t"><div class="f" style="width:${Math.round(v*100)}%"></div></div><span>${Math.round(v*100)}</span></div>`).join("")}</div>`;
+}
+function deltaHtml(r, cur){
+  const riego = +P.riego===1;
+  const items=[];
+  if(riego){
+    const d = cur.riegoMm>0 ? (1-r.riegoMm/cur.riegoMm)*100 : 0;
+    items.push([`${d>=0?"−":"+"}${fmt(Math.abs(d))} %`, "riego frente a la actual", d<0]);
+  } else {
+    const d = (r.iH2O-cur.iH2O)*100;
+    items.push([`${d>=0?"+":""}${fmt(d)} pts`, "demanda cubierta por lluvia", d<0]);
+  }
+  const dn = cur.fertN-r.fertN;
+  items.push([`${dn>=0?"−":"+"}${fmt(Math.abs(dn))} kg`, "N sintético en 3 años", dn<0]);
+  const dc = cur.desnudo-r.desnudo;
+  items.push([`${36-r.desnudo}/36`, `meses con suelo cubierto (actual ${36-cur.desnudo})`, dc<0]);
+  const dm = r.margin-cur.margin;
+  items.push([`${dm>=0?"+":"−"}$${fmt(Math.abs(dm))}`, "margen/ha en 3 años", dm<0]);
+  return `<div class="deltas">${items.map(([b,t,bad])=>`<div class="delta ${bad?"bad":""}"><b>${b}</b>${t}</div>`).join("")}</div>`;
+}
+
+// ===================== RENDER =====================
+function render(){
+  const {cur, top, clim} = lastResults;
+  $("current").innerHTML = `<div class="card current ${selected===-1?"sel":""}" data-i="-1">
+    <h3>Rotación actual · IRR</h3>
+    <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+      <div><div class="seq">${seqHtml(cur.seq)}</div><div class="irr">${fmt(cur.irr)}<small> / 100</small></div></div>
+      <div style="flex:1;min-width:220px">${barsHtml(cur)}</div>
+      <div style="flex:1.3;min-width:240px">
+        ${cur.viol.length?`<b style="font-size:13px;color:var(--red)">Reglas que incumple</b><ul class="viol">${cur.viol.map(v=>`<li>${v}</li>`).join("")}</ul>`:'<span class="note">No incumple reglas duras.</span>'}
+        <div class="note">${36-cur.desnudo}/36 meses con cultivo · ${fmt(cur.fertN)} kg N sintético · margen $${fmt(cur.margin)}/ha${+P.riego?` · riego ${fmt(cur.riegoMm)} mm`:""}</div>
+      </div>
+    </div></div>`;
+  $("cards").innerHTML = top.length ? top.map((r,i)=>`<div class="card ${selected===i?"sel":""}" data-i="${i}">
+      <h3>Opción ${i+1} · IRR</h3>
+      <div class="irr">${fmt(r.irr)}<small> / 100 &nbsp;(${r.irr>=cur.irr?"+":""}${fmt(r.irr-cur.irr)} vs. actual)</small></div>
+      <div class="seq">${seqHtml(r.seq)}</div>
+      ${barsHtml(r)}
+      ${deltaHtml(r,cur)}
+      <b style="font-size:13px">Por qué</b><ul class="why">${whyList(r,cur).map(x=>`<li>${x}</li>`).join("")}</ul>
+      ${warnList(r).length?`<b style="font-size:13px;color:#7a4a12;display:block;margin-top:6px">Validar en campo</b><ul class="warn">${warnList(r).map(x=>`<li>${x}</li>`).join("")}</ul>`:""}
+    </div>`).join("") : `<div class="panel">No hay combinaciones válidas para ${fmt(P.alt)} m. Revise la altitud.</div>`;
+  document.querySelectorAll(".card").forEach(el=>el.onclick=()=>{ selected=+el.dataset.i; render(); });
+  const sel = selected===-1 ? cur : (top[selected]||top[0]);
+  $("chartTitle").textContent = selected===-1 ? "rotación actual" : `opción ${selected+1}`;
+  drawChart(sel, cur);
+  drawClimTable(clim);
+}
+
+function drawChart(r, cur){
+  if(!r){ $("chart").innerHTML=""; return; }
+  const W=760,H=228, L=40, R=10, T=10, plotH=140, cw=(W-L-R)/36;
+  const maxV = Math.max(...r.cal.map(x=>Math.max(x.pef,x.etc)), ...cur.cal.map(x=>x.pef), 50)*1.1;
+  const y = v=>T+plotH - v/maxV*plotH;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Balance hídrico de 36 meses">`;
+  for(let g=0; g<=4; g++){ const v=maxV*g/4; s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#eee"/><text x="${L-5}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#888">${Math.round(v)}</text>`; }
+  s+=`<text x="4" y="${T+8}" font-size="10" fill="#888">mm</text>`;
+  r.cal.forEach((x,i)=>{ const bx=L+i*cw+2; s+=`<rect x="${bx}" y="${y(x.pef)}" width="${cw-4}" height="${T+plotH-y(x.pef)}" fill="#9cc3e6" rx="2"><title>${MESES[x.m]}: lluvia efectiva ${Math.round(x.pef)} mm${x.crop?`, ETc ${Math.round(x.etc)} mm`:""}</title></rect>`; });
+  // línea ETc
+  let path="";
+  r.cal.forEach((x,i)=>{ const cx=L+i*cw+cw/2; if(x.crop){ path += (path&&r.cal[i-1]&&r.cal[i-1].crop?"L":"M")+cx+","+y(x.etc); } });
+  s+=`<path d="${path}" fill="none" stroke="#d9822b" stroke-width="2.5"/>`;
+  r.cal.forEach((x,i)=>{ if(x.crop) s+=`<circle cx="${L+i*cw+cw/2}" cy="${y(x.etc)}" r="2.5" fill="#d9822b"/>`; });
+  // bandas de calendario
+  const band=(cal,yy,label)=>{
+    let b=`<text x="${L-5}" y="${yy+12}" font-size="10" text-anchor="end" fill="#555">${label}</text>`;
+    cal.forEach((x,i)=>{ b+=`<rect x="${L+i*cw}" y="${yy}" width="${cw-1}" height="16" fill="${x.crop?(FAMCOLOR[x.crop.familia]||"#555"):"#e7e3d6"}"><title>${MESES[x.m]}: ${x.crop?x.crop.nombre:"suelo desnudo"}</title></rect>`; });
+    let i=0; while(i<cal.length){ if(cal[i].crop){ let j=i; while(j+1<cal.length && cal[j+1].crop===cal[i].crop) j++; const wpx=(j-i+1)*cw; if(wpx>34) b+=`<text x="${L+(i+j+1)/2*cw}" y="${yy+12}" font-size="9.5" text-anchor="middle" fill="#fff">${cal[i].crop.nombre.split(" ")[0]}</text>`; i=j+1;} else i++; }
+    return b;
+  };
+  s+=band(r.cal, T+plotH+8, r===cur?"Actual":"Nueva");
+  if(r!==cur) s+=band(cur.cal, T+plotH+28, "Actual");
+  r.cal.forEach((x,i)=>{ if(i%3===0) s+=`<text x="${L+i*cw+cw/2}" y="${H-6}" font-size="9.5" text-anchor="middle" fill="#888">${MESES[x.m]}</text>`; });
+  s+=`</svg>`;
+  $("chart").innerHTML=s;
+}
+function drawClimTable(c){
+  const row=(n,a,d=0)=>`<tr><td>${n}</td>${a.map(v=>`<td>${fmt(v,d)}</td>`).join("")}</tr>`;
+  $("climTable").innerHTML = `<tr><th></th>${MESES.map(m=>`<th>${m}</th>`).join("")}</tr>`+
+    row("P (mm)",c.P)+row("Pef (mm)",c.Pef)+row("ET₀ (mm)",c.ET0)+row("Tmin (°C)",c.Tmin,1);
+  const live = P.fuenteClima!=="referencia";
+  $("climSrc").textContent = live ? P.fuenteClima : "referencia aproximada";
+  $("climSrc").className = "src"+(live?" live":"");
+}
+
+// ===================== ENTRADAS =====================
+function fillForm(){
+  $("lat").value=P.lat; $("lon").value=P.lon; $("alt").value=P.alt; $("slope").value=P.pendiente;
+  $("ph").value=P.suelo.ph; $("mo").value=P.suelo.mo; $("tex").value=P.suelo.textura;
+  $("smap").value=P.smap; $("riego").value=String(P.riego);
+  const opts = CROPS.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join("");
+  ["cur0","cur1","cur2"].forEach((id,i)=>{ $(id).innerHTML=opts; $(id).value=P.actual[i]; });
+  $("start").innerHTML = MESES.map((m,i)=>`<option value="${i}">${m}</option>`).join(""); $("start").value=P.inicio;
+  $("mapLink").innerHTML = `${P.nombre} · <a href="https://www.google.com/maps/@${P.lat},${P.lon},16z/data=!3m1!1e3" target="_blank" rel="noopener">ver en el mapa satelital</a>`;
+}
+function readForm(){
+  P.lat=+$("lat").value; P.lon=+$("lon").value; P.alt=+$("alt").value; P.pendiente=+$("slope").value;
+  P.suelo={ph:+$("ph").value, mo:+$("mo").value, textura:$("tex").value};
+  P.smap=+$("smap").value; P.riego=+$("riego").value;
+  P.actual=["cur0","cur1","cur2"].map(id=>$(id).value); P.inicio=+$("start").value;
+}
+function loadPreset(k){
+  P=structuredClone(PRESETS[k]); selected=0;
+  $("bSierra").classList.toggle("on",k==="sierra"); $("bCosta").classList.toggle("on",k==="costa");
+  $("soilSrc").textContent="por defecto · editar"; $("soilSrc").className="src";
+  $("msgPower").style.display="none";
+  fillForm(); run();
+}
+$("bSierra").onclick=()=>loadPreset("sierra");
+$("bCosta").onclick=()=>loadPreset("costa");
+["lat","lon","alt","slope","ph","mo","tex","smap","riego","cur0","cur1","cur2","start"].forEach(id=>$(id).addEventListener("change",()=>{
+  if(["ph","mo","tex"].includes(id)){ $("soilSrc").textContent="editado"; $("soilSrc").className="src live"; }
+  readForm(); run();
+}));
+[["wA","vA",3],["wN","vN",3],["wM","vM",3],["wR","vR",3]].forEach(([s,v,d])=>{ $(s).value=d; $(v).textContent=d; $(s).addEventListener("input",()=>{ $(v).textContent=$(s).value; run(); }); });
+
+function showMsg(id, text, ok){ const el=$(id); el.textContent=text; el.className="msg"+(ok?" ok":""); el.style.display="block"; }
+
+// NASA POWER climatología (funciona publicado en GitHub Pages; la vista previa de Claude bloquea conexiones externas)
+$("bPower").onclick = async ()=>{
+  readForm();
+  const url = `https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=T2M_MAX,T2M_MIN,PRECTOTCORR&community=AG&longitude=${P.lon}&latitude=${P.lat}&format=JSON`;
+  $("bPower").disabled=true; showMsg("msgPower","Consultando NASA POWER…",true);
+  try{
+    const ctrl = new AbortController(); const to=setTimeout(()=>ctrl.abort(),25000);
+    const j = await (await fetch(url,{signal:ctrl.signal})).json(); clearTimeout(to);
+    const p = j.properties.parameter, K=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+    const zGrid = j.geometry && j.geometry.coordinates && j.geometry.coordinates[2];
+    const dT = (typeof zGrid==="number" && P.alt) ? -0.0065*(P.alt - zGrid) : 0;
+    P.clima = { P:K.map((k,i)=>p.PRECTOTCORR[k]*DIAS[i]), Tmax:K.map(k=>p.T2M_MAX[k]+dT), Tmin:K.map(k=>p.T2M_MIN[k]+dT) };
+    P.fuenteClima = "NASA POWER en vivo";
+    showMsg("msgPower", `Listo. Climatología de NASA POWER cargada${dT?`; temperatura corregida ${fmt(dT,1)} °C (celda POWER a ${Math.round(zGrid)} m)`:""}.`, true);
+    run();
+  }catch(e){
+    showMsg("msgPower","No se pudo conectar con NASA POWER desde esta vista (las vistas previas bloquean conexiones externas). Publicada en GitHub Pages funciona; mientras tanto se usa la referencia aproximada o un parcela.json.");
+  }finally{ $("bPower").disabled=false; }
+};
+
+// parcela.json del equipo de datos
+// Esquema: {nombre, lat, lon, alt, pendiente, suelo:{ph, mo, textura}, smap, clima:{P:[12 mm], Tmax:[12 °C], Tmin:[12 °C]}, fuente}
+$("fParcela").onchange = async (ev)=>{
+  const f=ev.target.files[0]; if(!f) return;
+  try{
+    const j=JSON.parse(await f.text());
+    if(!j.clima || j.clima.P?.length!==12) throw new Error("falta clima.P con 12 meses");
+    P = {...P, ...j, suelo:{...P.suelo, ...(j.suelo||{})}, clima:j.clima, fuenteClima: j.fuente || "parcela.json (POWER)"};
+    if(j.suelo){ $("soilSrc").textContent="SoilGrids · parcela.json"; $("soilSrc").className="src live"; }
+    fillForm(); run(); showMsg("msgParcela",`Cargada: ${P.nombre||f.name}`,true);
+  }catch(e){ showMsg("msgParcela","No se pudo leer el archivo: "+e.message); }
+};
+
+// ===================== HLS: CSV de AppEEARS =====================
+function parseCSV(txt){
+  const lines = txt.replace(/\r/g,"").split("\n").filter(l=>l.trim());
+  const split = l=>{ const out=[]; let cur="", q=false; for(const ch of l){ if(ch==='"'){q=!q;} else if(ch===","&&!q){out.push(cur);cur="";} else cur+=ch; } out.push(cur); return out; };
+  const head = split(lines[0]);
+  return lines.slice(1).map(l=>{ const v=split(l); const o={}; head.forEach((h,i)=>o[h.trim()]=v[i]); return o; });
+}
+$("fHls").onchange = async (ev)=>{
+  const files=[...ev.target.files]; if(!files.length) return;
+  const obs=[];
+  for(const f of files){
+    const rows=parseCSV(await f.text()); if(!rows.length) continue;
+    const cols=Object.keys(rows[0]);
+    const find=(prod,band)=>cols.find(c=>c.includes(prod) && c.endsWith("_"+band));
+    const sets=[
+      {red:find("HLSL30","B04"),nir:find("HLSL30","B05"),s1:find("HLSL30","B06"),s2:find("HLSL30","B07"),fm:find("HLSL30","Fmask")},
+      {red:find("HLSS30","B04"),nir:find("HLSS30","B8A"),s1:find("HLSS30","B11"),s2:find("HLSS30","B12"),fm:find("HLSS30","Fmask")}
+    ].filter(s=>s.red&&s.nir);
+    const dateCol = cols.find(c=>c.toLowerCase()==="date");
+    for(const r of rows) for(const s of sets){
+      const red=+r[s.red], nir=+r[s.nir], s1=+r[s.s1], s2=+r[s.s2];
+      if(!(red>0&&nir>0) || red<=-9999 || nir<=-9999) continue;
+      if(s.fm){ const fm=+r[s.fm]; if(fm & 0b1110) continue; } // nube, adyacente o sombra
+      const d=new Date(r[dateCol]); if(isNaN(d)) continue;
+      obs.push({k:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`, ndvi:(nir-red)/(nir+red), ndti: (s1>0&&s2>0)?(s1-s2)/(s1+s2):null});
+    }
+  }
+  if(!obs.length){ showMsg("msgHls","No encontré columnas de HLS (B04/B05 o B04/B8A) con datos válidos en el CSV."); return; }
+  const med=a=>{ const s=[...a].sort((x,y)=>x-y); return s.length? s[Math.floor(s.length/2)] : null; };
+  const byM={}; obs.forEach(o=>{ (byM[o.k]=byM[o.k]||{n:[],t:[]}); byM[o.k].n.push(o.ndvi); if(o.ndti!==null) byM[o.k].t.push(o.ndti); });
+  const ks=Object.keys(byM).sort();
+  const ser=ks.map(k=>({k, ndvi:med(byM[k].n), ndti:med(byM[k].t)}));
+  const bare=ser.filter(s=>s.ndvi<0.25).length;
+  showMsg("msgHls",`${obs.length} observaciones sin nubes en ${ks.length} meses. El satélite vio suelo desnudo en ${bare} de ${ks.length} meses.`,true);
+  const W=760,H=200,L=40,R=10,T=10,ph=150, cw=(W-L-R)/ser.length, y=v=>T+ph-(v+0.1)/1.0*ph;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+  [0,0.25,0.5,0.75].forEach(v=>{ s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="${v===0.25?"#d9822b":"#eee"}" ${v===0.25?'stroke-dasharray="4 3"':""}/><text x="${L-5}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#888">${v}</text>`; });
+  ser.forEach((p,i)=>{ if(p.ndvi<0.25) s+=`<rect x="${L+i*cw}" y="${T}" width="${cw}" height="${ph}" fill="#f3ead6"/>`; });
+  const line=(key,col)=>{ let d=""; ser.forEach((p,i)=>{ if(p[key]!==null) d+=(d?"L":"M")+(L+i*cw+cw/2)+","+y(p[key]); }); return `<path d="${d}" fill="none" stroke="${col}" stroke-width="2"/>`; };
+  s+=line("ndvi","#2f7d4f")+line("ndti","#8a6d3b");
+  ser.forEach((p,i)=>{ if(i%Math.max(1,Math.ceil(ser.length/12))===0) s+=`<text x="${L+i*cw+cw/2}" y="${H-24}" font-size="9.5" text-anchor="middle" fill="#888">${p.k}</text>`; });
+  s+=`<text x="${L}" y="${H-6}" font-size="11" fill="#2f7d4f">— NDVI (verdor)</text><text x="${L+120}" y="${H-6}" font-size="11" fill="#8a6d3b">— NDTI (residuo/labranza)</text><text x="${L+300}" y="${H-6}" font-size="11" fill="#b08a3a">▮ suelo desnudo (NDVI &lt; 0,25)</text></svg>`;
+  $("hlsChart").innerHTML=s;
+};
+
+// ===================== COPIAR RESUMEN =====================
+$("bCopy").onclick = async ()=>{
+  const {cur, top} = lastResults; const r=top[0]; if(!r) return;
+  const txt = `RotaSat — ${P.nombre} (${P.alt} m, pendiente ${P.pendiente} %)
+Rotación actual: ${cur.seq.map(c=>c.nombre).join(" → ")} · IRR ${fmt(cur.irr)}
+${cur.viol.map(v=>"  ✗ "+v).join("\n")}
+Recomendada: ${r.seq.map(c=>c.nombre).join(" → ")} · IRR ${fmt(r.irr)}
+  · Demanda cubierta por lluvia: ${fmt(r.iH2O*100)} % (actual ${fmt(cur.iH2O*100)} %)
+  · N sintético en 3 años: ${fmt(r.fertN)} kg/ha (actual ${fmt(cur.fertN)})
+  · Meses con suelo cubierto: ${36-r.desnudo}/36 (actual ${36-cur.desnudo})
+  · Margen en 3 años: $${fmt(r.margin)}/ha (actual $${fmt(cur.margin)})`;
+  try{ await navigator.clipboard.writeText(txt); $("copyOk").textContent=" Copiado."; }
+  catch(e){ $("copyOk").textContent=" No se pudo copiar en esta vista."; }
+};
+
+loadPreset("sierra");
+</script>
 </body>
 </html>
