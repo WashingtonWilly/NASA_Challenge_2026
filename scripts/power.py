@@ -8,6 +8,7 @@ Hargreaves, y agrega la climatología mensual para parcela.json.
 import math
 import json
 import urllib.request
+from descarga import obtener_json
 import urllib.parse
 from datetime import datetime
 
@@ -41,7 +42,7 @@ def et0_hargreaves_diario(lat_deg: float, doy: int, tmed: float, tmax: float, tm
 
 
 def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101", fin: str = "20241231",
-                                 elev_parcela_m: float = None):
+                                 elev_parcela_m: float = None, cache: str = None, online: bool = True):
     """
     Consulta la API oficial de NASA POWER y devuelve la climatología mensual.
     Si se da elev_parcela_m, corrige la temperatura por altitud (−6,5 °C/km) entre la
@@ -49,7 +50,7 @@ def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101"
     Devuelve None si no hay conexión (el llamador decide qué hacer; nunca inventa datos).
     """
     params = urllib.parse.urlencode({
-        "parameters": "T2M_MAX,T2M_MIN,T2M,PRECTOTCORR,RH2M,WS2M,ALLSKY_SFC_SW_DWN",
+        "parameters": "T2M_MAX,T2M_MIN,T2M,PRECTOTCORR",
         "community": "AG",
         "latitude": round(lat, 4),
         "longitude": round(lon, 4),
@@ -59,9 +60,9 @@ def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101"
     })
     url = f"https://power.larc.nasa.gov/api/temporal/daily/point?{params}"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "NASA-SpaceApps-FieldShift/1.0"})
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+        data = obtener_json(url, cache, online, timeout=120)
+        if data is None:
+            return None
         param = data["properties"]["parameter"]
         coords = (data.get("geometry") or {}).get("coordinates") or []
         elev_celda = coords[2] if len(coords) > 2 and isinstance(coords[2], (int, float)) else None
@@ -109,7 +110,8 @@ def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101"
         return None
 
 
-def anomalia_lluvia_power(lat: float, lon: float, meses: int = 3, hoy: datetime = None):
+def anomalia_lluvia_power(lat: float, lon: float, meses: int = 3, hoy: datetime = None,
+                          cache: str = None, online: bool = True):
     """
     Anomalía de lluvia de los últimos `meses` meses completos frente al promedio de esos
     mismos meses en los años anteriores (desde 2001), con PRECTOTCORR de NASA POWER.
@@ -123,9 +125,9 @@ def anomalia_lluvia_power(lat: float, lon: float, meses: int = 3, hoy: datetime 
     })
     url = f"https://power.larc.nasa.gov/api/temporal/daily/point?{params}"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "NASA-SpaceApps-FieldShift/1.0"})
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+        data = obtener_json(url, cache, online, timeout=120)
+        if data is None:
+            return None
         prec = data["properties"]["parameter"]["PRECTOTCORR"]
         tot, dias = {}, {}
         for f, v in prec.items():
