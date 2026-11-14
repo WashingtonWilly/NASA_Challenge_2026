@@ -1437,7 +1437,7 @@
     if (btnAdminReset) {
       btnAdminReset.addEventListener('click', () => {
         Object.keys(state.parcelasOriginales).forEach(id => {
-          state.parcelas[id] = clonar(state.parcelasOriginales[id]);
+          state.parcelasActivas[id] = clonar(state.parcelasOriginales[id]);
         });
         state.opciones.escenarioLluviaPct = 0;
         sincronizarControlesPaso2ConParcela();
