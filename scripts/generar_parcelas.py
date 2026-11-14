@@ -144,6 +144,7 @@ def enriquecer_con_datos_reales(p, obs_hls, obs_smap, obs_dem=(), online=True):
                                             cache=os.path.join(crudos, f"power_clima_{p['id']}.json"), online=online)
         if clima:
             p["clima_mensual"] = clima["meses"]
+            p["clima_metodo_et0"] = clima["metodo_et0"]
             estado["clima"] = (f"NASA POWER {clima['periodo']} (diario, AG); T corregida "
                                f"{clima['correccion_T_C']:+.1f} °C por altitud (celda a {clima['elev_celda_m']} m)")
         anom = anomalia_lluvia_power(lat, lon, cache=os.path.join(crudos, f"power_lluvia_{p['id']}.json"), online=online)
@@ -190,7 +191,7 @@ def imprimir_urls():
         base = "https://power.larc.nasa.gov/api/temporal/daily/point?"
         print(f"\n{p['nombre']}")
         print(f"  power_clima_{pid}.json\n    " + base + urllib.parse.urlencode({
-            "parameters": "T2M_MAX,T2M_MIN,T2M,PRECTOTCORR", "community": "AG", "latitude": round(lat, 4),
+            "parameters": "T2M_MAX,T2M_MIN,T2M,PRECTOTCORR,ALLSKY_SFC_SW_DWN,WS2M,RH2M", "community": "AG", "latitude": round(lat, 4),
             "longitude": round(lon, 4), "start": "20150101", "end": "20241231", "format": "JSON"}))
         print(f"  power_lluvia_{pid}.json\n    " + base + urllib.parse.urlencode({
             "parameters": "PRECTOTCORR", "community": "AG", "latitude": round(lat, 4), "longitude": round(lon, 4),

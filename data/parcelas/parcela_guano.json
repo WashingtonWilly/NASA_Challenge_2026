@@ -387,6 +387,7 @@
     "papa"
   ],
   "nematodo_declarado": false,
+  "clima_metodo_et0": "Hargreaves FAO-56 (solo temperatura)",
   "estado_datos": {
     "clima": "NASA POWER 2015–2024 (diario, AG); T corregida +1.0 °C por altitud (celda a 3003.46 m)",
     "anomalia": "NASA POWER PRECTOTCORR, ago–oct 2026 vs 2001–2025",
