@@ -129,7 +129,7 @@
             <div class="kpi-box">
               <div class="kpi-label">
                 <span>Altitud (Piso Térmico)</span>
-                <span class="kpi-source-tag">NASADEM 30 m</span>
+                <span id="tag-elev" class="kpi-source-tag">NASADEM 30 m</span>
               </div>
               <div id="kpi-elev-val" class="kpi-value">2950 m s.n.m.</div>
               <div id="kpi-elev-sub" class="kpi-sub">Región Sierra | Orientación SE</div>
@@ -138,7 +138,7 @@
             <div class="kpi-box">
               <div class="kpi-label">
                 <span>Pendiente y Escorrentía</span>
-                <span class="kpi-source-tag">SRTM 30 m</span>
+                <span id="tag-pend" class="kpi-source-tag">SRTM 30 m</span>
               </div>
               <div id="kpi-pend-val" class="kpi-value">14% media</div>
               <div id="kpi-pend-sub" class="kpi-sub">Máxima: 22%</div>
@@ -147,7 +147,7 @@
             <div class="kpi-box">
               <div class="kpi-label">
                 <span>Lluvia vs Evaporación</span>
-                <span class="kpi-source-tag">NASA POWER 10a</span>
+                <span id="tag-clima" class="kpi-source-tag">NASA POWER 10a</span>
               </div>
               <div id="kpi-clima-val" class="kpi-value">686 mm/año</div>
               <div id="kpi-clima-sub" class="kpi-sub">ET₀ anual: 1105 mm/año</div>
@@ -224,7 +224,7 @@
 
           <div class="panel-card-header">
             <h3>📅 ¿Qué sembró en este lote los últimos 2 años?</h3>
-            <span class="kpi-source-tag">Fusión HLS NDVI + Conocimiento Local</span>
+            <span id="tag-historia" class="kpi-source-tag">Fusión HLS NDVI + Conocimiento Local</span>
           </div>
           <p style="margin: -8px 0 0; font-size: 0.84rem; color: var(--text-secondary);">
             El motor aplica pausas fitosanitarias por familia botánica (ej. 3 a 4 años sin repetir Solanáceas tras papa para cortar nematodos y lancha).
@@ -349,7 +349,7 @@
       <!-- Gráficos Interactivos: Balance Hídrico 36m + Historial HLS NDVI/NDTI -->
       <div class="charts-grid">
         <div class="chart-card">
-          <h3>📊 Balance Hídrico Mensual Simulado a 36 Meses (NASA POWER + SRTM + FAO-56)</h3>
+          <h3>📊 Balance Hídrico Mensual Simulado a 36 Meses (NASA POWER + SRTM + FAO-56) <span id="tag-chart-balance" class="tag-ejemplo" hidden>EJEMPLO</span></h3>
           <p id="chart-balance-subtitle">
             Comparación entre la lluvia efectiva que entra al suelo (Pef) y el agua que consume cada cultivo (ETc). Las barras rojas indican meses donde hace falta riego suplementario.
           </p>
@@ -359,7 +359,7 @@
         </div>
 
         <div class="chart-card">
-          <h3>🛰️ Historial Satelital del Lote 2023–2025 (HLS Landsat 8/9 + Sentinel-2, 30 m)</h3>
+          <h3>🛰️ Historial Satelital del Lote (HLS Landsat 8/9 + Sentinel-2, 30 m) <span id="tag-chart-hls" class="tag-ejemplo" hidden>EJEMPLO: aún no son datos del satélite</span></h3>
           <p>
             La curva verde muestra el verdor de los cultivos previos (NDVI) y la curva terracota el rastrojo sobre el suelo (NDTI). Cuando el NDVI cae bajo la línea roja punteada (0.25), el suelo quedó desnudo y expuesto a erosión.
           </p>

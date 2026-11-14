@@ -59,6 +59,7 @@ NASA_Challenge_2026/
 | Suelo 0–30 cm (textura, pH, carbono, N) | ISRIC SoilGrids 250 m | Automático con internet |
 | NDVI / NDTI mensual y meses de suelo desnudo | HLS Landsat + Sentinel-2 (30 m) | CSV de AppEEARS en `data/appeears/` |
 | Humedad de la zona radicular | SMAP L4 (SPL4SMGP, 9 km) | CSV de AppEEARS en `data/appeears/` |
+| Altitud, pendiente y orientación | NASADEM 30 m | CSV de AppEEARS (centro + 4 vecinos, ver `data/appeears/LEEME.md`) |
 
 ```bash
 python scripts/generar_parcelas.py           # con internet
@@ -67,7 +68,7 @@ python scripts/generar_parcelas.py --offline  # solo CSV locales
 
 Al terminar imprime el **estado de los datos** de cada parcela. Todo lo que siga diciendo `EJEMPLO`
 también queda marcado así en la app (campo `fuente` y `estado_datos`): **no se presenta como dato satelital**.
-Pendiente: pendiente y elevación desde NASADEM 30 m (`dem.py`).
+La app también muestra la etiqueta **EJEMPLO** junto a cada fuente (clima, terreno, NDVI) mientras el dato no sea real.
 
 > Nota: `test_cordura.js` espera una anomalía de lluvia < −15 % en Chimborazo. Con datos reales esa
 > condición puede no cumplirse; si esa prueba falla, es el dato real, no un error del motor.
