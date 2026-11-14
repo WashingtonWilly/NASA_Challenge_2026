@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AllpaWiñay — DSS de Rotación de Cultivos con Datos NASA | Space Apps 2026</title>
+  <title>AllpaWiñay — Sistema de apoyo a la decisión agrícola | NASA Space Apps 2026</title>
   <meta name="description" content="Herramienta de apoyo a la toma de decisiones agrícolas que integra observaciones de la Tierra de la NASA (POWER, GPM, SMAP, NASADEM, HLS) y SoilGrids para recomendar rotaciones de cultivos resilientes." />
 
-  <!-- Tipografías legibles en campo -->
+  <!-- Tipografías oficiales: Public Sans e IBM Plex Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
   <!-- Leaflet CSS + Leaflet.draw CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
@@ -21,54 +21,104 @@
 <body>
 
   <!-- ====================================================================
-       CABECERA PRINCIPAL
+       1. FRANJA SUPERIOR
        ==================================================================== -->
-  <header class="top-header">
-    <div class="header-inner">
-      <div class="brand-group">
-        <div class="brand-logo" aria-hidden="true">🌾</div>
-        <div class="brand-titles">
-          <h1>
-            AllpaWiñay — Rotación Inteligente de Cultivos
-            <span class="badge-nasa">NASA Space Apps 2026 · Field Shift</span>
-          </h1>
-          <p class="brand-subtitle">
-            Apoyo a las decisiones del agricultor combinando satélites NASA (POWER, GPM, SMAP, SRTM, HLS) + Suelo Local (SoilGrids / INIAP)
-          </p>
+  <div class="banda-top">
+    <div class="banda-top-inner">
+      <span>Proyecto para NASA International Space Apps Challenge 2026 · Riobamba</span>
+      <span class="lang-switch"><strong>ES</strong> / EN</span>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       2. BARRA DE NAVEGACIÓN
+       ==================================================================== -->
+  <nav class="nav-principal" aria-label="Navegación principal">
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <i data-lucide="wheat" class="icono"></i>
+        <span>AllpaWiñay</span>
+      </a>
+      <div class="nav-links">
+        <a href="#paso-1" class="nav-link activo">Mi terreno</a>
+        <a href="#paso-2" class="nav-link">Suelo y prioridades</a>
+        <a href="#paso-3" class="nav-link">Comparar rotaciones</a>
+        <a href="#panel-calculo" class="nav-link">Metodología NASA</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ====================================================================
+       3. HERO INSTITUCIONAL CON CURVAS DE NIVEL Y TARJETA DE DATOS
+       ==================================================================== -->
+  <header class="hero">
+    <div class="contenedor">
+      <div>
+        <div class="mono">Sistema de apoyo a la decisión agrícola</div>
+        <h1>Rotación de cultivos resiliente para el agro andino y costero</h1>
+        <p class="lead">
+          AllpaWiñay combina observaciones satelitales de la Tierra de la NASA (POWER, GPM, SMAP, NASADEM/SRTM y HLS) con datos edáficos de SoilGrids y el conocimiento del agricultor para planificar secuencias de siembra a 36 meses.
+        </p>
+        <div class="hero-actions">
+          <a href="#paso-1" class="btn">Evaluar mi parcela</a>
+          <a href="#panel-calculo">Ver cómo lo calculamos</a>
         </div>
       </div>
 
-      <div class="header-actions">
-        <nav class="step-pills" aria-label="Pasos de la herramienta">
-          <a href="#paso-1" class="step-pill">1. Mi Terreno</a>
-          <a href="#paso-2" class="step-pill">2. Mi Suelo y Prioridades</a>
-          <a href="#paso-3" class="step-pill">3. Comparar Rotaciones</a>
-        </nav>
-        <button type="button" id="btn-abrir-modal-cientifico" class="btn-cientifico">
-          🔬 Ver cómo lo calculamos (Panel NASA)
-        </button>
+      <!-- Tarjeta de datos del lote y monitoreo regional -->
+      <aside class="card-datos" id="anomaly-card" aria-label="Resumen satelital activo">
+        <h3>
+          <span><i data-lucide="satellite" class="icono"></i> <span id="anomaly-title">Monitoreo satelital activo</span></span>
+          <span id="anomaly-state-badge" class="estado alerta">Medio</span>
+        </h3>
+        <p id="anomaly-message" style="font-size:0.85rem; color:var(--texto-2); margin:0 0 10px;">
+          Cargando anomalía trimestral de precipitaciones y humedad superficial del suelo...
+        </p>
+        <div class="fila">
+          <span>Sensores hidrológicos</span>
+          <span id="anomaly-sensor-pill">GPM IMERG + SMAP L4 (10 km)</span>
+        </div>
+        <div class="fila">
+          <span>Ponderación hídrica en IRR</span>
+          <span id="anomaly-weight-pill" class="tabular-nums">38 % del índice</span>
+        </div>
+        <div class="fila">
+          <span>Resolución topográfica y óptica</span>
+          <span class="tabular-nums">30 <span class="unidad">m</span> (NASADEM / HLS)</span>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Tarjetas de pasos (3 columnas, borde superior 3 px) -->
+    <div class="contenedor pasos-strip">
+      <div class="pasos">
+        <a href="#paso-1" class="paso activo">
+          <div class="paso-meta">
+            <i data-lucide="map" class="icono"></i>
+            <span class="mono">Paso 1</span>
+          </div>
+          <h3>Mi terreno</h3>
+          <p>Seleccione una parcela o dibuje los linderos para extraer relieve, clima y vulnerabilidades.</p>
+        </a>
+        <a href="#paso-2" class="paso">
+          <div class="paso-meta">
+            <i data-lucide="sprout" class="icono"></i>
+            <span class="mono">Paso 2</span>
+          </div>
+          <h3>Suelo y prioridades</h3>
+          <p>Ajuste textura, carbono orgánico y pH, declare los cultivos previos y pondere sus metas.</p>
+        </a>
+        <a href="#paso-3" class="paso">
+          <div class="paso-meta">
+            <i data-lucide="shuffle" class="icono"></i>
+            <span class="mono">Paso 3</span>
+          </div>
+          <h3>Comparar rotaciones</h3>
+          <p>Contraste las 3 rotaciones más resilientes frente a su práctica actual y revise el balance hídrico.</p>
+        </a>
       </div>
     </div>
   </header>
-
-  <!-- ====================================================================
-       TARJETA PERMANENTE DE ANOMALÍA CLIMÁTICA REGIONAL (GPM + SMAP)
-       ==================================================================== -->
-  <section class="anomaly-banner" aria-label="Estado climático satelital regional">
-    <div id="anomaly-card" class="anomaly-card">
-      <div class="anomaly-main">
-        <span class="anomaly-icon" aria-hidden="true">🛰️</span>
-        <div class="anomaly-text">
-          <strong id="anomaly-title">Monitoreo Hidrológico Regional NASA GPM + SMAP</strong>
-          <p id="anomaly-message">Cargando anomalía trimestral de precipitaciones y humedad superficial del suelo...</p>
-        </div>
-      </div>
-      <div class="anomaly-meta">
-        <span id="anomaly-sensor-pill" class="anomaly-pill">🛰️ GPM IMERG + SMAP L4 (10 km)</span>
-        <span id="anomaly-weight-pill" class="anomaly-pill">⚡ Peso de Agua ×1.3 activo</span>
-      </div>
-    </div>
-  </section>
 
   <!-- ====================================================================
        CONTENIDO PRINCIPAL EN 3 PASOS
@@ -80,25 +130,21 @@
          ================================================================== -->
     <section id="paso-1" class="step-section">
       <div class="step-header">
-        <div class="step-title-group">
-          <span class="step-number">1</span>
-          <div>
-            <h2>Mi Terreno y Diagnóstico Satelital de la Parcela</h2>
-            <p>Seleccione una parcela demostrativa de Sierra o Costa, o dibuje los linderos de su lote directamente sobre el mapa satelital.</p>
-          </div>
-        </div>
+        <div class="mono"><i data-lucide="map" class="icono"></i> Paso 1</div>
+        <h2>Mi terreno y diagnóstico satelital de la parcela</h2>
+        <p>Seleccione una parcela demostrativa de Sierra o Costa, o dibuje los linderos de su lote directamente sobre el mapa satelital.</p>
       </div>
 
       <div class="parcela-selector-bar" role="group" aria-label="Selector de parcelas demostrativas">
-        <span class="parcela-selector-label">📍 Parcelas reales pre-calculadas:</span>
+        <span class="parcela-selector-label">Parcelas precalculadas:</span>
         <button type="button" class="parcela-btn active" data-parcela-id="parcela_chimborazo_1">
-          🏔️ Parcela 1: Sierra — Licto / Guamote (Chimborazo, 2950 m · Historia Papa–Papa)
+          Parcela 1: Sierra — Licto / Guamote (2 950 m · Papa–Papa)
         </button>
         <button type="button" class="parcela-btn" data-parcela-id="parcela_el_oro_2">
-          🌴 Parcela 2: Costa — El Guabo / Santa Rosa (El Oro, 28 m · Historia Maíz–Arroz)
+          Parcela 2: Costa — El Guabo / Santa Rosa (28 m · Maíz–Arroz)
         </button>
         <button type="button" class="parcela-btn" data-parcela-id="parcela_colta_3">
-          ⚠️ Parcela 3 (Caso Borde): Ladera Fuerte Colta (3180 m · Pendiente 28% + Helada)
+          Parcela 3: Ladera fuerte Colta (3 180 m · Pendiente 28 %)
         </button>
       </div>
 
@@ -106,65 +152,62 @@
         <!-- Mapa Satelital Leaflet -->
         <div class="map-wrapper">
           <div class="map-toolbar">
-            <span>✏️ <strong>Tip de campo:</strong> Use el botón de polígono (arriba a la izquierda del mapa) para dibujar su propio lote y calcular hectáreas y cuadras.</span>
-            <button type="button" id="btn-reset-parcela" class="step-pill" style="cursor:pointer; background:#fff; border:1px solid var(--border-strong);">
-              🔄 Restaurar linderos y suelo original
+            <span>Use la herramienta de polígono (arriba a la izquierda del mapa) para trazar su lote y calcular hectáreas y cuadras.</span>
+            <button type="button" id="btn-reset-parcela" class="btn-sec">
+              Restaurar linderos y suelo original
             </button>
           </div>
           <div id="mapa-parcela" class="map-container" aria-label="Mapa satelital interactivo de la parcela"></div>
         </div>
 
-        <!-- Telemetría Biofísica NASA -->
+        <!-- Telemetría Biofísica NASA (Tarjeta de datos) -->
         <div class="terreno-telemetry">
-          <div class="telemetry-kpis">
-            <div class="kpi-box">
-              <div class="kpi-label">
-                <span>Superficie del Lote</span>
-                <span class="kpi-source-tag">Geometría / Linderos</span>
-              </div>
-              <div id="kpi-area-val" class="kpi-value">1.8 ha</div>
-              <div id="kpi-area-sub" class="kpi-sub">Equivale a ~2.6 cuadras</div>
+          <div class="card-datos">
+            <h3>
+              <span><i data-lucide="satellite" class="icono"></i> Ficha biofísica del lote</span>
+              <span id="tag-elev" class="mono">NASADEM 30 m</span>
+            </h3>
+            <div class="fila">
+              <span>Superficie del lote</span>
+              <span><span id="kpi-area-val" class="tabular-nums">1.8 ha</span> <small id="kpi-area-sub" class="unidad">(~2.6 cuadras)</small></span>
             </div>
-
-            <div class="kpi-box">
-              <div class="kpi-label">
-                <span>Altitud (Piso Térmico)</span>
-                <span id="tag-elev" class="kpi-source-tag">NASADEM 30 m</span>
-              </div>
-              <div id="kpi-elev-val" class="kpi-value">2950 m s.n.m.</div>
-              <div id="kpi-elev-sub" class="kpi-sub">Región Sierra | Orientación SE</div>
+            <div class="fila">
+              <span>Altitud (piso térmico)</span>
+              <span><span id="kpi-elev-val" class="tabular-nums">2 950 m s.n.m.</span></span>
             </div>
-
-            <div class="kpi-box">
-              <div class="kpi-label">
-                <span>Pendiente y Escorrentía</span>
-                <span id="tag-pend" class="kpi-source-tag">SRTM 30 m</span>
-              </div>
-              <div id="kpi-pend-val" class="kpi-value">14% media</div>
-              <div id="kpi-pend-sub" class="kpi-sub">Máxima: 22%</div>
+            <div class="fila">
+              <span>Región y orientación</span>
+              <span id="kpi-elev-sub">Región Sierra · SE</span>
             </div>
-
-            <div class="kpi-box">
-              <div class="kpi-label">
-                <span>Lluvia vs Evaporación</span>
-                <span id="tag-clima" class="kpi-source-tag">NASA POWER 10a</span>
-              </div>
-              <div id="kpi-clima-val" class="kpi-value">686 mm/año</div>
-              <div id="kpi-clima-sub" class="kpi-sub">ET₀ anual: 1105 mm/año</div>
+            <div class="fila">
+              <span>Pendiente media (<span id="tag-pend" class="mono">SRTM 30 m</span>)</span>
+              <span id="kpi-pend-val" class="tabular-nums">14 %</span>
+            </div>
+            <div class="fila">
+              <span>Escorrentía y pendiente máxima</span>
+              <span id="kpi-pend-sub" class="tabular-nums">Máx. 22 %</span>
+            </div>
+            <div class="fila">
+              <span>Precipitación anual (<span id="tag-clima" class="mono">NASA POWER</span>)</span>
+              <span id="kpi-clima-val" class="tabular-nums">686 mm/año</span>
+            </div>
+            <div class="fila">
+              <span>Demanda evaporativa anual (ET₀)</span>
+              <span id="kpi-clima-sub" class="tabular-nums">1 105 mm/año</span>
             </div>
           </div>
 
           <div class="vulnerability-card">
-            <h3>🛡️ Semáforo de Vulnerabilidades Detectadas en el Lote</h3>
+            <h3><i data-lucide="shield-check" class="icono"></i> Semáforo de vulnerabilidades detectadas</h3>
             <div id="vuln-badges-container" class="vuln-badges">
               <!-- Poblado dinámicamente por app.js -->
             </div>
           </div>
 
-          <div class="vulnerability-card" style="background: var(--accent-nasa-soft); border-color: rgba(11,61,145,0.25);">
-            <h3 style="color: var(--accent-nasa);">🤝 El Satélite Apoya, el Agricultor Decide</h3>
-            <p style="margin:0; font-size:0.84rem; color: var(--text-secondary);">
-              Los satélites de la NASA observan el clima regional (10–50 km), la pendiente (30 m) y el verdor histórico (30 m), pero <strong>no reemplazan su experiencia local</strong>. En el Paso 2 puede corregir los datos de su suelo y definir sus prioridades familiares.
+          <div class="vulnerability-card">
+            <h3><i data-lucide="wheat" class="icono"></i> El satélite apoya, el agricultor decide</h3>
+            <p style="margin:0; font-size:0.85rem; color: var(--texto-2);">
+              Los satélites de la NASA observan el clima regional (10–50 <span class="unidad">km</span>), la pendiente (30 <span class="unidad">m</span>) y el verdor histórico (30 <span class="unidad">m</span>), pero no reemplazan su experiencia local. En el paso 2 puede corregir los datos de su suelo y definir sus prioridades.
             </p>
           </div>
         </div>
@@ -176,33 +219,29 @@
          ================================================================== -->
     <section id="paso-2" class="step-section">
       <div class="step-header">
-        <div class="step-title-group">
-          <span class="step-number">2</span>
-          <div>
-            <h2>Mi Suelo, Historial de Siembra y Prioridades</h2>
-            <p>Ajuste los datos de su tierra si cuenta con análisis de suelo, indique qué sembró los últimos 2 años y mueva las barras según lo que más necesite su finca.</p>
-          </div>
-        </div>
+        <div class="mono"><i data-lucide="sprout" class="icono"></i> Paso 2</div>
+        <h2>Mi suelo, historial de siembra y prioridades</h2>
+        <p>Ajuste los datos de su tierra si cuenta con análisis de laboratorio, indique qué sembró los últimos 2 años y pondere los objetivos de su finca.</p>
       </div>
 
       <div class="paso2-grid">
         <!-- Columna Izquierda: Suelo Editable + Historial de 2 años -->
         <div class="panel-card">
           <div class="panel-card-header">
-            <h3>🧪 Propiedades del Suelo (0–30 cm)</h3>
-            <span id="soil-origin-badge" class="soil-origin-badge">🛰️ ISRIC SoilGrids 250 m</span>
+            <h3><i data-lucide="flask-conical" class="icono"></i> Propiedades del suelo (0–30 cm)</h3>
+            <span id="soil-origin-badge" class="mono">ISRIC SoilGrids 250 m</span>
           </div>
-          <p style="margin: -8px 0 0; font-size: 0.84rem; color: var(--text-secondary);">
-            Pre-llenado por satélite a 250 m de resolución. Si usted conoce la textura de su lote o tiene análisis del INIAP, edítelo aquí:
+          <p style="margin: -6px 0 0; font-size: 0.85rem; color: var(--texto-2);">
+            Prellenado por satélite a 250 <span class="unidad">m</span> de resolución. Si conoce la textura de su lote o cuenta con análisis del INIAP, edítelo aquí:
           </p>
 
           <div class="form-grid-3">
             <div class="field-group">
-              <label for="input-suelo-textura">Textura del Suelo</label>
+              <label for="input-suelo-textura">Textura del suelo</label>
               <select id="input-suelo-textura" class="field-select">
-                <option value="Franco">Franco (Equilibrado)</option>
-                <option value="Franco arenoso">Franco arenoso (Suelto)</option>
-                <option value="Franco arcilloso">Franco arcilloso (Pesado)</option>
+                <option value="Franco">Franco (equilibrado)</option>
+                <option value="Franco arenoso">Franco arenoso (suelto)</option>
+                <option value="Franco arcilloso">Franco arcilloso (pesado)</option>
                 <option value="Franco limoso">Franco limoso</option>
                 <option value="Arcilloso">Arcilloso</option>
                 <option value="Arenoso">Arenoso</option>
@@ -210,24 +249,22 @@
             </div>
 
             <div class="field-group">
-              <label for="input-suelo-soc">Carbono / Mat. Orgánica (%)</label>
+              <label for="input-suelo-soc">Carbono orgánico (%)</label>
               <input type="number" id="input-suelo-soc" class="field-input tabular-nums" step="0.1" min="0.2" max="15" value="3.4" />
             </div>
 
             <div class="field-group">
-              <label for="input-suelo-ph">Acidez del Suelo (pH)</label>
+              <label for="input-suelo-ph">Acidez del suelo (pH)</label>
               <input type="number" id="input-suelo-ph" class="field-input tabular-nums" step="0.1" min="4.0" max="8.5" value="5.9" />
             </div>
           </div>
 
-          <hr style="border:none; border-top:1px solid var(--border-subtle); margin: 4px 0;" />
-
-          <div class="panel-card-header">
-            <h3>📅 ¿Qué sembró en este lote los últimos 2 años?</h3>
-            <span id="tag-historia" class="kpi-source-tag">Fusión HLS NDVI + Conocimiento Local</span>
+          <div class="panel-card-header" style="margin-top: 8px;">
+            <h3><i data-lucide="wheat" class="icono"></i> Historial del lote en los últimos 2 años</h3>
+            <span id="tag-historia" class="mono">HLS NDVI + dato local</span>
           </div>
-          <p style="margin: -8px 0 0; font-size: 0.84rem; color: var(--text-secondary);">
-            El motor aplica pausas fitosanitarias por familia botánica (ej. 3 a 4 años sin repetir Solanáceas tras papa para cortar nematodos y lancha).
+          <p style="margin: -6px 0 0; font-size: 0.85rem; color: var(--texto-2);">
+            El motor aplica pausas fitosanitarias por familia botánica (3 a 4 años sin repetir Solanáceas tras papa para cortar ciclos de nematodos y lancha).
           </p>
 
           <div class="form-grid-2">
@@ -243,59 +280,59 @@
 
           <label class="checkbox-row" for="check-nematodo">
             <input type="checkbox" id="check-nematodo" />
-            <span>🦠 ¿Ha observado "nematodo del quiste" (raíces con bolitas), hernia de la col o lancha severa en este lote? (Amplía la pausa sanitaria a 4 años)</span>
+            <span>Presencia observada de nematodo del quiste, hernia de la col o lancha severa en este lote (amplía la pausa sanitaria a 4 años).</span>
           </label>
 
           <label class="checkbox-row" for="check-retira-forraje">
             <input type="checkbox" id="check-retira-forraje" />
-            <span>🐄 ¿Corta y retira la caña/rastrojo para dar de comer a sus animales (cuyes, ganado)? (Descuenta 70% del aporte de rastrojo al suelo y prioriza forrajeras)</span>
+            <span>Corte y retiro del rastrojo para alimentación animal (descuenta 70 % del aporte de biomasa al suelo y prioriza especies forrajeras).</span>
           </label>
         </div>
 
         <!-- Columna Derecha: Prioridades del Agricultor y Simulador Climático -->
         <div class="panel-card">
           <div class="panel-card-header">
-            <h3>⚖️ ¿Qué es más importante para usted en los próximos 3 años?</h3>
-            <span class="kpi-source-tag">Recálculo en &lt; 35 ms</span>
+            <h3><i data-lucide="sprout" class="icono"></i> Prioridades de manejo para los próximos 3 años</h3>
+            <span class="mono">Ponderación IRR</span>
           </div>
 
           <div class="sliders-list">
             <div class="slider-item">
               <div class="slider-top">
-                <label class="slider-label" for="slider-agua">💧 Ahorrar agua y resistir sequías</label>
-                <span id="badge-peso-agua" class="slider-weight-badge">38% del índice</span>
+                <label class="slider-label" for="slider-agua"><i data-lucide="droplet" class="icono"></i> Ahorrar agua y resistir sequías</label>
+                <span id="badge-peso-agua" class="slider-weight-badge">38 % del índice</span>
               </div>
               <input type="range" id="slider-agua" class="range-slider" min="1" max="5" step="1" value="3" />
               <div class="slider-scale-labels">
-                <span>1 · Tengo riego seguro</span>
+                <span>1 · Riego disponible</span>
                 <span>3 · Equilibrado</span>
-                <span>5 · Dependo 100% de la lluvia</span>
+                <span>5 · Secano estricto</span>
               </div>
             </div>
 
             <div class="slider-item">
               <div class="slider-top">
-                <label class="slider-label" for="slider-suelo">🌱 Cuidar, abonar y descompactar mi suelo (Nitrógeno + Humus)</label>
-                <span id="badge-peso-suelo" class="slider-weight-badge">31% del índice</span>
+                <label class="slider-label" for="slider-suelo"><i data-lucide="sprout" class="icono"></i> Regenerar suelo (nitrógeno y humus)</label>
+                <span id="badge-peso-suelo" class="slider-weight-badge">31 % del índice</span>
               </div>
               <input type="range" id="slider-suelo" class="range-slider" min="1" max="5" step="1" value="3" />
               <div class="slider-scale-labels">
                 <span>1 · Suelo descansado</span>
                 <span>3 · Equilibrado</span>
-                <span>5 · Tierra cansada / ahorrar urea</span>
+                <span>5 · Tierra agotada</span>
               </div>
             </div>
 
             <div class="slider-item">
               <div class="slider-top">
-                <label class="slider-label" for="slider-ganar">💰 Ganar más ingreso y asegurar venta en mercado</label>
-                <span id="badge-peso-ganar" class="slider-weight-badge">31% del índice</span>
+                <label class="slider-label" for="slider-ganar"><i data-lucide="coins" class="icono"></i> Ingreso económico y venta en mercado</label>
+                <span id="badge-peso-ganar" class="slider-weight-badge">31 % del índice</span>
               </div>
               <input type="range" id="slider-ganar" class="range-slider" min="1" max="5" step="1" value="3" />
               <div class="slider-scale-labels">
-                <span>1 · Autoconsumo / cobertura</span>
+                <span>1 · Autoconsumo</span>
                 <span>3 · Equilibrado</span>
-                <span>5 · Máximo flujo de caja</span>
+                <span>5 · Flujo de caja</span>
               </div>
             </div>
 
@@ -303,18 +340,18 @@
             <div class="scenario-box">
               <div class="slider-top">
                 <label class="slider-label" for="slider-escenario-lluvia">
-                  🌦️ Simulador de Escenario Climático (¿Qué pasa si llueve menos o más?)
+                  <i data-lucide="droplet" class="icono"></i> Escenario de variación de lluvia (sensibilidad hídrica)
                 </label>
-                <span id="badge-escenario-lluvia" class="slider-weight-badge" style="background:#fff; color:var(--accent-terracotta);">
-                  0% (Clima Histórico Normal)
+                <span id="badge-escenario-lluvia" class="slider-weight-badge">
+                  0 % (climatología normal)
                 </span>
               </div>
-              <input type="range" id="slider-escenario-lluvia" class="range-slider" min="-30" max="20" step="5" value="0" style="accent-color: var(--accent-terracotta);" />
+              <input type="range" id="slider-escenario-lluvia" class="range-slider" min="-30" max="20" step="5" value="0" />
               <div class="slider-scale-labels">
-                <span>-30% Sequía severa</span>
-                <span>-15% Año seco</span>
-                <span>0% Normal NASA POWER</span>
-                <span>+20% Año lluvioso</span>
+                <span>-30 % sequía</span>
+                <span>-15 % año seco</span>
+                <span>0 % normal POWER</span>
+                <span>+20 % lluvioso</span>
               </div>
             </div>
           </div>
@@ -327,18 +364,14 @@
          ================================================================== -->
     <section id="paso-3" class="step-section">
       <div class="step-header">
-        <div class="step-title-group">
-          <span class="step-number">3</span>
-          <div>
-            <h2>Comparativa de Estrategias de Rotación a 3 Años (36 Meses)</h2>
-            <p>Comparamos las <strong>3 mejores estrategias resilientes</strong> frente a su <strong>práctica actual</strong>, explicando evidencia satelital NASA, beneficios, lagunas de datos y riesgos a validar en campo.</p>
-          </div>
-        </div>
+        <div class="mono"><i data-lucide="shuffle" class="icono"></i> Paso 3</div>
+        <h2>Comparativa de estrategias de rotación a 3 años (36 meses)</h2>
+        <p>Contraste las 3 estrategias con mayor índice de resiliencia frente a su práctica actual, con respaldo de datos satelitales NASA, beneficios cuantificados, lagunas de información y riesgos locales.</p>
       </div>
 
-      <!-- Barra de telemetría de ejecución del motor -->
+      <!-- Barra de metadatos del motor -->
       <div id="engine-meta-bar" class="engine-meta-bar">
-        Cargando evaluación multicriterio IRR...
+        Calculando evaluación multicriterio IRR...
       </div>
 
       <!-- Cuadrícula de 4 tarjetas: 3 recomendadas + 1 práctica actual -->
@@ -349,9 +382,9 @@
       <!-- Gráficos Interactivos: Balance Hídrico 36m + Historial HLS NDVI/NDTI -->
       <div class="charts-grid">
         <div class="chart-card">
-          <h3>📊 Balance Hídrico Mensual Simulado a 36 Meses (NASA POWER + SRTM + FAO-56) <span id="tag-chart-balance" class="tag-ejemplo" hidden>EJEMPLO</span></h3>
+          <h3><i data-lucide="droplet" class="icono"></i> Balance hídrico mensual simulado a 36 meses (NASA POWER + SRTM + FAO-56) <span id="tag-chart-balance" class="tag-ejemplo" hidden>Ejemplo</span></h3>
           <p id="chart-balance-subtitle">
-            Comparación entre la lluvia efectiva que entra al suelo (Pef) y el agua que consume cada cultivo (ETc). Las barras rojas indican meses donde hace falta riego suplementario.
+            Comparación entre la lluvia efectiva que ingresa al suelo (Pef) y la demanda evapotranspirativa de cada cultivo (ETc).
           </p>
           <div class="chart-canvas-wrap">
             <canvas id="chart-balance-36m"></canvas>
@@ -359,9 +392,9 @@
         </div>
 
         <div class="chart-card">
-          <h3>🛰️ Historial Satelital del Lote (HLS Landsat 8/9 + Sentinel-2, 30 m) <span id="tag-chart-hls" class="tag-ejemplo" hidden>EJEMPLO: aún no son datos del satélite</span></h3>
+          <h3><i data-lucide="satellite" class="icono"></i> Historial satelital del lote (HLS Landsat 8/9 + Sentinel-2, 30 m) <span id="tag-chart-hls" class="tag-ejemplo" hidden>Ejemplo: sin CSV satelital</span></h3>
           <p>
-            La curva verde muestra el verdor de los cultivos previos (NDVI) y la curva terracota el rastrojo sobre el suelo (NDTI). Cuando el NDVI cae bajo la línea roja punteada (0.25), el suelo quedó desnudo y expuesto a erosión.
+            La línea oliva muestra el verdor de los cultivos previos (NDVI) y la línea terracota el rastrojo sobre el suelo (NDTI). Bajo la línea punteada (0.25) el suelo quedó descubierto.
           </p>
           <div class="chart-canvas-wrap">
             <canvas id="chart-hls-ndvi"></canvas>
@@ -372,130 +405,108 @@
       <!-- Inspector de Cultivos Vetados -->
       <div class="vetados-section">
         <div class="panel-card-header">
-          <h3>🚫 ¿Por qué no recomendamos otros cultivos en este lote hoy? (Filtros Duros de Protección)</h3>
-          <span id="vetados-count-badge" class="soil-origin-badge editado">Cargando diagnósticos...</span>
+          <h3><i data-lucide="shield-check" class="icono"></i> Cultivos descartados en este lote por filtros de protección</h3>
+          <span id="vetados-count-badge" class="mono">Cargando diagnósticos...</span>
         </div>
-        <p style="margin: 4px 0 0; font-size: 0.86rem; color: var(--text-secondary);">
-          Transparencia total: aquí puede revisar cada cultivo descartado por el motor agronómico debido a pausas sanitarias (plagas del suelo), riesgo de heladas, piso térmico o pendiente pronunciada.
+        <p style="margin: 8px 0 0; font-size: 0.85rem; color: var(--texto-2);">
+          Registro transparente de cada especie excluida por el motor agronómico debido a pausas fitosanitarias, riesgo de helada, rango altitudinal o pendiente.
         </p>
         <div id="vetados-grid-container" class="vetados-grid">
           <!-- Generado dinámicamente por app.js -->
         </div>
+      </div>
+
+      <!-- Panel desplegable "Ver cómo lo calculamos" -->
+      <div id="panel-calculo" style="margin-top: 24px;">
+        <details open>
+          <summary>
+            <span><i data-lucide="satellite" class="icono"></i> Ver cómo lo calculamos — Armonización de satélites NASA y modelo matemático IRR</span>
+            <i data-lucide="chevron-down" class="icono"></i>
+          </summary>
+          <div class="explain-details-body">
+            <p style="margin:0; font-size:0.9rem; color:var(--texto-2);">
+              AllpaWiñay armoniza 6 fuentes de observación de la Tierra de la NASA e ISRIC con distintas resoluciones espaciales y temporales hacia la escala de parcela y paso mensual durante 36 meses.
+            </p>
+
+            <h3 style="margin:8px 0 4px; color:var(--oliva);">1. Armonización multirresolución de sensores NASA y suelo</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Fuente / misión</th>
+                  <th>Variables extraídas</th>
+                  <th>Resolución nativa</th>
+                  <th>Armonización en la parcela</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>NASA POWER</strong> (MERRA-2 / CERES)</td>
+                  <td><code>PRECTOTCORR</code>, <code>T2M_MAX</code>, <code>T2M_MIN</code>, <code>ALLSKY_SFC_SW_DWN</code></td>
+                  <td class="num">~50 <span class="unidad">km</span>, diario</td>
+                  <td>Climatología mensual en el centroide del lote; radiación extraterrestre Ra y ET₀ por Hargreaves (FAO-56).</td>
+                </tr>
+                <tr>
+                  <td><strong>NASA GPM IMERG + SMAP L4</strong></td>
+                  <td>Anomalía trimestral de lluvia (%) y humedad radicular</td>
+                  <td class="num">10 <span class="unidad">km</span> / 9 <span class="unidad">km</span></td>
+                  <td>Si la anomalía regional cae bajo -15 %, pondera por <code>1.3×</code> el peso hídrico antes de normalizar el IRR.</td>
+                </tr>
+                <tr>
+                  <td><strong>NASADEM / SRTM</strong> (LP DAAC)</td>
+                  <td>Elevación media, pendiente media y máxima, orientación</td>
+                  <td class="num">30 <span class="unidad">m</span>, estático</td>
+                  <td>Estadística zonal dentro del polígono; define piso térmico y coeficiente de escorrentía superficial.</td>
+                </tr>
+                <tr>
+                  <td><strong>NASA HLS</strong> (<code>HLSL30</code> + <code>HLSS30</code>)</td>
+                  <td>Bandas Red, NIR, SWIR1, SWIR2 → series de <code>NDVI</code> y <code>NDTI</code></td>
+                  <td class="num">30 <span class="unidad">m</span>, 2–3 días</td>
+                  <td>Enmascaramiento de nubes Fmask y mediana mensual para cuantificar meses de suelo desnudo (<code>NDVI &lt; 0.25</code>).</td>
+                </tr>
+                <tr>
+                  <td><strong>ISRIC SoilGrids v2.0</strong></td>
+                  <td>Textura, carbono orgánico (<code>soc</code>), nitrógeno y <code>pH</code> (0–30 cm)</td>
+                  <td class="num">250 <span class="unidad">m</span>, estático</td>
+                  <td>Promedio ponderado de 0 a 30 cm; editable por el agricultor cuando dispone de análisis de suelo local.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3 style="margin:8px 0 4px; color:var(--oliva);">2. Formulación del motor agronómico e índice IRR</h3>
+            <div class="formula-card">
+              ET0 = 0.0023 * (T_med + 17.8) * sqrt(T_max - T_min) * (0.408 * R_a) * dias_mes<br/>
+              P_ef(m) = f_pend(SRTM) * f_FAO(P_m) + Reserva_Andisol(SOC)<br/>
+              ET_c(m) = K_c(etapa) * ET0(m)  |  Deficit D(m) = max(0, ET_c(m) - P_ef(m))<br/><br/>
+              IRR = w_H2O * I_H2O + w_N * I_N + w_MOS * I_MOS + w_rent * I_rent<br/>
+              I_H2O = 1 - [ sum(D(m)) / sum(ET_c(m)) ]<br/>
+              I_N   = clip((sum(Creditos_N) - sum(Extracciones_N) + 300) / 600, 0, 1) + Bono_CN - Penal_Inmov<br/>
+              I_MOS = clip(sum(Residuo_i * h_i * f_forraje) / 4.5, 0, 1) - Penal_Raiz + Bono_Ladera<br/>
+              I_rent = clip(sum(Margen_i) / Max_Margen_Zona, 0, 1) + Bono_Diversificacion
+            </div>
+          </div>
+        </details>
       </div>
     </section>
 
   </main>
 
   <!-- ====================================================================
-       MODAL CIENTÍFICO PARA EL JURADO ("VER CÓMO LO CALCULAMOS")
+       PIE DE PÁGINA
        ==================================================================== -->
-  <div id="modal-cientifico" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-sci-title">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h2 id="modal-sci-title">🔬 Panel Científico NASA — Armonización de Datos, Ecuaciones y Modelo IRR</h2>
-        <button type="button" id="btn-cerrar-modal-cientifico" class="btn-close-modal">✕ Cerrar panel</button>
+  <footer>
+    <div class="contenedor">
+      <div>
+        <p><strong>Equipo AllpaWiñay</strong> · NASA International Space Apps Challenge 2026 · Sede Riobamba, Ecuador</p>
+        <p>Fuentes de datos: NASA POWER, GPM IMERG, SMAP L4, NASADEM/SRTM, HLS (Landsat 8/9 + Sentinel-2), ISRIC SoilGrids, MAG-SIPA e INIAP.</p>
       </div>
-      <div class="modal-body">
-        <p style="margin:0; font-size:0.92rem; color:var(--text-secondary);">
-          <strong>Arquitectura Abierta de 3 Capas:</strong> Este sistema traduce 6 productos de observación de la Tierra de la NASA e ISRIC con diferentes resoluciones espaciales y temporales a la unidad de decisión real del agricultor: <strong>la parcela y el paso mensual durante 36 meses</strong>.
-        </p>
-
-        <h3 style="margin:0; font-size:1.02rem;">1. Armonización Multi-Resolución de Satélites NASA y Suelo</h3>
-        <table class="sci-table">
-          <thead>
-            <tr>
-              <th>Fuente / Misión</th>
-              <th>Variables Extraídas</th>
-              <th>Resolución Nativa</th>
-              <th>Método de Armonización a la Parcela</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>NASA POWER</strong> (MERRA-2 / CERES)</td>
-              <td><code>PRECTOTCORR</code>, <code>T2M_MAX</code>, <code>T2M_MIN</code>, <code>ALLSKY_SFC_SW_DWN</code></td>
-              <td>~50 km (0.5°), diario (10 años)</td>
-              <td>Agregación climatológica mensual al centroide del lote; cálculo de radiación extraterrestre $R_a$ (FAO-56 Ec. 21) y $ET_0$ Hargreaves.</td>
-            </tr>
-            <tr>
-              <td><strong>NASA GPM IMERG + SMAP L4</strong></td>
-              <td>Anomalía trimestral de lluvia (%) y humedad de zona radicular</td>
-              <td>10 km / 9 km, mensual</td>
-              <td>Detección de sequía regional: si anomalía &lt; -15%, multiplica automáticamente por <code>1.3×</code> el peso hídrico ($w_{H2O}$) antes de normalizar.</td>
-            </tr>
-            <tr>
-              <td><strong>NASADEM / SRTM</strong> (LP DAAC)</td>
-              <td>Elevación media (m s.n.m.), pendiente media y máxima (%), orientación</td>
-              <td>30 m, estático</td>
-              <td>Recorte zonal por polígono de la parcela; define piso térmico y factor de escorrentía superficial $f_{pend}$ (0.65 a 0.92).</td>
-            </tr>
-            <tr>
-              <td><strong>NASA HLS</strong> (<code>HLSL30</code> + <code>HLSS30</code>)</td>
-              <td> Reflectancias Red, NIR, SWIR1, SWIR2 → series mensuales de <code>NDVI</code> y <code>NDTI</code></td>
-              <td>30 m, cada 2–3 días</td>
-              <td>Filtro de nubes Fmask, mediana mensual de píxeles dentro del lote. Detecta meses de suelo desnudo (<code>NDVI &lt; 0.25</code>) y cobertura de rastrojo (<code>NDTI</code>).</td>
-            </tr>
-            <tr>
-              <td><strong>ISRIC SoilGrids v2.0</strong></td>
-              <td>Arcilla, arena, limo, carbono orgánico (<code>soc</code>), nitrógeno y <code>pH</code> (0–30 cm)</td>
-              <td>250 m, estático</td>
-              <td>Ponderación por espesor en capas 0–5, 5–15 y 15–30 cm; editable en interfaz cuando el agricultor cuenta con análisis local.</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h3 style="margin:0; font-size:1.02rem;">2. Formulación Matemática del Motor Agronómico (Capa B)</h3>
-        <div class="formula-card">
-          <strong>Evapotranspiración de referencia (Hargreaves-Samani, FAO-56):</strong><br/>
-          ET₀ = 0.0023 × (T_med + 17.8) × √(T_max - T_min) × (0.408 × R_a) × días_mes<br/><br/>
-          <strong>Balance Hídrico Mensual a 36 Meses:</strong><br/>
-          P_ef(m) = f_pend(SRTM) × f_FAO(P_m) + Reserva_Andisol(SOC)<br/>
-          ET_c(m) = K_c(etapa_fenológica) × ET₀(m) &nbsp;&nbsp;|&nbsp;&nbsp; Déficit D(m) = max(0, ET_c(m) - P_ef(m))<br/><br/>
-          <strong>Índice de Resiliencia de Rotación (IRR ∈ [0, 1]):</strong><br/>
-          IRR = w_H2O · I_H2O + w_N · I_N + w_MOS · I_MOS + w_rent · I_rent<br/>
-          • I_H2O = 1 - [ Σ D(m) / Σ ET_c(m) ]<br/>
-          • I_N = clip((Σ Créditos_N - Σ Extracciones_N + 300) / 600, 0, 1) + Bono_Sincronía_CN(+0.10) - Penalización_Inmovilización(-0.15)<br/>
-          • I_MOS = clip(Σ (Residuo_i × h_i × f_forraje) / 4.5, 0, 1) - Penalización_Misma_Raíz(-0.10) + Bono_Cobertura_Ladera(+0.06)<br/>
-          • I_rent = clip(Σ Margen_Bruto_i / Max_Margen_Zona, 0, 1) + Bono_Diversificación(+0.05)
-        </div>
-
-        <h3 style="margin:0; font-size:1.02rem;">3. Glosario Sencillo de Términos Científicos</h3>
-        <table class="sci-table">
-          <thead>
-            <tr>
-              <th>Término Científico</th>
-              <th>¿Qué mide el satélite?</th>
-              <th>Traducción práctica para el agricultor</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>ET₀ y ETc</strong> (Evapotranspiración)</td>
-              <td>Milímetros de agua que se evaporan del suelo y transpiran las hojas según el calor y radiación solar.</td>
-              <td>La "sed" mensual del cultivo: cuánta lluvia o riego necesita para no marchitarse.</td>
-            </tr>
-            <tr>
-              <td><strong>NDVI</strong> (Índice de Vegetación)</td>
-              <td>Contraste entre luz roja absorbida por la clorofila y luz infrarroja reflejada por hojas sanas (0 a 1).</td>
-              <td>Nivel de verdor y cierre del cultivo. Si es menor a 0.25, la tierra está pelada (suelo desnudo) y la lluvia lava los nutrientes.</td>
-            </tr>
-            <tr>
-              <td><strong>NDTI</strong> (Índice de Labranza/Rastrojo)</td>
-              <td>Relación entre bandas infrarrojas de onda corta (SWIR1 y SWIR2) sensible a celulosa y paja seca.</td>
-              <td>Mide si el agricultor dejó "colchón" de rastrojo o paja protegiendo el suelo después de la cosecha.</td>
-            </tr>
-            <tr>
-              <td><strong>Sincronía C/N</strong> (Relación Carbono/Nitrógeno)</td>
-              <td>Velocidad con que los microorganismos descomponen los restos del cultivo anterior.</td>
-              <td>Las leguminosas (chocho, haba, soya) tienen C/N bajo y sueltan abono rápido; la paja de cereal (C/N alto &gt; 40) tarda en pudrirse y consume nitrógeno temporalmente.</td>
-            </tr>
-          </tbody>
-        </table>
+      <div>
+        <a href="https://github.com/WashingtonWilly/NASA_Challenge_2026" target="_blank" rel="noopener">Repositorio en GitHub</a>
       </div>
     </div>
-  </div>
+  </footer>
 
-  <!-- Scripts Externos: Leaflet, Leaflet.draw y Chart.js -->
+  <!-- Scripts Externos: Lucide Icons, Leaflet, Leaflet.draw y Chart.js -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin=""></script>

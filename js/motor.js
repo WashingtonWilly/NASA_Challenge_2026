@@ -119,22 +119,22 @@
   function determinarSemaforo(irrScore, bal, violaPausaFitosanitaria) {
     if (violaPausaFitosanitaria || irrScore < 0.45 || bal.coberturaAguaPct < 45) {
       return {
-        color: 'rojo',
-        etiqueta: 'Riesgo Alto (No recomendada)',
-        icono: '🔴'
+        color: 'riesgo',
+        etiqueta: 'Alto · Riesgo fitosanitario o hídrico',
+        icono: ''
       };
     }
     if (irrScore < 0.58 || bal.coberturaAguaPct < 62 || bal.mesesConDeficit > 12) {
       return {
-        color: 'amarillo',
-        etiqueta: 'Viable con Precaución (Riego / Manejo)',
-        icono: '🟡'
+        color: 'alerta',
+        etiqueta: 'Medio · Viable con precaución',
+        icono: ''
       };
     }
     return {
-      color: 'verde',
-      etiqueta: 'Rotación Resiliente y Segura',
-      icono: '🟢'
+      color: 'ok',
+      etiqueta: 'Bajo · Rotación resiliente',
+      icono: ''
     };
   }
 
@@ -254,7 +254,7 @@
     return {
       id: 'rotacion_actual',
       esActual: true,
-      titulo: 'Práctica Actual (Continuar rotación habitual del lote)',
+      titulo: 'Práctica actual (continuar secuencia habitual del lote)',
       cultivos: seqActual,
       irr: irrAjustado,
       irrPct: Math.round(irrAjustado * 100),
@@ -345,9 +345,9 @@
       );
 
       const etiquetasEstrategia = [
-        'Estrategia 1 — Máxima Resiliencia Integral (Recomendada)',
-        'Estrategia 2 — Alternativa de Suelo, Grano y Mercado',
-        'Estrategia 3 — Diversificación y Cobertura Protectora'
+        'Estrategia 1 — Máxima resiliencia integral (recomendada)',
+        'Estrategia 2 — Alternativa de suelo, grano y mercado',
+        'Estrategia 3 — Diversificación y cobertura protectora'
       ];
 
       top3.push({

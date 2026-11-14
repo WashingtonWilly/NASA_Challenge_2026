@@ -1,6 +1,7 @@
 /**
- * app.js — Capa C: Controlador Interactivo de Interfaz, Mapa Satelital Leaflet + Leaflet.draw,
- * Gráficos Chart.js (Balance Hídrico 36m + Historial HLS NDVI/NDTI) y Explicabilidad NASA.
+ * app.js — Capa C: Controlador interactivo de interfaz, mapa satelital Leaflet + Leaflet.draw,
+ * gráficos Chart.js (balance hídrico 36m + historial HLS NDVI/NDTI) y explicabilidad NASA.
+ * Alineado con AllpaWiñay — Guía de estilo visual.
  */
 (function () {
   'use strict';
@@ -40,11 +41,45 @@
   }
 
   /**
+   * Formatea números con espacio fino en miles (ej. 2 950) según la guía de estilo
+   */
+  function fmtMiles(num, decimales) {
+    const n = Number(num || 0);
+    const fixed = decimales !== undefined ? n.toFixed(decimales) : String(Math.round(n));
+    const parts = fixed.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '\u2009');
+    return parts.join('.');
+  }
+
+  function refrescarIconosLucide() {
+    if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
+    }
+  }
+
+  function configurarDefaultsChartJS() {
+    if (typeof Chart === 'undefined') return;
+    Chart.defaults.font.family = "'Public Sans', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#6B6450';
+    Chart.defaults.borderColor = '#D6CDB4';
+    if (Chart.defaults.plugins && Chart.defaults.plugins.legend && Chart.defaults.plugins.legend.labels) {
+      Chart.defaults.plugins.legend.labels.boxWidth = 12;
+    }
+    if (Chart.defaults.elements && Chart.defaults.elements.line) {
+      Chart.defaults.elements.line.tension = 0.25;
+    }
+    if (Chart.defaults.elements && Chart.defaults.elements.point) {
+      Chart.defaults.elements.point.radius = 0;
+    }
+  }
+
+  /**
    * Calcula el área geodésica aproximada en hectáreas de un polígono LatLng de Leaflet
    */
   function calcularAreaPoligonoHa(latlngs) {
     if (!latlngs || latlngs.length < 3) return 1.5;
-    const R = 6378137; // Radio terrestre en metros
+    const R = 6378137;
     let areaM2 = 0;
     const n = latlngs.length;
     for (let i = 0; i < n; i++) {
@@ -61,7 +96,7 @@
   }
 
   /**
-   * Inicializa los datos desde js/datos_embebidos.js (funciona sin servidor y con servidor)
+   * Inicializa los datos desde js/datos_embebidos.js
    */
   function cargarDatosIniciales() {
     if (window.CATALOGO_CULTIVOS && window.PARCELAS_DEMO) {
@@ -91,7 +126,7 @@
   }
 
   /**
-   * Inicializa el mapa satelital Leaflet con Esri World Imagery + OpenTopoMap + Leaflet.draw
+   * Inicializa el mapa satelital Leaflet con Esri World Imagery + OpenStreetMap + Leaflet.draw
    */
   function inicializarMapa() {
     const mapEl = document.getElementById('mapa-parcela');
@@ -105,7 +140,7 @@
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       {
         maxZoom: 19,
-        attribution: 'Imágenes © Esri, Maxar, Earthstar Geographics | Datos NASA POWER, SRTM, HLS, GPM'
+        attribution: 'Imágenes Esri, Maxar | Datos NASA POWER, SRTM, HLS, GPM'
       }
     );
 
@@ -113,7 +148,7 @@
       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {
         maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
+        attribution: 'OpenStreetMap contributors'
       }
     );
 
@@ -125,8 +160,8 @@
 
     L.control.layers(
       {
-        '🛰️ Satélite (Esri World Imagery)': esriSat,
-        '🗺️ Mapa de Caminos y Comunidades (OSM)': osmCalle
+        'Satélite (Esri World Imagery)': esriSat,
+        'Mapa de caminos y comunidades (OSM)': osmCalle
       },
       {},
       { position: 'topright' }
@@ -143,16 +178,16 @@
             allowIntersection: false,
             showArea: true,
             shapeOptions: {
-              color: '#F59E0B',
-              weight: 3,
-              fillOpacity: 0.28
+              color: '#A6512B',
+              weight: 2,
+              fillOpacity: 0.25
             }
           },
           rectangle: {
             shapeOptions: {
-              color: '#F59E0B',
-              weight: 3,
-              fillOpacity: 0.28
+              color: '#A6512B',
+              weight: 2,
+              fillOpacity: 0.25
             }
           },
           polyline: false,
@@ -199,13 +234,13 @@
   function crearPopupParcelaHtml(parcela) {
     const cuadras = haACuadras(parcela.area_ha);
     return `
-      <div style="font-family: sans-serif; min-width: 210px;">
-        <strong style="font-size: 0.95rem; color: #16261C;">${parcela.nombre}</strong>
-        <div style="font-size: 0.82rem; color: #3E5245; margin-top: 4px;">
-          📍 ${parcela.ubicacion_texto}<br/>
-          📐 <b>${parcela.area_ha} ha</b> (${cuadras} cuadras)<br/>
-          ⛰️ Altitud: <b>${parcela.terreno.elev_m} m s.n.m.</b> | Pendiente: <b>${parcela.terreno.pendiente_pct}%</b><br/>
-          🧪 Suelo: <b>${parcela.suelo.textura}</b> (MO/SOC: ${parcela.suelo.soc_pct}%, pH ${parcela.suelo.ph})
+      <div style="font-family: 'Public Sans', sans-serif; min-width: 210px; color: #2B2A22;">
+        <strong style="font-size: 0.92rem; color: #3E4A1E;">${parcela.nombre}</strong>
+        <div style="font-size: 0.82rem; color: #5A5440; margin-top: 4px; font-variant-numeric: tabular-nums;">
+          Ubicación: ${parcela.ubicacion_texto}<br/>
+          Superficie: <b>${parcela.area_ha} ha</b> (${cuadras} cuadras)<br/>
+          Altitud: <b>${fmtMiles(parcela.terreno.elev_m)} m s.n.m.</b> · Pendiente: <b>${parcela.terreno.pendiente_pct} %</b><br/>
+          Suelo: <b>${parcela.suelo.textura}</b> (SOC: ${parcela.suelo.soc_pct} %, pH ${parcela.suelo.ph})
         </div>
       </div>
     `;
@@ -220,14 +255,14 @@
     if (coords.length > 0) {
       const latlngs = coords.map(par => [par[1], par[0]]);
       const colorBorde = parcela.terreno.pendiente_pct > 25
-        ? '#C92A2A'
-        : (parcela.terreno.pendiente_pct >= 12 ? '#F59E0B' : '#22C55E');
+        ? '#9B2C1F'
+        : (parcela.terreno.pendiente_pct >= 12 ? '#B7791F' : '#4F6B1F');
 
       const poly = L.polygon(latlngs, {
         color: colorBorde,
-        weight: 3,
+        weight: 2,
         fillColor: colorBorde,
-        fillOpacity: 0.25
+        fillOpacity: 0.22
       });
 
       poly.bindPopup(crearPopupParcelaHtml(parcela));
@@ -240,127 +275,126 @@
   }
 
   /**
-   * Renderiza el Banner Permanente de Anomalía GPM IMERG + SMAP L4
+   * Renderiza la tarjeta de monitoreo hidrológico GPM IMERG + SMAP L4 en el Hero
    */
   function renderizarBannerAnomalia(parcela, pesos) {
     const anom = parcela.anomalia || { pct: 0, ventana: 'trimestre actual', mensaje: '' };
-    const cardEl = document.getElementById('anomaly-card');
     const titleEl = document.getElementById('anomaly-title');
     const msgEl = document.getElementById('anomaly-message');
     const pillSensorEl = document.getElementById('anomaly-sensor-pill');
     const pillWeightEl = document.getElementById('anomaly-weight-pill');
+    const stateBadgeEl = document.getElementById('anomaly-state-badge');
 
     const esSeco = anom.pct < -15 || state.opciones.escenarioLluviaPct <= -15;
-    if (cardEl) {
-      cardEl.className = esSeco ? 'anomaly-card' : 'anomaly-card anomaly-normal';
+    const signo = anom.pct > 0 ? '+' : '';
+
+    if (stateBadgeEl) {
+      stateBadgeEl.className = esSeco ? 'estado riesgo' : 'estado ok';
+      stateBadgeEl.textContent = esSeco ? 'Alto · Sequía' : 'Bajo · Normal';
     }
 
-    const signo = anom.pct > 0 ? '+' : '';
     if (titleEl) {
       titleEl.textContent = esSeco
-        ? `Alerta Satelital de Sequía Regional (${signo}${anom.pct}% lluvias en ${anom.ventana})`
-        : `Monitoreo Hidrológico Regional (${signo}${anom.pct}% en ${anom.ventana})`;
+        ? `Anomalía de sequía (${signo}${anom.pct} % en ${anom.ventana})`
+        : `Monitoreo hidrológico (${signo}${anom.pct} % en ${anom.ventana})`;
     }
     if (msgEl) {
       msgEl.textContent = anom.mensaje;
     }
     if (pillSensorEl) {
-      pillSensorEl.textContent = `🛰️ ${anom.fuente || 'NASA GPM IMERG + SMAP'} (${anom.res_km || 10} km)`;
+      pillSensorEl.innerHTML = `${anom.fuente || 'NASA GPM IMERG + SMAP'} (<span class="tabular-nums">${anom.res_km || 10}</span> <span class="unidad">km</span>)`;
     }
     if (pillWeightEl) {
-      pillWeightEl.textContent = pesos && pesos.ajusteSequiaAplicado
-        ? `⚡ Peso de Ahorro de Agua ×1.3 activo (${Math.round(pesos.w_h2o * 100)}% del IRR)`
-        : `💧 Peso de Agua actual: ${Math.round((pesos ? pesos.w_h2o : 0.33) * 100)}% del IRR`;
+      const pct = Math.round((pesos ? pesos.w_h2o : 0.33) * 100);
+      pillWeightEl.innerHTML = pesos && pesos.ajusteSequiaAplicado
+        ? `<span class="tabular-nums">${pct}</span> <span class="unidad">% del IRR (ajuste ×1.3)</span>`
+        : `<span class="tabular-nums">${pct}</span> <span class="unidad">% del IRR</span>`;
     }
   }
 
-  /**
-   * Renderiza los KPIs biofísicos y vulnerabilidades de campo del Paso 1
-   */
-  /**
-   * ¿Este bloque de datos de la parcela sigue siendo de EJEMPLO? (lo marca scripts/generar_parcelas.py)
-   */
   function esEjemplo(parcela, campo) {
     const e = parcela && parcela.estado_datos;
     return !!(e && typeof e[campo] === 'string' && e[campo].startsWith('EJEMPLO'));
   }
 
-  /**
-   * Cambia la etiqueta de fuente a "EJEMPLO" cuando el dato todavía no es real.
-   */
   function marcarFuente(id, parcela, campo, textoReal) {
     const el = document.getElementById(id);
     if (!el) return;
     if (!el.dataset.textoReal) el.dataset.textoReal = textoReal || el.textContent;
     const ejemplo = esEjemplo(parcela, campo);
-    el.textContent = ejemplo ? `EJEMPLO · ${el.dataset.textoReal}` : el.dataset.textoReal;
+    el.textContent = ejemplo ? `Ejemplo · ${el.dataset.textoReal}` : el.dataset.textoReal;
     el.classList.toggle('tag-ejemplo', ejemplo);
     el.title = (parcela.estado_datos && parcela.estado_datos[campo]) || '';
   }
 
+  /**
+   * Renderiza la ficha biofísica y el semáforo de vulnerabilidades del Paso 1
+   */
   function renderizarPaso1Terreno(parcela) {
     marcarFuente('tag-elev', parcela, 'terreno');
     marcarFuente('tag-pend', parcela, 'terreno');
     marcarFuente('tag-clima', parcela, 'clima');
     marcarFuente('tag-historia', parcela, 'ndvi');
+
     const tagBal = document.getElementById('tag-chart-balance');
     if (tagBal) tagBal.hidden = !esEjemplo(parcela, 'clima');
     const tagHls = document.getElementById('tag-chart-hls');
     if (tagHls) tagHls.hidden = !esEjemplo(parcela, 'ndvi');
+
     const cuadras = haACuadras(parcela.area_ha);
-    document.getElementById('kpi-area-val').textContent = `${parcela.area_ha} ha`;
-    document.getElementById('kpi-area-sub').textContent = `Equivale a ~${cuadras} cuadras (${parcela.ubicacion_texto})`;
+    document.getElementById('kpi-area-val').innerHTML = `${parcela.area_ha} <span class="unidad">ha</span>`;
+    document.getElementById('kpi-area-sub').textContent = `(~${cuadras} cuadras)`;
 
-    document.getElementById('kpi-elev-val').textContent = `${parcela.terreno.elev_m} m s.n.m.`;
-    document.getElementById('kpi-elev-sub').textContent = `Región ${parcela.region} | Orientación ${parcela.terreno.orientacion}`;
+    document.getElementById('kpi-elev-val').innerHTML = `${fmtMiles(parcela.terreno.elev_m)} <span class="unidad">m s.n.m.</span>`;
+    document.getElementById('kpi-elev-sub').textContent = `Región ${parcela.region} · ${parcela.terreno.orientacion}`;
 
-    document.getElementById('kpi-pend-val').textContent = `${parcela.terreno.pendiente_pct}% media`;
-    document.getElementById('kpi-pend-sub').textContent = `Máxima en lote: ${parcela.terreno.pendiente_max_pct}% (Factor escorrentía f=${window.BalanceMotor.factorPendiente(parcela.terreno.pendiente_pct)})`;
+    document.getElementById('kpi-pend-val').innerHTML = `${parcela.terreno.pendiente_pct} <span class="unidad">% media</span>`;
+    document.getElementById('kpi-pend-sub').innerHTML = `Máx. ${parcela.terreno.pendiente_max_pct} <span class="unidad">% (f=${window.BalanceMotor.factorPendiente(parcela.terreno.pendiente_pct)})</span>`;
 
     const lluviaAnual = (parcela.clima_mensual || []).reduce((acc, m) => acc + m.P_mm, 0);
     const et0Anual = (parcela.clima_mensual || []).reduce((acc, m) => acc + m.ET0_mm, 0);
     const factorEsc = 1 + (state.opciones.escenarioLluviaPct || 0) / 100;
     const lluviaEscenario = Math.round(lluviaAnual * factorEsc);
 
-    document.getElementById('kpi-clima-val').textContent = `${lluviaEscenario} mm/año`;
-    document.getElementById('kpi-clima-sub').textContent = `Demanda evaporativa ET₀: ${Math.round(et0Anual)} mm/año (${esEjemplo(parcela, 'clima') ? 'EJEMPLO, falta NASA POWER' : '10 años NASA POWER'})`;
+    document.getElementById('kpi-clima-val').innerHTML = `${fmtMiles(lluviaEscenario)} <span class="unidad">mm/año</span>`;
+    document.getElementById('kpi-clima-sub').innerHTML = `${fmtMiles(Math.round(et0Anual))} <span class="unidad">mm/año</span>`;
 
-    // Diagnóstico de vulnerabilidades en la parcela
+    // Semáforo de vulnerabilidades con texto explícito ("Bajo", "Medio", "Alto")
     const vulnContainer = document.getElementById('vuln-badges-container');
     const badges = [];
 
     if (parcela.terreno.pendiente_pct > 25) {
       badges.push({
-        nivel: 'alto',
-        texto: `🚨 Erosión crítica (Pendiente ${parcela.terreno.pendiente_pct}% > 25%): Prohibida labranza intensiva`
+        clase: 'riesgo',
+        texto: `Alto · Erosión crítica (pendiente ${parcela.terreno.pendiente_pct} % > 25 %): descartada labranza intensiva`
       });
     } else if (parcela.terreno.pendiente_pct >= 12) {
       badges.push({
-        nivel: 'medio',
-        texto: `⛰️ Ladera moderada (${parcela.terreno.pendiente_pct}%): Requiere surcos en contorno y rastrojo`
+        clase: 'alerta',
+        texto: `Medio · Ladera moderada (${parcela.terreno.pendiente_pct} %): requiere surcos en contorno y rastrojo`
       });
     } else {
       badges.push({
-        nivel: 'bajo',
-        texto: `🟢 Relieve plano/suave (${parcela.terreno.pendiente_pct}%): Baja pérdida por escorrentía`
+        clase: 'ok',
+        texto: `Bajo · Relieve suave (${parcela.terreno.pendiente_pct} %): baja pérdida por escorrentía`
       });
     }
 
     const minAbs = Math.min(...(parcela.clima_mensual || []).map(m => m.Tmin_abs));
     if (minAbs < 0) {
       badges.push({
-        nivel: 'alto',
-        texto: `❄️ Riesgo de helada severa (Tmin absoluta ${minAbs} °C en verano): Vetados cultivos sensibles`
+        clase: 'riesgo',
+        texto: `Alto · Helada severa (Tmin absoluta ${minAbs} °C en verano): excluidos cultivos sensibles`
       });
     } else if (minAbs < 2.0) {
       badges.push({
-        nivel: 'medio',
-        texto: `🌡️ Enfriamiento nocturno (Tmin ${minAbs} °C en Jun–Ago): Cuidar época de floración`
+        clase: 'alerta',
+        texto: `Medio · Enfriamiento nocturno (Tmin ${minAbs} °C en jun–ago): resguardar floración`
       });
     } else {
       badges.push({
-        nivel: 'bajo',
-        texto: `☀️ Sin riesgo de helada (Tmin mínima ${minAbs} °C)`
+        clase: 'ok',
+        texto: `Bajo · Sin riesgo de helada (Tmin mínima ${minAbs} °C)`
       });
     }
 
@@ -368,23 +402,23 @@
     const totalObs = (parcela.ndvi_mensual || []).length || 24;
     if (mesesDesnudo >= 8) {
       badges.push({
-        nivel: 'medio',
-        texto: `🛰️ Suelo desnudo frecuente: ${mesesDesnudo} de ${totalObs} meses con NDVI < 0.25 (${esEjemplo(parcela, 'ndvi') ? 'EJEMPLO, falta HLS' : 'HLS 30 m'})`
+        clase: 'alerta',
+        texto: `Medio · Suelo desnudo frecuente: ${mesesDesnudo} de ${totalObs} meses con NDVI < 0.25`
       });
     } else {
       badges.push({
-        nivel: 'bajo',
-        texto: `🌿 Buena cobertura vegetal histórica (${totalObs - mesesDesnudo}/${totalObs} meses cubiertos)`
+        clase: 'ok',
+        texto: `Bajo · Buena cobertura vegetal histórica (${totalObs - mesesDesnudo}/${totalObs} meses cubiertos)`
       });
     }
 
     vulnContainer.innerHTML = badges
-      .map(b => `<span class="vuln-badge ${b.nivel}">${b.texto}</span>`)
+      .map(b => `<span class="estado ${b.clase}">${b.texto}</span>`)
       .join('');
   }
 
   /**
-   * Pobla los selectores e inputs del Paso 2 (Suelo editable + Historial de cultivos)
+   * Pobla los selectores e inputs del Paso 2 (suelo editable + historial de cultivos)
    */
   function sincronizarControlesPaso2ConParcela() {
     const parcela = obtenerParcelaActual();
@@ -400,20 +434,19 @@
 
     if (badgeOrigen) {
       if (parcela.suelo.editado_por_usuario) {
-        badgeOrigen.textContent = '✍️ Editado con dato de campo por el agricultor';
-        badgeOrigen.className = 'soil-origin-badge editado';
+        badgeOrigen.textContent = 'Editado con dato local del agricultor';
+        badgeOrigen.className = 'estado alerta';
       } else {
-        badgeOrigen.textContent = `🛰️ ${parcela.suelo.fuente || 'ISRIC SoilGrids 250 m'}`;
-        badgeOrigen.className = 'soil-origin-badge';
+        badgeOrigen.textContent = parcela.suelo.fuente || 'ISRIC SoilGrids 250 m';
+        badgeOrigen.className = 'mono';
       }
     }
 
-    // Poblar los 2 selectores de historia (2024 y 2025)
     const selHist1 = document.getElementById('select-historia-1');
     const selHist2 = document.getElementById('select-historia-2');
     if (selHist1 && selHist2 && state.catalogo) {
       const opcionesHtml = state.catalogo.cultivos
-        .map(c => `<option value="${c.id}">${c.icono} ${c.nombre} (${c.familia})</option>`)
+        .map(c => `<option value="${c.id}">${c.nombre} (${c.familia})</option>`)
         .join('');
       selHist1.innerHTML = opcionesHtml;
       selHist2.innerHTML = opcionesHtml;
@@ -431,7 +464,7 @@
   }
 
   /**
-   * Renderiza las tarjetas comparativas del Paso 3 (Top 3 Recomendadas + Práctica Actual)
+   * Renderiza las tarjetas comparativas del Paso 3 (Top 3 recomendadas + práctica actual)
    */
   function renderizarTarjetasRotacion(resultado, parcela) {
     const grid = document.getElementById('rotations-cards-grid');
@@ -442,15 +475,15 @@
       const p = resultado.pesosAplicados;
       metaBar.innerHTML = `
         <div>
-          ⚡ <strong>Motor Agronómico ejecutado en <span class="tabular-nums">${resultado.tiempoCalculoMs} ms</span></strong>
-          — Evaluadas <strong class="tabular-nums">${resultado.totalSecuenciasEvaluadas}</strong> secuencias válidas de 3 años
-          (${resultado.cultivosAptos.length} cultivos aptos en este piso térmico, ${resultado.cultivosVetados.length} vetados).
+          Evaluadas <strong class="tabular-nums">${resultado.totalSecuenciasEvaluadas}</strong> secuencias válidas de 3 años
+          (<span class="tabular-nums">${resultado.cultivosAptos.length}</span> cultivos aptos en este piso térmico,
+          <span class="tabular-nums">${resultado.cultivosVetados.length}</span> descartados).
         </div>
-        <div class="tabular-nums">
-          Pesos IRR activos: 💧Agua <b>${Math.round(p.w_h2o * 100)}%</b> |
-          🌱Nitrógeno <b>${Math.round(p.w_n * 100)}%</b> |
-          🪱Suelo/MOS <b>${Math.round(p.w_mos * 100)}%</b> |
-          💰Rentabilidad <b>${Math.round(p.w_rent * 100)}%</b>
+        <div class="tabular-nums mono">
+          Pesos IRR: Agua ${Math.round(p.w_h2o * 100)} % ·
+          Nitrógeno ${Math.round(p.w_n * 100)} % ·
+          Materia orgánica ${Math.round(p.w_mos * 100)} % ·
+          Rentabilidad ${Math.round(p.w_rent * 100)} %
         </div>
       `;
     }
@@ -470,20 +503,19 @@
       const anosEtiquetas = ['Año 1 (2026–2027)', 'Año 2 (2027–2028)', 'Año 3 (2028–2029)'];
       const timelineHtml = rot.cultivos.map((c, i) => {
         const signoN = c.credito_n_kg > 0
-          ? `<span style="color:#155727; font-weight:700;">+${c.credito_n_kg} kg N/ha</span>`
-          : `<span style="color:#7A4B00;">-${c.extraccion_n_kg} kg N/ha</span>`;
+          ? `<span style="color:var(--ok); font-weight:600;">+${c.credito_n_kg} <span class="unidad">kg N/ha</span></span>`
+          : `<span style="color:var(--alerta);">-${c.extraccion_n_kg} <span class="unidad">kg N/ha</span></span>`;
         return `
           <div class="year-node">
             <span class="year-label">${anosEtiquetas[i]}</span>
             <div class="crop-name-row">
-              <span>${c.icono || '🌱'}</span>
               <span>${c.nombre}</span>
             </div>
             <span class="crop-family-tag">${c.familia}</span>
             <div class="crop-meta-mini">
               Raíz: ${c.raiz_tipo}<br/>
               Balance N: ${signoN}<br/>
-              Margen: <b>$${(c.margen_usd_ha || 0).toLocaleString()}/ha</b>${c.estado_economico === 'oficial' ? '' : ' <span class="tag-ejemplo" title="' + (c.fuente || '') + '">estimado</span>'}
+              Margen: <b>$${fmtMiles(c.margen_usd_ha || 0)}</b> <span class="unidad">/ha</span>${c.estado_economico === 'oficial' ? '' : ' <span class="tag-ejemplo" title="' + (c.fuente || '') + '">estimado</span>'}
             </div>
           </div>
         `;
@@ -496,8 +528,8 @@
 
       const ingresoTotalLoteAnual = Math.round(rot.detalles.rentabilidad.margenAnualPromedioUsdHa * areaHa);
       const alertaFitoHtml = rot.violaReglasFitosanitarias
-        ? `<div style="background:var(--sem-rojo-bg); border:1px solid var(--sem-rojo-border); color:var(--sem-rojo-text); padding:8px 12px; border-radius:8px; font-size:0.83rem; font-weight:700;">
-             ⚠️ Alerta Fitosanitaria: ${rot.motivoRiesgoFitosanitario}
+        ? `<div class="estado riesgo" style="padding:6px 10px;">
+             Alto · ${rot.motivoRiesgoFitosanitario}
            </div>`
         : '';
 
@@ -505,14 +537,14 @@
         <article class="${clasesCard}" data-rot-id="${rot.id}">
           <div class="rot-card-header">
             <div class="rot-title-group">
-              <span class="rot-strategy-badge ${rot.semaforo.color}">
-                ${rot.semaforo.icono} ${rot.semaforo.etiqueta}
+              <span class="estado ${rot.semaforo.color}">
+                ${rot.semaforo.etiqueta}
               </span>
               <h3 class="rot-card-title">${rot.titulo}</h3>
             </div>
             <div class="irr-score-badge">
               <div class="irr-score-num">${rot.irr.toFixed(2)}</div>
-              <div class="irr-score-label">Índice IRR (${rot.irrPct}/100)</div>
+              <div class="irr-score-label">IRR (${rot.irrPct} <span class="unidad">/ 100</span>)</div>
             </div>
           </div>
 
@@ -525,62 +557,65 @@
           <div class="subindices-bars">
             <div class="subbar-item">
               <div class="subbar-head">
-                <span>💧 Agua cubierta por lluvia</span>
-                <span class="tabular-nums">${rot.balanceHidrico.coberturaAguaPct}% (I_H2O ${rot.subindices.agua.toFixed(2)})</span>
+                <span><i data-lucide="droplet" class="icono"></i> Agua cubierta por lluvia</span>
+                <span class="tabular-nums">${rot.balanceHidrico.coberturaAguaPct} <span class="unidad">%</span> (I_H2O ${rot.subindices.agua.toFixed(2)})</span>
               </div>
               <div class="subbar-track"><div class="subbar-fill agua" style="width:${wAguaPct}%"></div></div>
-              <div class="subbar-translation">Déficit 3 años: <b>${rot.balanceHidrico.deficitTotal} mm</b> (${rot.balanceHidrico.mesesConDeficit} meses secos)</div>
+              <div class="subbar-translation">Déficit 3 años: <b>${fmtMiles(rot.balanceHidrico.deficitTotal)}</b> <span class="unidad">mm</span> (${rot.balanceHidrico.mesesConDeficit} meses secos)</div>
             </div>
 
             <div class="subbar-item">
               <div class="subbar-head">
-                <span>🌱 Balance de Nitrógeno</span>
-                <span class="tabular-nums">${rot.detalles.nitrogeno.balanceNetoKgHa >= 0 ? '+' : ''}${rot.detalles.nitrogeno.balanceNetoKgHa} kg N/ha (I_N ${rot.subindices.nitrogeno.toFixed(2)})</span>
+                <span><i data-lucide="sprout" class="icono"></i> Balance de nitrógeno</span>
+                <span class="tabular-nums">${rot.detalles.nitrogeno.balanceNetoKgHa >= 0 ? '+' : ''}${rot.detalles.nitrogeno.balanceNetoKgHa} <span class="unidad">kg N/ha</span> (I_N ${rot.subindices.nitrogeno.toFixed(2)})</span>
               </div>
               <div class="subbar-track"><div class="subbar-fill nitrogeno" style="width:${wNitPct}%"></div></div>
-              <div class="subbar-translation">Fijación leguminosas: <b>+${rot.detalles.nitrogeno.creditosKgHa} kg N/ha</b></div>
+              <div class="subbar-translation">Fijación por leguminosas: <b>+${rot.detalles.nitrogeno.creditosKgHa}</b> <span class="unidad">kg N/ha</span></div>
             </div>
 
             <div class="subbar-item">
               <div class="subbar-head">
-                <span>🪱 Materia Orgánica y Suelo</span>
-                <span class="tabular-nums">${rot.detalles.materiaOrganica.humusEstableTHa} t/ha humus (I_MOS ${rot.subindices.materiaOrganica.toFixed(2)})</span>
+                <span><i data-lucide="flask-conical" class="icono"></i> Materia orgánica y suelo</span>
+                <span class="tabular-nums">${rot.detalles.materiaOrganica.humusEstableTHa} <span class="unidad">t/ha humus</span> (I_MOS ${rot.subindices.materiaOrganica.toFixed(2)})</span>
               </div>
               <div class="subbar-track"><div class="subbar-fill mos" style="width:${wMosPct}%"></div></div>
-              <div class="subbar-translation">Rastrojo: <b>${rot.detalles.materiaOrganica.biomasaResiduoTHa} t MS/ha</b> en 3 años</div>
+              <div class="subbar-translation">Biomasa de rastrojo: <b>${rot.detalles.materiaOrganica.biomasaResiduoTHa}</b> <span class="unidad">t MS/ha en 3 años</span></div>
             </div>
 
             <div class="subbar-item">
               <div class="subbar-head">
-                <span>💰 Margen Bruto Estimado</span>
-                <span class="tabular-nums">$${rot.detalles.rentabilidad.margenAnualPromedioUsdHa.toLocaleString()}/ha/año (I_rent ${rot.subindices.rentabilidad.toFixed(2)})</span>
+                <span><i data-lucide="coins" class="icono"></i> Margen bruto estimado</span>
+                <span class="tabular-nums">$${fmtMiles(rot.detalles.rentabilidad.margenAnualPromedioUsdHa)} <span class="unidad">/ha/año</span> (I_rent ${rot.subindices.rentabilidad.toFixed(2)})</span>
               </div>
               <div class="subbar-track"><div class="subbar-fill rent" style="width:${wRentPct}%"></div></div>
-              <div class="subbar-translation">En su lote (${areaHa} ha): <b>~$${ingresoTotalLoteAnual.toLocaleString()} USD/año</b></div>
+              <div class="subbar-translation">En el lote (${areaHa} <span class="unidad">ha</span>): <b>~$${fmtMiles(ingresoTotalLoteAnual)}</b> <span class="unidad">USD/año</span></div>
             </div>
           </div>
 
           <div class="explain-5-box">
             <p class="explain-summary-text">
-              <strong>1. ¿Por qué se sugiere?</strong> ${rot.explicacion.porQue}
+              <strong>1. Por qué se sugiere:</strong> ${rot.explicacion.porQue}
             </p>
-            <details class="explain-details" ${idx === 0 ? 'open' : ''}>
-              <summary>🔍 Ver Evidencia Satelital NASA, Beneficios, Incertidumbre y Riesgos Locales (5 Puntos)</summary>
+            <details ${idx === 0 ? 'open' : ''}>
+              <summary>
+                <span>Ver evidencia satelital NASA, beneficios, lagunas y riesgos (5 puntos)</span>
+                <i data-lucide="chevron-down" class="icono"></i>
+              </summary>
               <div class="explain-details-body">
                 <div class="explain-block">
-                  <h4>🛰️ 2. Evidencia Satelital NASA y de Suelo que la respalda</h4>
+                  <h4><i data-lucide="satellite" class="icono"></i> 2. Evidencia satelital NASA y de suelo que la respalda</h4>
                   <ul>${rot.explicacion.evidenciaNasa.map(x => `<li>${x}</li>`).join('')}</ul>
                 </div>
                 <div class="explain-block">
-                  <h4>🌾 3. Beneficios cuantificados para su explotación</h4>
+                  <h4><i data-lucide="wheat" class="icono"></i> 3. Beneficios cuantificados para la parcela</h4>
                   <ul>${rot.explicacion.beneficios.map(x => `<li>${x}</li>`).join('')}</ul>
                 </div>
                 <div class="explain-block">
-                  <h4>📡 4. Lagunas de información (Satélite vs. Medición en Tierra)</h4>
+                  <h4><i data-lucide="flask-conical" class="icono"></i> 4. Lagunas de información (satélite vs. medición en campo)</h4>
                   <ul>${rot.explicacion.lagunasInfo.map(x => `<li>${x}</li>`).join('')}</ul>
                 </div>
                 <div class="explain-block">
-                  <h4>👩‍🌾 5. Riesgos que requieren validación local por el agricultor o técnico</h4>
+                  <h4><i data-lucide="shield-check" class="icono"></i> 5. Riesgos que requieren validación local</h4>
                   <ul>${rot.explicacion.riesgosLocales.map(x => `<li>${x}</li>`).join('')}</ul>
                 </div>
               </div>
@@ -588,15 +623,15 @@
           </div>
 
           <div class="card-footer-actions">
-            <button type="button" class="btn-ver-grafico" data-select-rot="${rot.id}">
-              📊 ${esSeleccionadaGrafico ? 'Mostrando en Gráfico Hídrico de 36 Meses (Activa)' : 'Ver Balance Hídrico de 36 Meses de esta Estrategia'}
+            <button type="button" class="btn-sec btn-ver-grafico" data-select-rot="${rot.id}">
+              <i data-lucide="droplet" class="icono"></i>
+              <span>${esSeleccionadaGrafico ? 'Mostrando en el gráfico hídrico de 36 meses' : 'Ver balance hídrico de 36 meses'}</span>
             </button>
           </div>
         </article>
       `;
     }).join('');
 
-    // Enlazar botones para cambiar el gráfico de 36 meses
     grid.querySelectorAll('[data-select-rot]').forEach(btn => {
       btn.addEventListener('click', function () {
         state.rotacionSeleccionadaGraficoId = this.getAttribute('data-select-rot');
@@ -604,10 +639,12 @@
         actualizarGraficoBalance36m();
       });
     });
+
+    refrescarIconosLucide();
   }
 
   /**
-   * Renderiza o actualiza el Gráfico 1: Balance Hídrico Mensual a 36 Meses (Chart.js)
+   * Renderiza el Gráfico 1: Balance hídrico mensual a 36 meses con la paleta oficial
    */
   function actualizarGraficoBalance36m() {
     if (typeof Chart === 'undefined' || !state.ultimoResultado) return;
@@ -626,7 +663,7 @@
 
     const subtituloEl = document.getElementById('chart-balance-subtitle');
     if (subtituloEl) {
-      subtituloEl.innerHTML = `Estrategia visualizada: <strong>${rot.titulo} (${rot.cultivos.map(c => c.nombre).join(' → ')})</strong> — Suelo descubierto: <b>${rot.balanceHidrico.mesesSinCobertura} de 36 meses</b> | Déficit acumulado: <b>${rot.balanceHidrico.deficitTotal} mm</b>`;
+      subtituloEl.innerHTML = `Estrategia activa: <strong>${rot.titulo} (${rot.cultivos.map(c => c.nombre).join(' → ')})</strong> · Suelo descubierto: <b class="tabular-nums">${rot.balanceHidrico.mesesSinCobertura}/36</b> <span class="unidad">meses</span> · Déficit acumulado: <b class="tabular-nums">${fmtMiles(rot.balanceHidrico.deficitTotal)}</b> <span class="unidad">mm</span>`;
     }
 
     if (state.chartBalance) {
@@ -640,34 +677,27 @@
         datasets: [
           {
             type: 'line',
-            label: 'Lluvia Efectiva Aprovechable Pef (mm/mes)',
-            data: dataPef,
-            borderColor: '#1971C2',
-            backgroundColor: 'rgba(25, 113, 194, 0.14)',
-            borderWidth: 2.5,
-            fill: true,
-            tension: 0.3,
-            pointRadius: 2
-          },
-          {
-            type: 'line',
-            label: 'Demanda del Cultivo ETc = Kc × ET₀ (mm/mes)',
+            label: 'Demanda ETc (mm/mes)',
             data: dataETc,
-            borderColor: '#236B38',
+            borderColor: '#B7791F',
             backgroundColor: 'transparent',
-            borderWidth: 2.5,
-            borderDash: [4, 3],
+            borderWidth: 2,
             tension: 0.25,
-            pointRadius: 2
+            pointRadius: 0
           },
           {
             type: 'bar',
-            label: 'Déficit Hídrico Mensual (Riego requerido, mm)',
+            label: 'Lluvia efectiva Pef (mm/mes)',
+            data: dataPef,
+            backgroundColor: '#6F8A9A',
+            borderWidth: 0
+          },
+          {
+            type: 'bar',
+            label: 'Déficit de riego (mm/mes)',
             data: dataDeficit,
-            backgroundColor: 'rgba(201, 42, 42, 0.68)',
-            borderColor: '#C92A2A',
-            borderWidth: 1,
-            borderRadius: 3
+            backgroundColor: '#9B2C1F',
+            borderWidth: 0
           }
         ]
       },
@@ -681,8 +711,11 @@
         plugins: {
           legend: {
             position: 'top',
+            align: 'start',
             labels: {
-              font: { size: 11, weight: 'bold' }
+              boxWidth: 12,
+              color: '#6B6450',
+              font: { family: "'Public Sans', sans-serif", size: 12 }
             }
           },
           tooltip: {
@@ -690,26 +723,40 @@
               afterBody: function (items) {
                 const idx = items[0].dataIndex;
                 const info = meses[idx];
-                return `Estado lote: ${info.sueloDesnudo ? '⚠️ Suelo descubierto / descanso' : `${info.cultivoNombre} (Etapa ${info.etapa}, Kc=${info.kc})`}`;
+                return `Estado del lote: ${info.sueloDesnudo ? 'Suelo descubierto / descanso' : `${info.cultivoNombre} (etapa ${info.etapa}, Kc=${info.kc})`}`;
               }
             }
           }
         },
         scales: {
           x: {
+            grid: {
+              display: false
+            },
             ticks: {
               maxRotation: 45,
               minRotation: 45,
               autoSkip: true,
               maxTicksLimit: 18,
-              font: { size: 10 }
+              color: '#6B6450',
+              font: { family: "'Public Sans', sans-serif", size: 11 }
             }
           },
           y: {
             beginAtZero: true,
+            grid: {
+              color: '#D6CDB4',
+              lineWidth: 1
+            },
+            ticks: {
+              color: '#6B6450',
+              font: { family: "'Public Sans', sans-serif", size: 12 }
+            },
             title: {
               display: true,
-              text: 'Milímetros de agua (mm/mes)'
+              text: 'Agua mensual (mm)',
+              color: '#6B6450',
+              font: { family: "'Public Sans', sans-serif", size: 12 }
             }
           }
         }
@@ -718,7 +765,7 @@
   }
 
   /**
-   * Renderiza el Gráfico 2: Serie Histórica Satelital HLS (Landsat + Sentinel-2, 30 m) NDVI y NDTI
+   * Renderiza el Gráfico 2: Serie histórica satelital HLS con la paleta oficial
    */
   function actualizarGraficoHLS(parcela) {
     if (typeof Chart === 'undefined') return;
@@ -741,30 +788,31 @@
         labels,
         datasets: [
           {
-            label: esEjemplo(parcela, 'ndvi') ? 'NDVI de EJEMPLO (falta CSV de AppEEARS)' : 'Verdor del Cultivo (NDVI HLS 30 m)',
+            label: esEjemplo(parcela, 'ndvi') ? 'NDVI de ejemplo (sin CSV satelital)' : 'NDVI (vegetación)',
             data: dataNdvi,
-            borderColor: '#236B38',
-            backgroundColor: 'rgba(35, 107, 56, 0.18)',
-            borderWidth: 2.5,
-            fill: true,
-            tension: 0.3,
-            pointRadius: 3
-          },
-          {
-            label: 'Cobertura de Rastrojo (NDTI SWIR)',
-            data: dataNdti,
-            borderColor: '#B85418',
+            borderColor: '#3E4A1E',
             backgroundColor: 'transparent',
             borderWidth: 2,
-            tension: 0.3,
-            pointRadius: 2
+            fill: false,
+            tension: 0.25,
+            pointRadius: 0
           },
           {
-            label: 'Umbral de Suelo Desnudo (NDVI = 0.25)',
+            label: 'NDTI (rastrojo / labranza)',
+            data: dataNdti,
+            borderColor: '#A6512B',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            fill: false,
+            tension: 0.25,
+            pointRadius: 0
+          },
+          {
+            label: 'Umbral de suelo desnudo (0.25)',
             data: umbralDesnudo,
-            borderColor: '#C92A2A',
+            borderColor: '#9B2C1F',
             borderWidth: 1.5,
-            borderDash: [6, 4],
+            borderDash: [4, 4],
             pointRadius: 0,
             fill: false
           }
@@ -780,18 +828,40 @@
         plugins: {
           legend: {
             position: 'top',
+            align: 'start',
             labels: {
-              font: { size: 11, weight: 'bold' }
+              boxWidth: 12,
+              color: '#6B6450',
+              font: { family: "'Public Sans', sans-serif", size: 12 }
             }
           }
         },
         scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#6B6450',
+              font: { family: "'Public Sans', sans-serif", size: 11 }
+            }
+          },
           y: {
             min: 0,
             max: 1.0,
+            grid: {
+              color: '#D6CDB4',
+              lineWidth: 1
+            },
+            ticks: {
+              color: '#6B6450',
+              font: { family: "'Public Sans', sans-serif", size: 12 }
+            },
             title: {
               display: true,
-              text: 'Índice espectral (0 a 1)'
+              text: 'Índice espectral (0 a 1)',
+              color: '#6B6450',
+              font: { family: "'Public Sans', sans-serif", size: 12 }
             }
           }
         }
@@ -800,7 +870,7 @@
   }
 
   /**
-   * Renderiza el Inspector de Cultivos Vetados (Semáforo Rojo)
+   * Renderiza el inspector de cultivos descartados con etiquetas de estado
    */
   function renderizarCultivosVetados(resultado) {
     const cont = document.getElementById('vetados-grid-container');
@@ -809,10 +879,9 @@
 
     const vetados = resultado.cultivosVetados || [];
     if (countBadge) {
-      countBadge.textContent = `${vetados.length} cultivos descartados por protección de suelo/clima`;
+      countBadge.textContent = `${vetados.length} cultivos descartados`;
     }
 
-    // Ordenar mostrando primero los vetados por causa fitosanitaria (ej. Papa en Chimborazo)
     const ordenados = vetados.slice().sort((a, b) => {
       if (a.tipoVeto === b.tipoVeto) return 0;
       return a.tipoVeto === 'fitosanitario' ? -1 : 1;
@@ -821,19 +890,21 @@
     cont.innerHTML = ordenados.map(item => {
       const c = item.cultivo;
       const etiquetaTipo = item.tipoVeto === 'fitosanitario'
-        ? '<span class="rot-strategy-badge rojo">🦠 Pausa Fitosanitaria</span>'
-        : '<span class="rot-strategy-badge amarillo">⛰️ Límite Biofísico (Clima/Ladera)</span>';
+        ? '<span class="estado riesgo">Alto · Pausa fitosanitaria</span>'
+        : '<span class="estado alerta">Medio · Límite biofísico</span>';
 
       return `
         <div class="vetado-item">
           <div class="vetado-head">
-            <span>${c.icono || '🌱'} ${c.nombre} <small style="color:var(--text-muted);">(${c.familia})</small></span>
+            <span><i data-lucide="wheat" class="icono"></i> ${c.nombre} <small class="unidad">(${c.familia})</small></span>
             ${etiquetaTipo}
           </div>
           <p class="vetado-reason">${item.razones.join(' ')}</p>
         </div>
       `;
     }).join('');
+
+    refrescarIconosLucide();
   }
 
   /**
@@ -851,11 +922,10 @@
     );
     state.ultimoResultado = resultado;
 
-    // Actualizar etiquetas de pesos junto a cada slider
     const p = resultado.pesosAplicados;
-    document.getElementById('badge-peso-agua').textContent = `${Math.round(p.w_h2o * 100)}% del índice`;
-    document.getElementById('badge-peso-suelo').textContent = `${Math.round((p.w_n + p.w_mos) * 100)}% del índice`;
-    document.getElementById('badge-peso-ganar').textContent = `${Math.round(p.w_rent * 100)}% del índice`;
+    document.getElementById('badge-peso-agua').textContent = `${Math.round(p.w_h2o * 100)} % del índice`;
+    document.getElementById('badge-peso-suelo').textContent = `${Math.round((p.w_n + p.w_mos) * 100)} % del índice`;
+    document.getElementById('badge-peso-ganar').textContent = `${Math.round(p.w_rent * 100)} % del índice`;
 
     renderizarBannerAnomalia(parcela, p);
     renderizarPaso1Terreno(parcela);
@@ -863,13 +933,13 @@
     actualizarGraficoBalance36m();
     actualizarGraficoHLS(parcela);
     renderizarCultivosVetados(resultado);
+    refrescarIconosLucide();
   }
 
   /**
-   * Configura todos los eventos de botones, sliders, inputs y modal científico
+   * Configura todos los eventos de botones, sliders e inputs
    */
   function configurarEventos() {
-    // Botones selectores de parcela demostrativa
     document.querySelectorAll('[data-parcela-id]').forEach(btn => {
       btn.addEventListener('click', function () {
         const nuevoId = this.getAttribute('data-parcela-id');
@@ -886,7 +956,6 @@
       });
     });
 
-    // Edición de Suelo (SoilGrids editable)
     const onSoilChange = () => {
       const p = obtenerParcelaActual();
       p.suelo.textura = document.getElementById('input-suelo-textura').value;
@@ -902,7 +971,6 @@
       if (el) el.addEventListener('change', onSoilChange);
     });
 
-    // Botón para restaurar datos satelitales originales de la parcela
     const btnResetSuelo = document.getElementById('btn-reset-parcela');
     if (btnResetSuelo) {
       btnResetSuelo.addEventListener('click', () => {
@@ -914,7 +982,6 @@
       });
     }
 
-    // Edición de historia de cultivos (2024 y 2025) y nematodos
     const onHistoriaChange = () => {
       const p = obtenerParcelaActual();
       const h1 = document.getElementById('select-historia-1').value;
@@ -929,7 +996,6 @@
       if (el) el.addEventListener('change', onHistoriaChange);
     });
 
-    // Sliders de prioridades del agricultor
     const bindSlider = (id, key) => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -942,7 +1008,6 @@
     bindSlider('slider-suelo', 'suelo');
     bindSlider('slider-ganar', 'ganar');
 
-    // Slider de Escenario Climático de Lluvias (-30% a +20%)
     const sliderEsc = document.getElementById('slider-escenario-lluvia');
     const badgeEsc = document.getElementById('badge-escenario-lluvia');
     if (sliderEsc) {
@@ -951,14 +1016,13 @@
         state.opciones.escenarioLluviaPct = val;
         if (badgeEsc) {
           badgeEsc.textContent = val === 0
-            ? '0% (Clima Histórico Normal)'
-            : `${val > 0 ? '+' : ''}${val}% de lluvia`;
+            ? '0 % (climatología normal)'
+            : `${val > 0 ? '+' : ''}${val} % de lluvia`;
         }
         actualizarTodo();
       });
     }
 
-    // Checkbox de uso de rastrojo como forraje para animales
     const chkForraje = document.getElementById('check-retira-forraje');
     if (chkForraje) {
       chkForraje.addEventListener('change', function () {
@@ -968,31 +1032,24 @@
       });
     }
 
-    // Modal Científico ("Ver cómo lo calculamos")
-    const modal = document.getElementById('modal-cientifico');
-    const btnOpenModal = document.getElementById('btn-abrir-modal-cientifico');
-    const btnCloseModal = document.getElementById('btn-cerrar-modal-cientifico');
-
-    if (btnOpenModal && modal) {
-      btnOpenModal.addEventListener('click', () => {
-        modal.removeAttribute('hidden');
+    // Marcar paso activo al navegar
+    document.querySelectorAll('.paso, .nav-link').forEach(link => {
+      link.addEventListener('click', function () {
+        const href = this.getAttribute('href');
+        if (!href || !href.startsWith('#paso-')) return;
+        document.querySelectorAll('.paso').forEach(p => {
+          p.classList.toggle('activo', p.getAttribute('href') === href);
+        });
+        document.querySelectorAll('.nav-link').forEach(n => {
+          n.classList.toggle('activo', n.getAttribute('href') === href);
+        });
       });
-    }
-    if (btnCloseModal && modal) {
-      btnCloseModal.addEventListener('click', () => {
-        modal.setAttribute('hidden', 'hidden');
-      });
-    }
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.setAttribute('hidden', 'hidden');
-        }
-      });
-    }
+    });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    configurarDefaultsChartJS();
+    refrescarIconosLucide();
     cargarDatosIniciales()
       .then(() => {
         sincronizarControlesPaso2ConParcela();

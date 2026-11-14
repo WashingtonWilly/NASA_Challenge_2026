@@ -1,57 +1,32 @@
 /* ==========================================================================
-   AllpaWiñay / KawsaySuyu — DSS de Rotación de Cultivos con Datos NASA
-   NASA Space Apps Challenge 2026 — Riobamba, Ecuador
-   Diseño centrado en el agricultor (Daylight-First High Contrast Field UI)
+   AllpaWiñay — Guía de estilo visual institucional y cartográfica
+   NASA International Space Apps Challenge 2026 · Riobamba
    ========================================================================== */
 
 :root {
-  /* Superficies cálidas de alto contraste bajo luz solar */
-  --bg-canvas: #F5F2EB;
-  --bg-surface: #FFFFFF;
-  --bg-elevated: #FAF8F4;
-  --bg-subtle: #EDE8DF;
-  --bg-glass: rgba(255, 255, 255, 0.92);
-
-  /* Tipografía de alta legibilidad */
-  --text-primary: #16261C;
-  --text-secondary: #3E5245;
-  --text-muted: #64766A;
-
-  /* Acentos agrícolas y telemetría NASA */
-  --accent-primary: #236B38;
-  --accent-primary-hover: #195229;
-  --accent-primary-soft: #E6F3EA;
-  --accent-terracotta: #B85418;
-  --accent-terracotta-soft: #FCEEE6;
-  --accent-nasa: #0B3D91;
-  --accent-nasa-soft: #E7EFFC;
-
-  /* Semáforo agronómico */
-  --sem-verde-bg: #E6F6EC;
-  --sem-verde-border: #2B8A44;
-  --sem-verde-text: #155727;
-
-  --sem-amarillo-bg: #FFF6E0;
-  --sem-amarillo-border: #D98A00;
-  --sem-amarillo-text: #7A4B00;
-
-  --sem-rojo-bg: #FDECEC;
-  --sem-rojo-border: #C92A2A;
-  --sem-rojo-text: #841717;
-
-  /* Bordes y sombras */
-  --border-subtle: #DCD5C7;
-  --border-strong: #BFB5A2;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --shadow-sm: 0 2px 6px rgba(22, 38, 28, 0.06);
-  --shadow-md: 0 6px 20px rgba(22, 38, 28, 0.09);
-  --shadow-lg: 0 12px 32px rgba(22, 38, 28, 0.14);
-
-  /* Fuentes */
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --papel: #EFEADC;
+  --papel-claro: #F7F3E8;
+  --campo: #FBF8F0;
+  --banda: #E4DDCB;
+  --tinta: #2B2A22;
+  --texto-2: #5A5440;
+  --gris: #6B6450;
+  --oliva: #3E4A1E;
+  --tierra: #A6512B;
+  --tierra-hover: #8C4322;
+  --borde: #D6CDB4;
+  --curva: #C9BFA2;
+  --texto-nav: #F4EFE2;
+  --subrayado-nav: #D9A178;
+  --ok: #4F6B1F;
+  --ok-bg: #E6EAD3;
+  --alerta: #B7791F;
+  --alerta-bg: #F4E6C8;
+  --riesgo: #9B2C1F;
+  --riesgo-bg: #F2D9D2;
+  --fuente: 'Public Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --radio: 4px;
 }
 
 *, *::before, *::after {
@@ -65,425 +40,587 @@ html {
 
 body {
   margin: 0;
-  padding: 0;
-  font-family: var(--font-sans);
-  background-color: var(--bg-canvas);
-  color: var(--text-primary);
-  line-height: 1.55;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fuente);
+  font-size: 16px;
+  line-height: 1.6;
+  text-align: left;
   -webkit-font-smoothing: antialiased;
 }
 
+.contenedor,
+.main-container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+section,
+.step-section {
+  padding: 64px 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.step-section:last-of-type {
+  border-bottom: 0;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--gris);
+}
+
 .tabular-nums {
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
-/* ==========================================================================
-   Barra Superior (Top Header)
-   ========================================================================== */
-.top-header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background: var(--bg-glass);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-sm);
+.unidad {
+  color: var(--gris);
+  font-weight: 400;
 }
 
-.header-inner {
-  max-width: 1440px;
+h1, h2, h3, h4 {
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.015em;
+  font-style: normal;
+}
+
+h1 {
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--oliva);
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--oliva);
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--tinta);
+}
+
+p {
+  margin: 0 0 0.75rem;
+  color: var(--tinta);
+}
+
+.lead {
+  color: var(--texto-2);
+  font-size: 1.02rem;
+  max-width: 34rem;
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+a {
+  color: var(--oliva);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--tierra);
+}
+
+/* Iconos Lucide */
+.icono {
+  width: 20px;
+  height: 20px;
+  color: var(--oliva);
+  vertical-align: -4px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Franja superior y Barra de navegación
+   ========================================================================== */
+.banda-top {
+  background: var(--banda);
+  color: var(--gris);
+  font-size: 0.75rem;
+  padding: 6px 20px;
+}
+
+.banda-top-inner {
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 12px 24px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lang-switch {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--gris);
+}
+
+.lang-switch strong {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+nav.nav-principal {
+  background: var(--oliva);
+  color: var(--texto-nav);
+  padding: 14px 20px;
+}
+
+.nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 16px;
   flex-wrap: wrap;
 }
 
-.brand-group {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.brand-logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent-primary), #154723);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.45rem;
-  box-shadow: 0 3px 10px rgba(35, 107, 56, 0.25);
-  flex-shrink: 0;
-}
-
-.brand-titles h1 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.badge-nasa {
-  font-size: 0.72rem;
+nav.nav-principal .logo {
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: var(--accent-nasa);
-  color: #fff;
-  padding: 3px 8px;
-  border-radius: 999px;
-}
-
-.brand-subtitle {
-  margin: 2px 0 0;
-  font-size: 0.84rem;
-  color: var(--text-secondary);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.step-pills {
-  display: flex;
-  gap: 6px;
-}
-
-.step-pill {
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--texto-nav);
   text-decoration: none;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  transition: all 0.18s ease;
-}
-
-.step-pill:hover {
-  background: var(--bg-subtle);
-  color: var(--text-primary);
-}
-
-.btn-cientifico {
-  min-height: 44px;
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--accent-nasa);
-  background: var(--accent-nasa-soft);
-  color: var(--accent-nasa);
-  font-family: var(--font-sans);
-  font-size: 0.86rem;
-  font-weight: 700;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.18s ease;
 }
 
-.btn-cientifico:hover {
-  background: var(--accent-nasa);
-  color: #fff;
+nav.nav-principal .logo .icono {
+  color: var(--texto-nav);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+nav.nav-principal a.nav-link {
+  color: var(--texto-nav);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 400;
+  margin-left: 20px;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+}
+
+nav.nav-principal a.nav-link.activo,
+nav.nav-principal a.nav-link:hover {
+  color: var(--texto-nav);
+  border-bottom-color: var(--subrayado-nav);
 }
 
 /* ==========================================================================
-   Banner Permanente de Anomalía Climática NASA (GPM + SMAP)
+   Hero institucional con curvas de nivel y tarjeta de datos
    ========================================================================== */
-.anomaly-banner {
-  max-width: 1440px;
-  margin: 16px auto 0;
-  padding: 0 24px;
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 40px 0;
+  background: var(--papel);
+  border-bottom: 1px solid var(--borde);
 }
 
-.anomaly-card {
-  background: var(--sem-amarillo-bg);
-  border: 1.5px solid var(--sem-amarillo-border);
-  border-left-width: 6px;
-  border-radius: var(--radius-md);
-  padding: 14px 18px;
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('../img/curvas-nivel.svg') right center / 55% 100% no-repeat;
+  pointer-events: none;
+}
+
+.hero .contenedor {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+/* Botones (uno solo terracota por pantalla) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--tierra);
+  color: #FBF6EA;
+  border: 0;
+  border-radius: var(--radio);
+  padding: 10px 16px;
+  font: 600 0.9rem var(--fuente);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--tierra-hover);
+  color: #FBF6EA;
+}
+
+.btn .icono {
+  color: #FBF6EA;
+}
+
+.btn-sec {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--oliva);
+  border: 1px solid var(--oliva);
+  border-radius: var(--radio);
+  padding: 9px 15px;
+  font: 600 0.9rem var(--fuente);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-sec:hover {
+  background: var(--papel-claro);
+  color: var(--oliva);
+}
+
+/* Tarjeta de datos (borde superior 4 px terracota, radio 0) */
+.card-datos {
+  background: var(--papel-claro);
+  border: 1px solid var(--borde);
+  border-top: 4px solid var(--tierra);
+  border-radius: 0;
+  padding: 14px 16px;
+  font-size: 0.85rem;
+}
+
+.card-datos h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--oliva);
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  box-shadow: var(--shadow-sm);
+  gap: 8px;
 }
 
-.anomaly-card.anomaly-normal {
-  background: var(--accent-nasa-soft);
-  border-color: var(--accent-nasa);
-}
-
-.anomaly-main {
+.fila {
   display: flex;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: baseline;
   gap: 12px;
-  flex: 1;
-  min-width: 280px;
+  padding: 6px 0;
+  border-bottom: 1px dotted var(--borde);
 }
 
-.anomaly-icon {
-  font-size: 1.6rem;
-  line-height: 1;
-  margin-top: 2px;
+.fila:last-child {
+  border-bottom: 0;
 }
 
-.anomaly-text strong {
+.fila span:first-child {
+  color: var(--gris);
+}
+
+.fila span:last-child {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--tinta);
+  text-align: right;
+}
+
+/* ==========================================================================
+   Tarjetas de pasos (3 columnas iguales, sin caja, borde superior 3 px)
+   ========================================================================== */
+.pasos-strip {
+  padding: 24px 0 0;
+}
+
+.pasos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.paso {
+  border-top: 3px solid var(--oliva);
+  padding-top: 12px;
+  text-decoration: none;
   display: block;
-  font-size: 0.96rem;
-  color: var(--text-primary);
-  margin-bottom: 2px;
 }
 
-.anomaly-text p {
-  margin: 0;
-  font-size: 0.88rem;
-  color: var(--text-secondary);
+.paso.activo {
+  border-top-color: var(--tierra);
 }
 
-.anomaly-meta {
+.paso-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
-.anomaly-pill {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  color: var(--text-primary);
+.paso h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tinta);
+  margin: 0 0 4px;
+}
+
+.paso p {
+  font-size: 0.85rem;
+  color: var(--texto-2);
+  margin: 0;
 }
 
 /* ==========================================================================
-   Contenedor Principal y Secciones por Paso
+   Encabezados de sección y controles
    ========================================================================== */
-.main-container {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 20px 24px 64px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-.step-section {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
-}
-
 .step-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border-subtle);
-  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--borde);
 }
 
-.step-title-group {
-  display: flex;
+.step-header .mono {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
+  margin-bottom: 4px;
 }
 
-.step-number {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--accent-primary);
-  color: #fff;
-  font-weight: 800;
-  font-size: 1.05rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.step-header p {
+  color: var(--texto-2);
+  font-size: 0.95rem;
+  max-width: 46rem;
+  margin: 4px 0 0;
+}
+
+/* Inputs, selects, sliders y casillas */
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--tinta);
+  margin-bottom: 4px;
+}
+
+input[type="number"],
+input[type="text"],
+select,
+textarea,
+.field-input,
+.field-select {
+  width: 100%;
+  font: inherit;
+  font-size: 0.9rem;
+  background: var(--campo);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 8px 10px;
+  color: var(--tinta);
+  min-height: 38px;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible,
+.btn:focus-visible,
+.btn-sec:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--tierra);
+  outline-offset: 1px;
+}
+
+input[type="range"],
+.range-slider {
+  width: 100%;
+  accent-color: var(--tierra);
+  padding: 0;
+  border: 0;
+  background: none;
+  min-height: 0;
+  cursor: pointer;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--oliva);
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+  cursor: pointer;
   flex-shrink: 0;
 }
 
-.step-title-group h2 {
-  margin: 0;
-  font-size: 1.32rem;
-  font-weight: 800;
-  color: var(--text-primary);
+/* ==========================================================================
+   Semáforo de vulnerabilidades y estados
+   ========================================================================== */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 2px;
+  line-height: 1.4;
 }
 
-.step-title-group p {
-  margin: 2px 0 0;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+.estado::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.estado.ok,
+.estado.bajo,
+.estado.verde {
+  color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.estado.alerta,
+.estado.medio,
+.estado.amarillo {
+  color: var(--alerta);
+  background: var(--alerta-bg);
+}
+
+.estado.riesgo,
+.estado.alto,
+.estado.rojo {
+  color: var(--riesgo);
+  background: var(--riesgo-bg);
+}
+
+/* Etiquetas de datos de ejemplo */
+.tag-ejemplo {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--alerta);
+  background: var(--alerta-bg);
+  padding: 2px 6px;
+  border-radius: 2px;
+  border: 1px solid var(--borde);
 }
 
 /* ==========================================================================
-   PASO 1: Mi Terreno (Mapa Satelital + Resumen Biofísico)
+   Paso 1: Mi terreno (selector de parcelas, mapa y tarjeta de datos)
    ========================================================================== */
 .parcela-selector-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .parcela-selector-label {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--text-secondary);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--gris);
+  margin-right: 4px;
 }
 
 .parcela-btn {
-  min-height: 46px;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--border-strong);
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  font-weight: 700;
+  background: transparent;
+  color: var(--oliva);
+  border: 1px solid var(--oliva);
+  border-radius: var(--radio);
+  padding: 8px 12px;
+  font: 600 0.85rem var(--fuente);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.16s ease;
+  gap: 6px;
 }
 
 .parcela-btn:hover {
-  border-color: var(--accent-primary);
-  background: var(--accent-primary-soft);
+  background: var(--papel-claro);
 }
 
 .parcela-btn.active {
-  background: var(--accent-primary);
-  color: #fff;
-  border-color: var(--accent-primary);
-  box-shadow: 0 3px 10px rgba(35, 107, 56, 0.25);
+  background: var(--oliva);
+  color: var(--texto-nav);
+  border-color: var(--oliva);
 }
 
 .terreno-grid {
   display: grid;
-  grid-template-columns: 1.35fr 1fr;
-  gap: 22px;
-  align-items: stretch;
+  grid-template-columns: 3fr 2fr;
+  gap: 24px;
+  align-items: start;
 }
 
 .map-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .map-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
-  background: var(--bg-elevated);
+  background: var(--papel-claro);
   padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
-  font-size: 0.84rem;
+  border: 1px solid var(--borde);
+  border-radius: 0;
+  font-size: 0.85rem;
+  color: var(--texto-2);
 }
 
 .map-container {
   width: 100%;
-  height: 410px;
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--border-strong);
+  height: 400px;
+  border: 1px solid var(--borde);
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .terreno-telemetry {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
-
-.telemetry-kpis {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.kpi-box {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 14px;
-}
-
-.kpi-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.kpi-source-tag {
-  font-size: 0.68rem;
-  background: var(--accent-nasa-soft);
-  color: var(--accent-nasa);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 700;
-}
-
-.kpi-value {
-  margin-top: 6px;
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-}
-
-.kpi-sub {
-  margin-top: 3px;
-  font-size: 0.82rem;
-  color: var(--text-secondary);
+  gap: 16px;
 }
 
 .vulnerability-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  background: var(--papel-claro);
+  border: 1px solid var(--borde);
+  border-radius: 0;
   padding: 14px 16px;
 }
 
 .vulnerability-card h3 {
-  margin: 0 0 10px;
   font-size: 0.95rem;
-  font-weight: 800;
+  color: var(--oliva);
+  margin: 0 0 8px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -491,52 +628,27 @@ body {
 
 .vuln-badges {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
-}
-
-.vuln-badge {
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.vuln-badge.alto {
-  background: var(--sem-rojo-bg);
-  color: var(--sem-rojo-text);
-  border: 1px solid var(--sem-rojo-border);
-}
-
-.vuln-badge.medio {
-  background: var(--sem-amarillo-bg);
-  color: var(--sem-amarillo-text);
-  border: 1px solid var(--sem-amarillo-border);
-}
-
-.vuln-badge.bajo {
-  background: var(--sem-verde-bg);
-  color: var(--sem-verde-text);
-  border: 1px solid var(--sem-verde-border);
+  align-items: flex-start;
 }
 
 /* ==========================================================================
-   PASO 2: Mi Suelo, Historial y Prioridades
+   Paso 2: Suelo, historial y prioridades
    ========================================================================== */
 .paso2-grid {
   display: grid;
-  grid-template-columns: 1fr 1.15fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
+  align-items: start;
 }
 
 .panel-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 18px 20px;
+  background: var(--papel-claro);
+  border: 1px solid var(--borde);
+  border-top: 3px solid var(--oliva);
+  border-radius: 0;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -544,31 +656,22 @@ body {
 
 .panel-card-header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  border-bottom: 1px solid var(--borde);
+  padding-bottom: 8px;
 }
 
 .panel-card-header h3 {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--text-primary);
-}
-
-.soil-origin-badge {
-  font-size: 0.76rem;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--accent-nasa-soft);
-  color: var(--accent-nasa);
-}
-
-.soil-origin-badge.editado {
-  background: var(--accent-terracotta-soft);
-  color: var(--accent-terracotta);
+  color: var(--oliva);
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .form-grid-3 {
@@ -586,120 +689,82 @@ body {
 .field-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-}
-
-.field-group label {
-  font-size: 0.83rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-}
-
-.field-input,
-.field-select {
-  min-height: 44px;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--border-strong);
-  background: #fff;
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 0.92rem;
-  font-weight: 600;
-}
-
-.field-input:focus,
-.field-select:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(35, 107, 56, 0.18);
 }
 
 .checkbox-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-  padding: 10px 12px;
-  background: #fff;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
+  padding: 8px 0;
+  border-top: 1px dotted var(--borde);
   cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--tinta);
 }
 
 .checkbox-row input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--accent-primary);
-  cursor: pointer;
+  margin-top: 4px;
 }
 
-/* Sliders de Prioridades del Agricultor */
 .sliders-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .slider-item {
-  background: #fff;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dotted var(--borde);
+}
+
+.slider-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
 }
 
 .slider-top {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .slider-label {
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  display: flex;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--tinta);
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  margin: 0;
 }
 
 .slider-weight-badge {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: var(--accent-primary-soft);
-  color: var(--accent-primary);
-}
-
-.range-slider {
-  width: 100%;
-  height: 8px;
-  accent-color: var(--accent-primary);
-  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--gris);
+  font-variant-numeric: tabular-nums;
 }
 
 .slider-scale-labels {
   display: flex;
   justify-content: space-between;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--gris);
   margin-top: 4px;
 }
 
 .scenario-box {
-  background: var(--accent-terracotta-soft);
-  border: 1px solid rgba(184, 84, 24, 0.35);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
+  background: var(--papel);
+  border: 1px solid var(--borde);
+  border-radius: 0;
+  padding: 12px;
 }
 
 /* ==========================================================================
-   PASO 3: Comparativa de Rotaciones (Tarjetas + Explicabilidad NASA 5 Puntos)
+   Paso 3: Comparativa de rotaciones, gráficos y tablas
    ========================================================================== */
 .engine-meta-bar {
   display: flex;
@@ -707,47 +772,41 @@ body {
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 10px 16px;
-  margin-bottom: 20px;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  border-bottom: 1px dotted var(--borde);
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--gris);
 }
 
 .rotations-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 16px;
 }
 
 .rotation-card {
-  background: var(--bg-surface);
-  border: 2px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 20px;
+  background: var(--papel-claro);
+  border: 1px solid var(--borde);
+  border-top: 3px solid var(--oliva);
+  border-radius: 0;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
-  position: relative;
+  gap: 12px;
 }
 
 .rotation-card.rank-1 {
-  border-color: var(--sem-verde-border);
-  box-shadow: var(--shadow-md);
+  border-top: 4px solid var(--tierra);
 }
 
 .rotation-card.actual-card {
-  border-color: var(--sem-rojo-border);
-  background: #FFFAFA;
+  border-top: 3px solid var(--riesgo);
 }
 
 .rotation-card.selected-for-chart {
-  outline: 3px solid var(--accent-nasa);
-  outline-offset: 2px;
+  outline: 2px solid var(--tierra);
+  outline-offset: 1px;
 }
 
 .rot-card-header {
@@ -755,218 +814,202 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  border-bottom: 1px solid var(--borde);
+  padding-bottom: 8px;
 }
 
 .rot-title-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.rot-strategy-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.76rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 4px 10px;
-  border-radius: 999px;
-  width: fit-content;
-}
-
-.rot-strategy-badge.verde {
-  background: var(--sem-verde-bg);
-  color: var(--sem-verde-text);
-  border: 1px solid var(--sem-verde-border);
-}
-
-.rot-strategy-badge.amarillo {
-  background: var(--sem-amarillo-bg);
-  color: var(--sem-amarillo-text);
-  border: 1px solid var(--sem-amarillo-border);
-}
-
-.rot-strategy-badge.rojo {
-  background: var(--sem-rojo-bg);
-  color: var(--sem-rojo-text);
-  border: 1px solid var(--sem-rojo-border);
+  align-items: flex-start;
 }
 
 .rot-card-title {
   margin: 4px 0 0;
-  font-size: 1.08rem;
-  font-weight: 800;
-  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tinta);
 }
 
 .irr-score-badge {
   text-align: right;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
-  min-width: 92px;
   flex-shrink: 0;
 }
 
 .irr-score-num {
-  font-family: var(--font-mono);
-  font-size: 1.45rem;
-  font-weight: 800;
+  font-family: var(--fuente);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.5rem;
+  font-weight: 700;
   line-height: 1.1;
-  color: var(--text-primary);
+  color: var(--oliva);
 }
 
 .irr-score-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--gris);
 }
 
-/* Línea de Tiempo de 3 Años dentro de cada tarjeta */
+/* Línea de tiempo de 3 años */
 .timeline-3y {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  background: var(--bg-elevated);
-  padding: 12px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
+  gap: 8px;
 }
 
 .year-node {
-  background: #fff;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  background: var(--papel);
+  border: 1px solid var(--borde);
+  border-radius: 0;
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  position: relative;
+  gap: 2px;
 }
 
 .year-label {
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--gris);
 }
 
 .crop-name-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--tinta);
 }
 
 .crop-family-tag {
   font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--accent-primary);
+  color: var(--oliva);
 }
 
 .crop-meta-mini {
-  font-size: 0.74rem;
-  color: var(--text-secondary);
-  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--texto-2);
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dotted var(--borde);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Barras de Sub-índices y Métricas Traducidas al Agricultor */
+/* Filas de subíndices en formato técnico */
 .subindices-bars {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
 }
 
 .subbar-item {
-  background: var(--bg-elevated);
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
+  padding: 6px 0;
+  border-bottom: 1px dotted var(--borde);
+}
+
+.subbar-item:last-child {
+  border-bottom: 0;
 }
 
 .subbar-head {
   display: flex;
   justify-content: space-between;
-  font-size: 0.78rem;
-  font-weight: 700;
-  margin-bottom: 5px;
+  align-items: baseline;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.subbar-head span:first-child {
+  color: var(--gris);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.subbar-head span:last-child {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--tinta);
 }
 
 .subbar-track {
   width: 100%;
-  height: 7px;
-  background: #E0DBD1;
-  border-radius: 999px;
+  height: 4px;
+  background: var(--borde);
+  border-radius: 0;
   overflow: hidden;
 }
 
 .subbar-fill {
   height: 100%;
-  border-radius: 999px;
-  background: var(--accent-primary);
+  background: var(--oliva);
 }
 
-.subbar-fill.agua { background: #1971C2; }
-.subbar-fill.nitrogeno { background: #2B8A3E; }
-.subbar-fill.mos { background: #86592D; }
-.subbar-fill.rent { background: #D97706; }
+.subbar-fill.agua { background: #6F8A9A; }
+.subbar-fill.nitrogeno { background: var(--oliva); }
+.subbar-fill.mos { background: var(--tierra); }
+.subbar-fill.rent { background: var(--alerta); }
 
 .subbar-translation {
-  font-size: 0.76rem;
-  color: var(--text-secondary);
-  margin-top: 5px;
+  font-size: 0.8rem;
+  color: var(--texto-2);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Acordeón de las 5 Dimensiones Oficiales NASA */
+/* Explicación 5 dimensiones y <details> */
 .explain-5-box {
-  border-top: 1px solid var(--border-subtle);
-  padding-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .explain-summary-text {
-  font-size: 0.88rem;
-  color: var(--text-primary);
+  font-size: 0.85rem;
+  color: var(--texto-2);
   margin: 0;
-  background: var(--bg-elevated);
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  border-left: 4px solid var(--accent-primary);
+  padding: 8px 12px;
+  background: var(--papel);
+  border-left: 3px solid var(--oliva);
 }
 
 .rotation-card.actual-card .explain-summary-text {
-  border-left-color: var(--sem-rojo-border);
-  background: var(--sem-rojo-bg);
+  border-left-color: var(--riesgo);
 }
 
-.explain-details {
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  overflow: hidden;
+details {
+  background: var(--papel-claro);
+  border: 1px solid var(--borde);
+  border-radius: 0;
+  padding: 12px 16px;
 }
 
-.explain-details summary {
-  padding: 10px 14px;
-  font-size: 0.85rem;
-  font-weight: 700;
+summary {
+  color: var(--oliva);
+  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
-  color: var(--accent-nasa);
-  background: var(--bg-elevated);
-  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+details code,
+.formula {
+  font-family: var(--mono);
+  font-size: 0.85rem;
 }
 
 .explain-details-body {
-  padding: 12px 14px;
-  font-size: 0.84rem;
+  padding-top: 12px;
+  margin-top: 8px;
+  border-top: 1px dotted var(--borde);
+  font-size: 0.85rem;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -974,17 +1017,15 @@ body {
 
 .explain-block h4 {
   margin: 0 0 4px;
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--oliva);
 }
 
 .explain-block ul {
   margin: 0;
   padding-left: 18px;
-  color: var(--text-secondary);
+  color: var(--texto-2);
 }
 
 .explain-block li {
@@ -993,255 +1034,211 @@ body {
 
 .card-footer-actions {
   margin-top: auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
   padding-top: 8px;
 }
 
 .btn-ver-grafico {
   width: 100%;
-  min-height: 42px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--accent-nasa);
-  background: #fff;
-  color: var(--accent-nasa);
-  font-family: var(--font-sans);
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.16s ease;
+  justify-content: center;
 }
 
-.btn-ver-grafico:hover,
 .rotation-card.selected-for-chart .btn-ver-grafico {
-  background: var(--accent-nasa);
-  color: #fff;
+  background: var(--oliva);
+  color: var(--texto-nav);
 }
 
 /* ==========================================================================
-   Gráficos Interactivos (Balance Hídrico 36m + Historial Satelital HLS)
+   Gráficos (sin fondos de color ni sombras)
    ========================================================================== */
 .charts-grid {
   display: grid;
-  grid-template-columns: 1.25fr 1fr;
-  gap: 22px;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
   margin-top: 24px;
 }
 
 .chart-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 18px;
+  background: var(--papel-claro);
+  border: 1px solid var(--borde);
+  border-top: 3px solid var(--oliva);
+  border-radius: 0;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .chart-card h3 {
   margin: 0;
-  font-size: 1.02rem;
-  font-weight: 800;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--oliva);
 }
 
 .chart-card p {
   margin: 0;
-  font-size: 0.84rem;
-  color: var(--text-secondary);
+  font-size: 0.85rem;
+  color: var(--texto-2);
 }
 
 .chart-canvas-wrap {
   position: relative;
-  height: 290px;
+  height: 280px;
   width: 100%;
-  background: #fff;
-  border-radius: var(--radius-sm);
-  padding: 10px;
-  border: 1px solid var(--border-subtle);
+  padding: 8px 0 0;
 }
 
 /* ==========================================================================
-   Inspector de Cultivos Vetados (Semáforo Rojo con Razón Exacta)
+   Cultivos descartados y Panel "Ver cómo lo calculamos"
    ========================================================================== */
 .vetados-section {
   margin-top: 24px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 18px 20px;
-}
-
-.vetados-section h3 {
-  margin: 0 0 6px;
-  font-size: 1.05rem;
-  font-weight: 800;
+  background: var(--papel-claro);
+  border: 1px solid var(--borde);
+  border-top: 3px solid var(--oliva);
+  border-radius: 0;
+  padding: 16px;
 }
 
 .vetados-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
 .vetado-item {
-  background: #fff;
-  border: 1px solid var(--border-subtle);
-  border-left: 4px solid var(--sem-rojo-border);
-  border-radius: var(--radius-sm);
+  background: var(--papel);
+  border: 1px solid var(--borde);
+  border-left: 3px solid var(--riesgo);
+  border-radius: 0;
   padding: 10px 12px;
-  font-size: 0.84rem;
+  font-size: 0.85rem;
 }
 
 .vetado-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: 800;
+  gap: 8px;
+  font-weight: 600;
   margin-bottom: 4px;
 }
 
 .vetado-reason {
-  color: var(--text-secondary);
+  color: var(--texto-2);
   margin: 0;
-}
-
-/* ==========================================================================
-   Modal Científico para el Jurado ("Ver cómo lo calculamos")
-   ========================================================================== */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-  background: rgba(15, 28, 20, 0.65);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.modal-backdrop[hidden] {
-  display: none !important;
-}
-
-.modal-dialog {
-  background: var(--bg-surface);
-  border-radius: var(--radius-lg);
-  max-width: 960px;
-  width: 100%;
-  max-height: 88vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-strong);
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-header {
-  position: sticky;
-  top: 0;
-  background: var(--accent-nasa);
-  color: #fff;
-  padding: 18px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  z-index: 10;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 800;
-}
-
-.btn-close-modal {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: var(--radius-sm);
-  padding: 8px 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.modal-body {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.sci-table {
-  width: 100%;
-  border-collapse: collapse;
   font-size: 0.85rem;
 }
 
-.sci-table th,
-.sci-table td {
-  border: 1px solid var(--border-subtle);
-  padding: 10px 12px;
-  text-align: left;
+/* Tablas institucionales */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
 }
 
-.sci-table th {
-  background: var(--bg-elevated);
-  font-weight: 800;
+th {
+  text-align: left;
+  color: var(--oliva);
+  font-weight: 600;
+  border-bottom: 2px solid var(--oliva);
+  padding: 8px;
+}
+
+td {
+  border-bottom: 1px solid var(--borde);
+  padding: 8px;
+  color: var(--tinta);
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .formula-card {
-  background: var(--bg-elevated);
-  border-left: 4px solid var(--accent-nasa);
+  background: var(--papel);
+  border: 1px solid var(--borde);
+  border-left: 3px solid var(--oliva);
   padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--tinta);
+  margin: 12px 0;
 }
 
 /* ==========================================================================
-   Responsividad Móvil y Tableta (Campo)
+   Pie de página
    ========================================================================== */
-@media (max-width: 1080px) {
+footer {
+  background: var(--oliva);
+  color: var(--texto-nav);
+  font-size: 0.85rem;
+  padding: 32px 0;
+}
+
+footer .contenedor {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+footer p {
+  color: var(--texto-nav);
+  margin: 0 0 4px;
+}
+
+footer a {
+  color: var(--texto-nav);
+  text-underline-offset: 3px;
+}
+
+footer a:hover {
+  color: var(--subrayado-nav);
+}
+
+/* ==========================================================================
+   Punto de quiebre móvil (760 px: todo pasa a una columna)
+   ========================================================================== */
+@media (max-width: 760px) {
+  .contenedor,
+  .main-container {
+    padding: 0 20px;
+  }
+
+  section,
+  .step-section {
+    padding: 40px 0;
+  }
+
+  .hero .contenedor,
+  .pasos,
   .terreno-grid,
   .paso2-grid,
   .rotations-grid,
-  .charts-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 680px) {
-  .header-inner {
-    padding: 10px 16px;
-  }
-  .main-container {
-    padding: 14px 14px 48px;
-  }
-  .step-section {
-    padding: 16px;
-  }
-  .telemetry-kpis,
+  .charts-grid,
   .form-grid-3,
   .form-grid-2,
-  .timeline-3y,
-  .subindices-bars {
+  .timeline-3y {
     grid-template-columns: 1fr;
   }
-}
 
-/* Datos todavía provisionales (ver parcela.estado_datos y scripts/generar_parcelas.py) */
-.tag-ejemplo, .kpi-source-tag.tag-ejemplo {
-  background: #fff1d6 !important;
-  color: #8a4b00 !important;
-  border: 1px dashed #d08a1e !important;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 999px;
-  vertical-align: middle;
+  .hero::before {
+    background-size: 100% 100%;
+    opacity: 0.5;
+  }
+
+  .nav-inner {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  nav.nav-principal a.nav-link {
+    margin-left: 0;
+    margin-right: 16px;
+  }
 }

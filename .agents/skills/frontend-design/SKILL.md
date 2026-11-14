@@ -72,20 +72,15 @@ Keep the tone conversational: plain verbs, sentence case, no filler, with tone m
 
 ---
 
-## Project Context: RotaSat (NASA Space Apps Challenge 2026 · Riobamba)
+## Project Context: AllpaWiñay / RotaSat (NASA Space Apps Challenge 2026 · Riobamba)
 
-Do not ask the user what this project is about; use this established context by default:
+Do not ask the user what this project is about; use this established context and style guide by default:
 
-- **Product:** **RotaSat** — Herramienta de soporte a la decisión para rotación de cultivos resiliente a 36 meses, impulsada por datos de observación de la Tierra de la NASA (`Web/index.html`).
-- **Target Audience & Context:** Agricultores, técnicos agrónomos y jurados del **NASA Space Apps Challenge 2026 (sede Riobamba, Ecuador)**. Contempla dos pisos bioclimáticos principales de demostración en Ecuador:
-  - **Sierra Andina:** Licto, Chimborazo (~2900 m s.n.m., cultivos como papa, haba, chocho, cebada, quinua, maíz suave, arveja, melloco, avena-vicia).
-  - **Costa:** El Guabo, El Oro (~20 m s.n.m., cultivos como maíz duro, arroz, soya, fréjol caupí, maní, yuca, sandía, sorgo, canavalia).
-- **Primary Job of the UI:** Diagnosticar los riesgos de la rotación actual del agricultor (monocultivo, vetos fitosanitarios por familia botánica, piso altitudinal, déficit hídrico, suelo desnudo) y comparar las **3 mejores secuencias recomendadas de 36 meses** mediante el **Índice de Rotación Resiliente (IRR)** ponderado según 4 prioridades del usuario: Agua ($I_{\text{H2O}}$), Nitrógeno ($I_{\text{N}}$), Materia Orgánica ($I_{\text{MOS}}$) y Rentabilidad ($I_{\text{Rent}}$).
-- **Data Sources & Domain Vernacular:**
-  - **NASA POWER** (clima mensual, radiación extraterrestre y $ET_0$ por Hargreaves FAO-56 corregida por gradiente térmico altitudinal).
-  - **NASADEM / SRTM** (altitud y pendiente para escorrentía y erosión).
-  - **SMAP L4** (`sm_rootzone` humedad radicular inicial) y **GPM IMERG** (precipitación efectiva USDA-SCS).
-  - **HLS Landsat + Sentinel-2** vía AppEEARS (series históricas de NDVI y NDTI con máscara Fmask para detectar meses de suelo desnudo).
-  - **SoilGrids (ISRIC)** (pH, materia orgánica y textura del suelo).
-- **Aesthetic Direction Hint:** Combinar la claridad de un **cuaderno de campo agronómico ecuatoriano** con la precisión instrumental de **cartografía y telemetría satelital de observación terrestre** — evitando la apariencia de un dashboard SaaS genérico.
+- **Product:** **AllpaWiñay** (`index.html`, `css/styles.css`, `js/app.js` y `Web/index.html`) — Sistema de apoyo a la decisión para rotación de cultivos resiliente a 36 meses, impulsado por datos de observación de la Tierra de la NASA.
+- **Official Visual Style Guide (AllpaWiñay — Guía de estilo visual):**
+  - **Paleta`:root` obligatoria:** `--papel: #EFEADC`, `--papel-claro: #F7F3E8`, `--campo: #FBF8F0`, `--banda: #E4DDCB`, `--tinta: #2B2A22`, `--texto-2: #5A5440`, `--gris: #6B6450`, `--oliva: #3E4A1E`, `--tierra: #A6512B`, `--tierra-hover: #8C4322`, `--borde: #D6CDB4`, `--curva: #C9BFA2`, `--texto-nav: #F4EFE2`, `--subrayado-nav: #D9A178`, `--ok: #4F6B1F` (`#E6EAD3`), `--alerta: #B7791F` (`#F4E6C8`), `--riesgo: #9B2C1F` (`#F2D9D2`).
+  - **Tipografía:** `Public Sans` (`400;500;600;700`) para todo el texto e `IBM Plex Mono` (`400;500`) para coordenadas, etiquetas técnicas, fórmulas y numeración de pasos. Mayúscula inicial (sentence case), sin cursivas decorativas.
+  - **Geometría y superficies:** Cero sombras (`box-shadow: none`), cero degradados, radio `4px` en botones e inputs, radio `0` a `2px` en tarjetas. Un solo botón terracota (`#A6512B`) por pantalla.
+  - **Iconos y números:** Cero emojis; todos los iconos son Lucide (`stroke-width: 1.75`, `20px`, color oliva `#3E4A1E`). Cifras con `font-variant-numeric: tabular-nums`, espacio fino en miles (`2 950 m`) y unidades en `--gris`.
+  - **Gráficos:** NDVI en `#3E4A1E` oliva, NDTI en `#A6512B` terracota, Lluvia en `#6F8A9A` barras, `ET₀`/`ETc` en `#B7791F` ocre, Déficit en `#9B2C1F` barras, umbral de suelo desnudo en `#9B2C1F` punteado (`[4, 4]`), cuadrícula horizontal `#D6CDB4`.
 
