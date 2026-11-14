@@ -1,0 +1,27 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "parcela_sierra",
+        "nombre": "Parcela Sierra - Licto, Chimborazo",
+        "area_ha_aprox": 9.5,
+        "historia_declarada": "pendiente (Colegio 2)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-78.6065828, -1.8053477],
+          [-78.6029166, -1.8053825],
+          [-78.6045427, -1.8078617],
+          [-78.6067485, -1.8076134],
+          [-78.6071321, -1.8061189],
+          [-78.6069316, -1.8055829],
+          [-78.6067921, -1.8054522],
+          [-78.6065828, -1.8053477]
+        ]]
+      }
+    }
+  ]
+}
