@@ -1034,14 +1034,14 @@ window.PARCELAS_DEMO = {
       }
     ],
     "anomalia": {
-      "fuente": "GPM IMERG + SMAP L4",
+      "fuente": "EJEMPLO (dato provisional, falta dato real)",
       "res_km": 10,
       "pct": -18,
       "ventana": "ago–oct 2026",
-      "mensaje": "Su zona viene 18 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
+      "mensaje": "EJEMPLO: Su zona viene 18 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
     },
     "suelo": {
-      "fuente": "SoilGrids 250 m",
+      "fuente": "EJEMPLO (dato provisional, falta dato real)",
       "textura": "Franco",
       "arcilla_pct": 24.0,
       "arena_pct": 41.0,
@@ -1277,7 +1277,15 @@ window.PARCELAS_DEMO = {
       "papa",
       "papa"
     ],
-    "nematodo_declarado": false
+    "nematodo_declarado": false,
+    "estado_datos": {
+      "clima": "EJEMPLO (dato provisional, falta dato real)",
+      "anomalia": "EJEMPLO (dato provisional, falta dato real)",
+      "suelo": "EJEMPLO (dato provisional, falta dato real)",
+      "ndvi": "EJEMPLO (dato provisional, falta dato real)",
+      "smap": "sin dato",
+      "terreno": "EJEMPLO (verificar con NASADEM 30 m)"
+    }
   },
   "parcela_el_oro_2": {
     "id": "parcela_el_oro_2",
@@ -1421,14 +1429,14 @@ window.PARCELAS_DEMO = {
       }
     ],
     "anomalia": {
-      "fuente": "GPM IMERG + SMAP L4",
+      "fuente": "EJEMPLO (dato provisional, falta dato real)",
       "res_km": 10,
       "pct": -21,
       "ventana": "ago–oct 2026",
-      "mensaje": "Su zona viene 21 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
+      "mensaje": "EJEMPLO: Su zona viene 21 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
     },
     "suelo": {
-      "fuente": "SoilGrids 250 m",
+      "fuente": "EJEMPLO (dato provisional, falta dato real)",
       "textura": "Franco",
       "arcilla_pct": 28.0,
       "arena_pct": 36.0,
@@ -1668,7 +1676,15 @@ window.PARCELAS_DEMO = {
       "maiz_duro",
       "arroz"
     ],
-    "nematodo_declarado": false
+    "nematodo_declarado": false,
+    "estado_datos": {
+      "clima": "EJEMPLO (dato provisional, falta dato real)",
+      "anomalia": "EJEMPLO (dato provisional, falta dato real)",
+      "suelo": "EJEMPLO (dato provisional, falta dato real)",
+      "ndvi": "EJEMPLO (dato provisional, falta dato real)",
+      "smap": "sin dato",
+      "terreno": "EJEMPLO (verificar con NASADEM 30 m)"
+    }
   },
   "parcela_colta_3": {
     "id": "parcela_colta_3",
@@ -1812,14 +1828,14 @@ window.PARCELAS_DEMO = {
       }
     ],
     "anomalia": {
-      "fuente": "GPM IMERG + SMAP L4",
+      "fuente": "EJEMPLO (dato provisional, falta dato real)",
       "res_km": 10,
       "pct": -18,
       "ventana": "ago–oct 2026",
-      "mensaje": "Su zona viene 18 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
+      "mensaje": "EJEMPLO: Su zona viene 18 % más seca que un año normal (lluvias ago–oct, satélite GPM de la NASA, 10 km). Por eso damos más peso al ahorro de agua."
     },
     "suelo": {
-      "fuente": "SoilGrids 250 m",
+      "fuente": "EJEMPLO (dato provisional, falta dato real)",
       "textura": "Franco",
       "arcilla_pct": 21.0,
       "arena_pct": 45.0,
@@ -2055,6 +2071,14 @@ window.PARCELAS_DEMO = {
       "papa",
       "cebada"
     ],
-    "nematodo_declarado": false
+    "nematodo_declarado": false,
+    "estado_datos": {
+      "clima": "EJEMPLO (dato provisional, falta dato real)",
+      "anomalia": "EJEMPLO (dato provisional, falta dato real)",
+      "suelo": "EJEMPLO (dato provisional, falta dato real)",
+      "ndvi": "EJEMPLO (dato provisional, falta dato real)",
+      "smap": "sin dato",
+      "terreno": "EJEMPLO (verificar con NASADEM 30 m)"
+    }
   }
 };
