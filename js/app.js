@@ -283,7 +283,7 @@
     if (!window.DatosVivo) return;
     const token = (state.tokenLote = (state.tokenLote || 0) + 1);
     const filas = {
-      terreno: { texto: 'Altitud y pendiente · NASA SRTM 30 m', ok: null },
+      terreno: { texto: 'Altitud y pendiente · SRTM 30 m (OpenTopoData / Open-Elevation / Open-Meteo)', ok: null },
       clima: { texto: 'Clima 2015–2024 · NASA POWER', ok: null },
       anomalia: { texto: 'Anomalía de lluvia · NASA POWER', ok: null },
       suelo: { texto: 'Suelo · ISRIC SoilGrids 250 m', ok: null },
@@ -302,10 +302,15 @@
     const p = state.parcelasActivas[lote.id];
     if (!p) return;
     const falla = 'EJEMPLO (no respondió el servicio; se mantienen valores de la parcela de demo)';
-    if (r.terreno) {
-      Object.assign(p.terreno, r.terreno);
+    if (r.terreno && !r.terreno.aproximado) {
+      const { fuente, ...t } = r.terreno;
+      Object.assign(p.terreno, t);
       p.region = r.region || p.region;
-      p.estado_datos.terreno = 'NASA SRTM 30 m (vía OpenTopoData), 5 puntos';
+      p.estado_datos.terreno = `${fuente || 'SRTM 30 m'}, 5 puntos`;
+    } else if (r.terreno) {
+      p.terreno.elev_m = r.terreno.elev_m;
+      p.region = r.region || p.region;
+      p.estado_datos.terreno = 'EJEMPLO: altitud aproximada de la celda NASA POWER (~50 km); pendiente no verificada';
     } else { p.estado_datos.terreno = falla; }
     if (r.clima) {
       p.clima_mensual = r.clima.meses;
@@ -321,7 +326,7 @@
     } else { p.estado_datos.suelo = falla; p.suelo.fuente = falla; }
     state.parcelasOriginales[lote.id] = clonar(p);
 
-    const nOk = ['terreno', 'clima', 'anomalia', 'suelo'].filter(k => r[k]).length;
+    const nOk = ['terreno', 'clima', 'anomalia', 'suelo'].filter(k => r[k] && !(k === 'terreno' && r[k].aproximado)).length;
     pintar(nOk === 4
       ? 'Listo: su lote ya usa datos reales de la NASA y SoilGrids.'
       : `Se cargaron ${nOk} de 4 fuentes; lo demás queda marcado como EJEMPLO.`);

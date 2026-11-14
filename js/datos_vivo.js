@@ -172,10 +172,29 @@
     const d = 0.0005; // ~55 m
     const pts = [[lat, lon], [lat + d, lon], [lat - d, lon], [lat, lon + d], [lat, lon - d]];
 
-    const pTerreno = fetchJson('https://api.opentopodata.org/v1/srtm30m?locations=' +
-      pts.map(p => p[0].toFixed(5) + ',' + p[1].toFixed(5)).join('|'), 20000)
-      .then(j => procesarTerreno(j, pts)).catch(() => null)
-      .then(r => { avisar('terreno', !!r); return r; });
+    // Elevación SRTM 30 m: tres servicios en cascada (todos sirven el SRTM de la NASA);
+    // si ninguno responde, al menos la altitud de la celda de NASA POWER.
+    const locs = pts.map(p => p[0].toFixed(5) + ',' + p[1].toFixed(5)).join('|');
+    const locs2 = pts.map(p => p[0].toFixed(5) + ',' + p[1].toFixed(5)).join(',');
+    const fuentesElev = [
+      ['OpenTopoData (SRTM 30 m)', () => fetchJson('https://api.opentopodata.org/v1/srtm30m?locations=' + locs, 15000)
+        .then(j => procesarTerreno(j, pts))],
+      ['Open-Elevation (SRTM)', () => fetchJson('https://api.open-elevation.com/api/v1/lookup?locations=' + locs, 15000)
+        .then(j => procesarTerreno(j, pts))],
+      ['Open-Meteo (Copernicus 90 m)', () => fetchJson('https://api.open-meteo.com/v1/elevation?latitude=' +
+        pts.map(p => p[0].toFixed(5)).join(',') + '&longitude=' + pts.map(p => p[1].toFixed(5)).join(','), 15000)
+        .then(j => procesarTerreno({ results: (j.elevation || []).map(z => ({ elevation: z })) }, pts))]
+    ];
+    const pTerreno = (async () => {
+      for (const [nombre, pedir] of fuentesElev) {
+        try {
+          const r = await pedir();
+          if (r) { r.fuente = nombre; avisar('terreno', true); return r; }
+        } catch (e) { /* siguiente servicio */ }
+      }
+      avisar('terreno', false);
+      return null;
+    })();
     const pClimaRaw = fetchJson(`${base}&parameters=T2M_MAX,T2M_MIN,T2M,PRECTOTCORR&latitude=${la}&longitude=${lo}&start=20150101&end=20241231`, 60000)
       .catch(() => null);
     const pAnom = fetchJson(`${base}&parameters=PRECTOTCORR&latitude=${la}&longitude=${lo}&start=20010101&end=${yyyymmdd(new Date())}`, 60000)
@@ -196,8 +215,12 @@
       return null;
     }).then(r => { avisar('suelo', !!r); return r; });
 
-    const terreno = await pTerreno;
+    let terreno = await pTerreno;
     const climaRaw = await pClimaRaw;
+    if (!terreno && climaRaw && climaRaw.geometry && typeof (climaRaw.geometry.coordinates || [])[2] === 'number') {
+      // Sin servicio de elevación: altitud aproximada de la celda POWER (~50 km); pendiente desconocida
+      terreno = { elev_m: Math.round(climaRaw.geometry.coordinates[2]), fuente: 'celda NASA POWER (~50 km), aproximada', aproximado: true };
+    }
     let clima = null;
     try { clima = climaRaw ? procesarClima(climaRaw, lat, terreno ? terreno.elev_m : null) : null; } catch (e) { clima = null; }
     avisar('clima', !!clima);
