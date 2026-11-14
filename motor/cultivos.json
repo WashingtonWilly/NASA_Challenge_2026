@@ -1,1 +1,40 @@
-
+{
+  "cultivos": [
+    {"id": "papa", "nombre": "Papa", "familia": "Solanaceas", "raiz": "fasciculada",
+     "alt_min": 2600, "alt_max": 3800, "ciclo_dias": 135, "kc": [0.50, 1.15, 0.75],
+     "residuo_t_ha": 1.5, "credito_n": 0, "cn_residuo": "medio", "siembra": ["S1", "S2"],
+     "tolera_helada": false, "beneficio_suelo": [],
+     "rend_t_ha": 0, "precio_usd_t": 0, "costo_usd_ha": 0, "fuente": "FAO-56; INIAP"},
+    {"id": "haba", "nombre": "Haba", "familia": "Fabaceas", "raiz": "pivotante",
+     "alt_min": 2600, "alt_max": 3600, "ciclo_dias": 165, "kc": [0.50, 1.15, 1.10],
+     "residuo_t_ha": 2.5, "credito_n": 40, "cn_residuo": "bajo", "siembra": ["S1", "S2"],
+     "tolera_helada": true, "beneficio_suelo": ["fijador_n", "resiste_helada"],
+     "rend_t_ha": 0, "precio_usd_t": 0, "costo_usd_ha": 0, "fuente": "FAO-56; INIAP"},
+    {"id": "chocho", "nombre": "Chocho (tarwi)", "familia": "Fabaceas", "raiz": "pivotante_profunda",
+     "alt_min": 2600, "alt_max": 3600, "ciclo_dias": 210, "kc": [0.40, 1.00, 0.50],
+     "residuo_t_ha": 3.5, "credito_n": 50, "cn_residuo": "bajo", "siembra": ["S1"],
+     "tolera_helada": true, "beneficio_suelo": ["fijador_n", "descompacta"],
+     "rend_t_ha": 0, "precio_usd_t": 0, "costo_usd_ha": 0, "fuente": "FAO-56; INIAP"},
+    {"id": "cebada", "nombre": "Cebada", "familia": "Poaceas", "raiz": "fasciculada",
+     "alt_min": 2600, "alt_max": 3600, "ciclo_dias": 165, "kc": [0.30, 1.15, 0.25],
+     "residuo_t_ha": 4.0, "credito_n": 0, "cn_residuo": "alto", "siembra": ["S1", "S2"],
+     "tolera_helada": true, "beneficio_suelo": ["cobertura_residuo", "resiste_helada"],
+     "rend_t_ha": 0, "precio_usd_t": 0, "costo_usd_ha": 0, "fuente": "FAO-56; INIAP"},
+    {"id": "quinua", "nombre": "Quinua", "familia": "Amarantaceas", "raiz": "pivotante",
+     "alt_min": 2600, "alt_max": 3600, "ciclo_dias": 165, "kc": [0.50, 1.00, 0.70],
+     "residuo_t_ha": 2.5, "credito_n": 0, "cn_residuo": "medio", "siembra": ["S1"],
+     "tolera_helada": true, "beneficio_suelo": ["descompacta", "resiste_helada"],
+     "rend_t_ha": 0, "precio_usd_t": 0, "costo_usd_ha": 0, "fuente": "FAO-56; INIAP"}
+  ],
+  "pausa_familia": {
+    "Solanaceas": 3,
+    "Brasicaceas": 4,
+    "Apiaceas": 3,
+    "Amarilidaceas": 3,
+    "Cucurbitaceas": 3,
+    "Fabaceas": 2,
+    "Amarantaceas": 2,
+    "Euforbiaceas": 2,
+    "Poaceas": 1
+  }
+}
