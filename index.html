@@ -78,35 +78,10 @@
             <span class="sidebar-badge-num">8</span>
           </button>
 
-          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-vulnerabilidades">
-            <span class="sidebar-item-left">
-              <i data-lucide="shield-alert" class="icono"></i>
-              <span>Vulnerabilidades</span>
-            </span>
-            <span id="sidebar-vuln-badge" class="sidebar-badge-status alto">
-              <span class="status-dot"></span>
-              <span class="status-text">Alto</span>
-            </span>
-          </button>
-
           <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-metodologia">
             <span class="sidebar-item-left">
               <i data-lucide="calculator" class="icono"></i>
               <span>Metodología NASA</span>
-            </span>
-          </button>
-
-          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-admin">
-            <span class="sidebar-item-left">
-              <i data-lucide="settings" class="icono"></i>
-              <span>Administración</span>
-            </span>
-          </button>
-
-          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-cuenta">
-            <span class="sidebar-item-left">
-              <i data-lucide="user" class="icono"></i>
-              <span>Acceso y cuenta</span>
             </span>
           </button>
         </nav>
@@ -597,27 +572,7 @@
           </div>
         </section>
 
-        <!-- MÓDULO 5: VULNERABILIDADES -->
-        <section id="tab-vulnerabilidades" class="step-section tab-panel" data-tab-panel="tab-vulnerabilidades" role="tabpanel" hidden>
-          <div class="step-header">
-            <div class="mono"><i data-lucide="shield-alert" class="icono"></i> Diagnóstico de riesgo</div>
-            <h2>Vulnerabilidades detectadas en la parcela activa</h2>
-            <p>Resumen consolidado de riesgos de erosión por pendiente, heladas nocturnas, suelo descubierto y pausas fitosanitarias.</p>
-          </div>
-          <div class="vulnerability-card">
-            <h3><i data-lucide="shield-check" class="icono"></i> Semáforo de vulnerabilidades del lote</h3>
-            <div id="vuln-badges-mirror" class="vuln-badges">
-              <span class="estado alerta">Seleccione o revise una parcela en "Mi terreno" para actualizar</span>
-            </div>
-          </div>
-          <div style="margin-top: 16px;">
-            <button type="button" class="btn-sec" data-tab-go="tab-terreno">
-              <i data-lucide="map" class="icono"></i> Ir al mapa y ajustar linderos
-            </button>
-          </div>
-        </section>
-
-        <!-- MÓDULO 6: METODOLOGÍA NASA -->
+        <!-- MÓDULO 5: METODOLOGÍA NASA -->
         <section id="tab-metodologia" class="step-section tab-panel" data-tab-panel="tab-metodologia" role="tabpanel" hidden>
           <div class="step-header">
             <div class="mono"><i data-lucide="calculator" class="icono"></i> Transparencia científica</div>
@@ -692,74 +647,6 @@
                 </div>
               </div>
             </details>
-          </div>
-        </section>
-
-        <!-- MÓDULO 7: ADMINISTRACIÓN -->
-        <section id="tab-admin" class="step-section tab-panel" data-tab-panel="tab-admin" role="tabpanel" hidden>
-          <div class="step-header">
-            <div class="mono"><i data-lucide="settings" class="icono"></i> Gestión de datos</div>
-            <h2>Administración del catálogo y parcelas</h2>
-            <p>Respalde la configuración de la parcela activa en formato JSON o restaure los valores de demostración.</p>
-          </div>
-          <div class="paso2-grid">
-            <div class="panel-card">
-              <div class="panel-card-header">
-                <h3><i data-lucide="database" class="icono"></i> Exportar parcela activa</h3>
-              </div>
-              <p style="font-size:0.85rem; color:var(--texto-2); margin:0;">
-                Descargue un archivo JSON con los linderos, parámetros edáficos e historial declarado de la parcela en memoria.
-              </p>
-              <div>
-                <button type="button" id="btn-exportar-parcela" class="btn-sec">
-                  <i data-lucide="download" class="icono"></i> Descargar parcela.json
-                </button>
-              </div>
-            </div>
-            <div class="panel-card">
-              <div class="panel-card-header">
-                <h3><i data-lucide="rotate-ccw" class="icono"></i> Restablecer entorno</h3>
-              </div>
-              <p style="font-size:0.85rem; color:var(--texto-2); margin:0;">
-                Vuelve a los valores iniciales de demostración (Licto y Guano) y limpia ediciones locales.
-              </p>
-              <div>
-                <button type="button" id="btn-admin-reset" class="btn-sec">
-                  Restaurar datos originales
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- MÓDULO 8: ACCESO Y CUENTA -->
-        <section id="tab-cuenta" class="step-section tab-panel" data-tab-panel="tab-cuenta" role="tabpanel" hidden>
-          <div class="step-header">
-            <div class="mono"><i data-lucide="user" class="icono"></i> Perfil de campo</div>
-            <h2>Acceso y cuenta de usuario</h2>
-            <p>Configure su perfil de agricultor o técnico extensionista para personalizar los reportes de campo.</p>
-          </div>
-          <div class="panel-card" style="max-width: 560px;">
-            <div class="panel-card-header">
-              <h3><i data-lucide="user" class="icono"></i> Datos del responsable</h3>
-              <span class="estado ok">Sesión local activa</span>
-            </div>
-            <div class="field-group">
-              <label for="cuenta-nombre">Nombre completo</label>
-              <input type="text" id="cuenta-nombre" class="field-input" value="Equipo Técnico AllpaWiñay" />
-            </div>
-            <div class="field-group">
-              <label for="cuenta-rol">Rol en campo</label>
-              <select id="cuenta-rol" class="field-select">
-                <option value="agricultor">Agricultor / Productor</option>
-                <option value="tecnico" selected>Técnico agrónomo (MAG / INIAP)</option>
-                <option value="investigador">Investigador / Jurado Space Apps</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label for="cuenta-zona">Zona de trabajo principal</label>
-              <input type="text" id="cuenta-zona" class="field-input" value="Riobamba, Chimborazo — Ecuador" />
-            </div>
           </div>
         </section>
 

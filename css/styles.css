@@ -65,17 +65,12 @@ body {
 }
 
 .sidebar-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
   width: 270px;
+  flex-shrink: 0;
   background-color: var(--papel-claro);
   border-right: 1px solid var(--borde);
   display: flex;
   flex-direction: column;
-  z-index: 900;
-  overflow-y: auto;
 }
 
 .sidebar-brand {
@@ -318,7 +313,6 @@ body {
 
 .app-main {
   flex: 1;
-  margin-left: 270px;
   min-width: 0;
 }
 
@@ -1599,11 +1593,9 @@ footer a:hover {
   }
 
   .sidebar-nav {
-    position: sticky;
-    top: 0;
+    position: relative;
     width: 100%;
     height: auto;
-    bottom: auto;
     border-right: 0;
     border-bottom: 1px solid var(--borde);
   }
