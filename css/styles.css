@@ -2184,3 +2184,392 @@ body.modo-tecnico .solo-agricultor {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   Ayudas para el agricultor: medidores, avisos con "¿Qué puede hacer?",
+   barritas de prioridad, letra grande y lectura en voz alta
+   ========================================================================== */
+:root {
+  --info: #3F5A73;
+  --info-bg: #E3E9EE;
+}
+
+/* Letra grande (botón A+): todo lo que usa rem crece */
+html.letra-grande { font-size: 19px; }
+html.letra-grande body { font-size: 19px; }
+html.letra-grande .sidebar-item { font-size: 16px; padding-top: 13px; padding-bottom: 13px; }
+html.letra-grande .estado { font-size: 0.85rem; }
+#btn-letra-grande[aria-pressed="true"] {
+  background-color: var(--oliva);
+  border-color: var(--oliva);
+  color: #FFFFFF;
+}
+
+/* --- Medidores del lote --- */
+.card-medidores h3 { margin-bottom: 10px; }
+.medidores-lote { display: flex; flex-direction: column; gap: 14px; }
+.medidores-barras { display: flex; flex-direction: column; gap: 14px; }
+
+.medidor-cabeza {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+.medidor-titulo { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--tinta); }
+.medidor-emoji { font-size: 1.15rem; line-height: 1; }
+.medidor-valor { font-weight: 700; font-size: 1.05rem; color: var(--oliva); }
+
+.medidor-pista {
+  position: relative;
+  display: flex;
+  height: 14px;
+  margin: 6px 0 4px;
+  border-radius: 999px;
+  overflow: visible;
+  background: var(--banda);
+}
+.medidor-seg { height: 100%; }
+.medidor-seg:first-child { border-radius: 999px 0 0 999px; }
+.medidor-seg:nth-last-child(2) { border-radius: 0 999px 999px 0; }
+.medidor-seg.ok { background: #9DB873; }
+.medidor-seg.alerta { background: #E3B65E; }
+.medidor-seg.riesgo { background: #C9684F; }
+.medidor-seg.info { background: #8FA6B8; }
+
+.medidor-marca {
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 4px solid var(--tinta);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transform: translate(-50%, -50%);
+}
+
+.medidor-veredicto { font-size: 0.88rem; font-weight: 600; }
+.medidor-veredicto.ok { color: var(--ok); }
+.medidor-veredicto.alerta { color: var(--alerta); }
+.medidor-veredicto.riesgo { color: var(--riesgo); }
+.medidor-veredicto.info { color: var(--info); }
+
+.medidores-circulos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--borde);
+}
+
+/* --- Círculo que se llena --- */
+.medidor-circulo { display: flex; align-items: center; gap: 12px; }
+.anillo {
+  --p: 0;
+  --c: var(--oliva);
+  position: relative;
+  flex-shrink: 0;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: conic-gradient(var(--c) calc(var(--p) * 1%), var(--banda) 0);
+  display: grid;
+  place-items: center;
+}
+.anillo::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: var(--campo);
+}
+.anillo.ok { --c: var(--ok); }
+.anillo.alerta { --c: #D69A2D; }
+.anillo.riesgo { --c: var(--riesgo); }
+.anillo-centro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  font-size: 0.8rem;
+}
+.anillo-centro b { font-size: 1.05rem; color: var(--tinta); }
+.anillo-texto { display: flex; flex-direction: column; font-size: 0.85rem; color: var(--texto-2); line-height: 1.35; }
+.anillo-texto strong { color: var(--tinta); font-size: 0.95rem; }
+
+/* --- Avisos con "¿Qué puede hacer?" --- */
+.vuln-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.vuln-cabeza h3 { margin: 0; }
+.avisos-lista { align-items: stretch; gap: 10px; margin-top: 10px; }
+
+.aviso-agro {
+  border: 1px solid var(--borde);
+  border-left: 6px solid var(--ok);
+  background: var(--campo);
+  padding: 10px 12px;
+  border-radius: 4px;
+}
+.aviso-agro.alerta { border-left-color: #D69A2D; background: #FBF5E8; }
+.aviso-agro.riesgo { border-left-color: var(--riesgo); background: #FBF0EC; }
+.aviso-agro.info { border-left-color: var(--info); background: #F2F5F7; }
+.aviso-agro.ok { padding: 8px 12px; }
+
+.aviso-cabeza { display: flex; align-items: center; gap: 10px; }
+.aviso-emoji { font-size: 1.6rem; line-height: 1; }
+.aviso-titulos { display: flex; flex-direction: column; line-height: 1.25; }
+.aviso-titulos strong { font-size: 1rem; color: var(--tinta); }
+.aviso-nivel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.aviso-agro.ok .aviso-nivel { color: var(--ok); }
+.aviso-agro.alerta .aviso-nivel { color: var(--alerta); }
+.aviso-agro.riesgo .aviso-nivel { color: var(--riesgo); }
+.aviso-agro.info .aviso-nivel { color: var(--info); }
+.aviso-porque { margin: 6px 0 0; font-size: 0.9rem; color: var(--texto-2); }
+
+.aviso-acciones { margin-top: 8px; }
+.aviso-acciones summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 2px solid var(--oliva);
+  border-radius: 999px;
+  background: var(--campo);
+  color: var(--oliva);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  list-style: none;
+}
+.aviso-acciones summary::-webkit-details-marker { display: none; }
+.aviso-acciones summary:hover { background: var(--ok-bg); }
+.aviso-acciones summary:focus-visible { outline: 3px solid var(--tierra); outline-offset: 2px; }
+.aviso-acciones[open] summary { background: var(--oliva); color: #FFFFFF; }
+.aviso-acciones ul {
+  margin: 10px 0 2px;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.aviso-acciones li {
+  position: relative;
+  padding-left: 30px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+.aviso-acciones li::before {
+  content: "👉";
+  position: absolute;
+  left: 2px;
+  top: 0;
+}
+.aviso-acciones-suelto { margin: 8px 0 4px; }
+
+.vetado-motivo { margin: 2px 0 4px; font-weight: 700; color: var(--riesgo); font-size: 0.95rem; }
+
+/* --- Botón Escuchar --- */
+.btn-escuchar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 16px;
+  border: 2px solid var(--tierra);
+  border-radius: 999px;
+  background: var(--campo);
+  color: var(--tierra);
+  font: 700 0.95rem var(--fuente);
+  cursor: pointer;
+}
+.btn-escuchar:hover { background: #F6E7DF; }
+.btn-escuchar:focus-visible { outline: 3px solid var(--oliva); outline-offset: 2px; }
+.btn-escuchar.hablando { background: var(--tierra); color: #FFFFFF; animation: pulso-voz 1.2s ease-in-out infinite; }
+@keyframes pulso-voz { 50% { box-shadow: 0 0 0 6px rgba(166, 81, 43, 0.18); } }
+
+/* --- Barritas de prioridad --- */
+.ayuda-gesto { margin: 4px 0 0; font-size: 0.88rem; color: var(--texto-2); }
+.priority-simple-item { flex-wrap: wrap; }
+.prio-slider-wrap { flex: 1 1 220px; min-width: 200px; }
+.prio-slider {
+  --lleno: 50%;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.prio-slider::-webkit-slider-runnable-track {
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--oliva) 0 var(--lleno), var(--banda) var(--lleno) 100%);
+  border: 1px solid var(--borde);
+}
+.prio-slider::-moz-range-track {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--banda);
+  border: 1px solid var(--borde);
+}
+.prio-slider::-moz-range-progress { height: 14px; border-radius: 999px; background: var(--oliva); }
+.prio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 34px;
+  height: 34px;
+  margin-top: -11px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 4px solid var(--tierra);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.prio-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 4px solid var(--tierra);
+}
+.prio-slider:focus-visible { outline: 3px solid var(--tierra); outline-offset: 4px; border-radius: 999px; }
+.prio-slider-escala {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--texto-2);
+  margin-top: -2px;
+}
+.prio-slider-estado { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.prio-iconos { font-size: 1.05rem; letter-spacing: 1px; min-height: 1.4em; }
+.prio-texto { font-size: 1rem; color: var(--oliva); }
+
+/* --- Tarjetas de rotación: círculo de puntaje y mini barras --- */
+.rot-simple-medidores {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px 16px;
+  align-items: center;
+  margin: 6px 0 10px;
+}
+.rot-simple-medidores .medidor-circulo .anillo-texto { display: none; }
+.rot-mini-barras { display: flex; flex-direction: column; gap: 8px; }
+.rot-mini-barra { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 8px; font-size: 0.88rem; }
+.rot-mini-pista { height: 12px; border-radius: 999px; background: var(--banda); overflow: hidden; }
+.rot-mini-lleno { display: block; height: 100%; border-radius: 999px; }
+.rot-mini-lleno.ok { background: var(--ok); }
+.rot-mini-lleno.alerta { background: #D69A2D; }
+.rot-mini-lleno.riesgo { background: var(--riesgo); }
+.card-footer-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* Botones más fáciles de tocar en la vista agricultor */
+body:not(.modo-tecnico) .soil-simple-btn,
+body:not(.modo-tecnico) .btn,
+body:not(.modo-tecnico) .btn-sec { min-height: 44px; }
+body:not(.modo-tecnico) .checkbox-row input[type="checkbox"] { width: 22px; height: 22px; }
+
+@media (max-width: 520px) {
+  .rot-simple-medidores { grid-template-columns: 1fr; justify-items: center; }
+  .rot-mini-barras { width: 100%; }
+  .medidores-circulos { grid-template-columns: 1fr; }
+}
+
+/* --- ¿Cuándo sembrar? --- */
+.calendario-siembra { margin-top: 16px; }
+.cal-ayuda { margin: 6px 0 8px; font-size: 0.9rem; color: var(--texto-2); }
+.cal-leyenda { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.85rem; margin-bottom: 8px; }
+.cal-leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+.cal-leyenda .cal-celda { width: 18px; height: 18px; min-height: 0; }
+.cal-filas { display: flex; flex-direction: column; gap: 10px; }
+.cal-fila {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(300px, 2fr);
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px dashed var(--borde);
+}
+.cal-nombre { display: flex; flex-direction: column; font-size: 0.85rem; color: var(--texto-2); line-height: 1.35; }
+.cal-nombre strong { font-size: 1rem; color: var(--tinta); }
+.cal-celdas { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; }
+.cal-celda {
+  display: inline-grid;
+  place-items: center;
+  min-height: 36px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-style: normal;
+  cursor: pointer;
+}
+.cal-celda.ok { background: #9DB873; color: #213010; }
+.cal-celda.alerta { background: #E9C77E; color: #4A3507; }
+.cal-celda.riesgo { background: #D99A88; color: #4A140B; }
+.cal-celda:focus-visible { outline: 3px solid var(--tinta); outline-offset: 1px; }
+.cal-detalle { min-height: 1.4em; margin: 8px 0 0; font-weight: 600; color: var(--oliva); }
+
+/* --- Botón WhatsApp --- */
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: #1F7A4D;
+  color: #FFFFFF;
+  font: 700 0.95rem var(--fuente);
+  text-decoration: none;
+}
+.btn-whatsapp:hover { background: #17603C; color: #FFFFFF; }
+.btn-whatsapp:focus-visible { outline: 3px solid var(--tierra); outline-offset: 2px; }
+
+@media (max-width: 700px) {
+  .cal-fila { grid-template-columns: 1fr; }
+  .cal-celda { min-height: 30px; font-size: 0.72rem; }
+}
+.aviso-acciones,
+.aviso-acciones[open] { border: 0; padding: 0; background: transparent; box-shadow: none; }
+.priority-simple-item:has(.prio-slider-wrap) { flex-direction: column; align-items: stretch; gap: 6px; }
+.priority-simple-item:has(.prio-slider-wrap) .prio-slider-wrap { flex: 1 1 auto; min-width: 0; width: 100%; }
+.priority-simple-label strong { font-size: 1rem; }
+
+/* --- Vista técnica: datos exactos --- */
+.aviso-tecnico {
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  border-left: 3px solid var(--borde);
+  background: rgba(255, 255, 255, 0.55);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--texto-2);
+}
+.cal-celda { grid-template-rows: auto; }
+.cal-pct { font-size: 0.62rem; font-weight: 500; line-height: 1; }
+body.modo-tecnico .cal-celda { min-height: 44px; align-content: center; gap: 2px; }
+body.modo-tecnico .cal-pct.solo-tecnico { display: block !important; }
+.tabla-scroll { overflow-x: auto; }
+.tabla-clima { font-size: 0.8rem; min-width: 520px; }
+.tabla-clima th, .tabla-clima td { padding: 4px 6px; text-align: right; border-bottom: 1px solid var(--borde); }
+.tabla-clima th[scope="row"], .tabla-clima thead th:first-child { text-align: left; }
+.tabla-clima thead th { font-size: 0.72rem; color: var(--texto-2); font-weight: 600; }
+.tabla-clima td.neg { color: var(--riesgo); font-weight: 600; }
+.tabla-clima td.pos { color: var(--ok); }
+.tabla-clima td.aviso { color: var(--alerta); font-weight: 600; }
+.tabla-clima tfoot th, .tabla-clima tfoot td { font-weight: 700; border-top: 2px solid var(--borde); }
+.tabla-nota { margin: 6px 0 0; font-size: 0.75rem; color: var(--texto-2); }
