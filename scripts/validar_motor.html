@@ -23,8 +23,8 @@
       const parcelas = window.PARCELAS_DEMO || {};
       const sliders = { agua: 3, suelo: 3, ganar: 3 };
 
-      // 1. Escenarios por parcela (Licto, Guano, El Oro)
-      ['parcela_licto', 'parcela_guano', 'parcela_el_oro'].forEach(pid => {
+      // 1. Escenarios por parcela (Licto, Guano)
+      ['parcela_licto', 'parcela_guano'].forEach(pid => {
         const p = parcelas[pid];
         assert(`Parcela ${pid} cargada`, Boolean(p), pid);
         if (!p) return;

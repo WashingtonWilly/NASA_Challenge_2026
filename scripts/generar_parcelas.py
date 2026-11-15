@@ -120,11 +120,7 @@ def construir_parcelas_ejemplo():
     parcela_guano = parcela("parcela_guano", "Parcela 2 — Guano / San Andrés (Chimborazo)", "Sierra",
                             "San Andrés, Guano, Chimborazo", -1.6375, -78.5878, 2850, 8.0, 14.0, "S",
                             ["maiz_suave", "papa"])
-    # 3. Santa Rosa (El Oro): lote de ciclo corto en Costa baja, historia arroz–arroz
-    parcela_el_oro = parcela("parcela_el_oro", "Parcela 3 — Santa Rosa (El Oro, Costa)", "Costa",
-                             "Santa Rosa, El Oro", -3.4486, -79.9617, 18, 2.0, 4.0, "O",
-                             ["arroz", "arroz"])
-    return [parcela_licto, parcela_guano, parcela_el_oro]
+    return [parcela_licto, parcela_guano]
 
 
 EJEMPLO = "EJEMPLO (dato provisional, falta dato real)"

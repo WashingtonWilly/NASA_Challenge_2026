@@ -140,11 +140,10 @@
     return Promise.all([
       fetch('data/cultivos.json').then(r => r.json()),
       fetch('data/parcelas/parcela_licto.json').then(r => r.json()),
-      fetch('data/parcelas/parcela_guano.json').then(r => r.json()),
-      fetch('data/parcelas/parcela_el_oro.json').then(r => r.json()).catch(() => null)
-    ]).then(([cat, p1, p2, p3]) => {
+      fetch('data/parcelas/parcela_guano.json').then(r => r.json())
+    ]).then(([cat, p1, p2]) => {
       state.catalogo = cat;
-      [p1, p2, p3].filter(Boolean).forEach(p => {
+      [p1, p2].forEach(p => {
         state.parcelasOriginales[p.id] = clonar(p);
         state.parcelasActivas[p.id] = clonar(p);
       });
