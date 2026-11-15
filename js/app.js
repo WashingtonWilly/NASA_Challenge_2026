@@ -2154,6 +2154,10 @@
     renderizarCalendarioSiembra(resultado, parcela);
     renderizarPanelInforme(resultado, parcela);
     refrescarIconosLucide();
+    if (window.RotaSatI18n && window.RotaSatI18n.getLang() === 'en') {
+      window.RotaSatI18n.aplicarEstatico();
+      window.RotaSatI18n.aplicarDinamico();
+    }
   }
 
   /**
@@ -2655,6 +2659,10 @@
       sincronizarControlesPaso2ConParcela();
       if (state.ultimoResultado) {
         renderizarTarjetasRotacion(state.ultimoResultado, obtenerParcelaActual());
+      }
+      if (window.RotaSatI18n && window.RotaSatI18n.getLang() === 'en') {
+        window.RotaSatI18n.aplicarEstatico();
+        window.RotaSatI18n.aplicarDinamico();
       }
     }
 
@@ -3287,47 +3295,28 @@
 
     const btnLang = document.getElementById('btn-lang-switch');
     if (btnLang) {
-      const i18nMap = {
-        es: {
-          nav: {
-            'tab-simulador': 'Inicio',
-            'tab-terreno': '1. Mi lote',
-            'tab-riesgos': '2. Riesgos y qué hacer',
-            'tab-rotaciones': '3. Plan de 3 años',
-            'tab-informe': '4. Calendario y PDF',
-            'tab-satelites': '5. Metodología NASA'
-          },
-          banner: 'Proyecto para NASA International Space Apps Challenge 2026 · Riobamba',
-          btnModo: 'Vista: Agricultor · Modo técnico'
-        },
-        en: {
-          nav: {
-            'tab-simulador': 'Home',
-            'tab-terreno': '1. My Plot',
-            'tab-riesgos': '2. Risks & Actions',
-            'tab-rotaciones': '3. 3-Year Plan',
-            'tab-informe': '4. Calendar & PDF',
-            'tab-satelites': '5. NASA Methodology'
-          },
-          banner: 'NASA International Space Apps Challenge 2026 Project · Riobamba',
-          btnModo: 'View: Farmer · Technical Mode'
+      const aplicarIdioma = (lang) => {
+        state.lang = lang === 'en' ? 'en' : 'es';
+        try { localStorage.setItem('rotasat_lang', state.lang); } catch (e) {}
+        if (window.RotaSatI18n) {
+          window.RotaSatI18n.setLang(state.lang, () => actualizarTodo());
+        } else {
+          document.documentElement.lang = state.lang;
         }
       };
+
       btnLang.addEventListener('click', function () {
-        state.lang = state.lang === 'es' ? 'en' : 'es';
-        const dict = i18nMap[state.lang];
-        document.documentElement.lang = state.lang;
-        btnLang.setAttribute('aria-pressed', state.lang === 'en' ? 'true' : 'false');
-        btnLang.innerHTML = state.lang === 'es' ? '<strong>ES</strong> / EN' : 'ES / <strong>EN</strong>';
-        const bannerSpan = document.querySelector('.banda-top-inner > span');
-        if (bannerSpan) bannerSpan.textContent = dict.banner;
-        const modoTxt = document.getElementById('btn-modo-usuario-texto');
-        if (modoTxt && !document.body.classList.contains('modo-tecnico')) modoTxt.textContent = dict.btnModo;
-        Object.entries(dict.nav).forEach(([tabId, label]) => {
-          const btn = document.querySelector(`[data-tab-target="${tabId}"] span`);
-          if (btn) btn.textContent = label;
-        });
+        aplicarIdioma(state.lang === 'es' ? 'en' : 'es');
       });
+
+      const params = new URLSearchParams(window.location.search);
+      let inicial = params.get('lang');
+      if (!inicial) {
+        try { inicial = localStorage.getItem('rotasat_lang'); } catch (e) {}
+      }
+      if (inicial === 'en') {
+        setTimeout(() => aplicarIdioma('en'), 0);
+      }
     }
 
     const chkForraje = document.getElementById('check-retira-forraje');
