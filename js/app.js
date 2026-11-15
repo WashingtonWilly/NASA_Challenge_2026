@@ -609,9 +609,12 @@
     if (AY) {
       const avisos = AY.advertenciasLote(parcela, state.opciones);
       state.avisosLote = avisos;
-      vulnContainer.innerHTML = AY.tarjetasAdvertencias(avisos, { abrir: true });
+      vulnContainer.innerHTML = AY.listaDetalleAdvertencias(avisos);
+      AY.activarListaDetalle(vulnContainer);
       const resumen = document.getElementById('resumen-riesgos');
       if (resumen) resumen.innerHTML = AY.resumenRiesgos(avisos);
+      const cnt = document.getElementById('cuenta-avisos');
+      if (cnt) cnt.textContent = avisos.filter(x => x.clase === 'riesgo' || x.clase === 'alerta').length;
       const medEl = document.getElementById('medidores-lote');
       if (medEl) medEl.innerHTML = AY.medidoresLote(parcela, state.opciones);
       const tabEl = document.getElementById('tabla-clima-tecnica');
@@ -1424,12 +1427,16 @@
     if (countBadge) {
       countBadge.textContent = `${vetados.length} cultivos descartados`;
     }
+    const cntV = document.getElementById('cuenta-vetados');
+    if (cntV) cntV.textContent = vetados.length;
 
     const ordenados = vetados.slice().sort((a, b) => {
       if (a.tipoVeto === b.tipoVeto) return 0;
       return a.tipoVeto === 'fitosanitario' ? -1 : 1;
     });
 
+    const idsVetados = new Set(vetados.map(v => v.cultivo.id));
+    const sugeribles = (resultado.cultivosAptos || []).filter(c => !idsVetados.has(c.id));
     const soloAltitud = ordenados.filter(it => it.razones.length && it.razones.every(r => /^Altitud fuera de rango/i.test(r)));
     const resto = ordenados.filter(it => !soloAltitud.includes(it));
     const elevLote = obtenerParcelaActual()?.terreno?.elev_m;
@@ -1443,7 +1450,7 @@
         <details class="aviso-acciones">
           <summary>✅ ¿Qué puede hacer?</summary>
           <ul>
-            <li>La altura no se puede cambiar: elija entre los ${resultado.cultivosAptos.length} cultivos que sí se dan aquí (${resultado.cultivosAptos.slice(0, 5).map(c => c.nombre).join(', ')}${resultado.cultivosAptos.length > 5 ? '…' : ''}).</li>
+            <li>La altura no se puede cambiar: elija entre los cultivos que sí se dan aquí (${sugeribles.slice(0, 6).map(c => c.nombre).join(', ')}${sugeribles.length > 6 ? '…' : ''}).</li>
             <li>Pregunte en INIAP o al técnico por variedades adaptadas a su piso de altura.</li>
           </ul>
         </details>
@@ -1456,7 +1463,7 @@
         : '<span class="estado alerta">Medio · Límite biofísico</span>';
 
       const rem = window.AyudaAgricultor
-        ? window.AyudaAgricultor.remediosVeto(item.razones, c, resultado.cultivosAptos)
+        ? window.AyudaAgricultor.remediosVeto(item.razones, c, sugeribles)
         : null;
       return `
         <div class="vetado-item">
@@ -1505,7 +1512,64 @@
     actualizarGraficoHLS(parcela);
     renderizarCultivosVetados(resultado);
     renderizarCalendarioSiembra(resultado, parcela);
+    renderizarPanelInforme(resultado, parcela);
     refrescarIconosLucide();
+  }
+
+  /**
+   * Paso 4: lista de revisión (qué falta) y opciones del informe PDF.
+   */
+  function renderizarPanelInforme(resultado, parcela) {
+    const lista = document.getElementById('informe-lista');
+    if (!lista) return;
+    asegurarEsquemaDual(parcela);
+    const est = parcela.estado_datos || {};
+    const real = c => typeof est[c] === 'string' && !/^EJEMPLO|^sin dato/i.test(est[c]);
+    const hist = (parcela.historia_declarada || []).filter(Boolean);
+    const items = [
+      { ok: true, txt: `Lote ubicado: ${parcela.nombre} (${parcela.area_ha} ha)`, ir: 'tab-terreno:lote-mapa' },
+      { ok: Boolean(parcela.agricultor && parcela.agricultor.editado_tierra), txt: 'Tipo de tierra confirmado por usted', pend: 'Se usa el dato de ISRIC SoilGrids', ir: 'tab-terreno:lote-tierra' },
+      { ok: hist.length === 2, txt: 'Cultivos de los últimos 2 años', pend: 'Indique qué sembró en 2024 y 2025', ir: 'tab-terreno:lote-tierra' },
+      { ok: Boolean(state.prioridadesTocadas), txt: 'Sus prioridades (agua, tierra, ganancia)', pend: 'Se usan valores normales', ir: 'tab-rotaciones' },
+      { ok: real('clima'), txt: 'Clima NASA POWER del lote', pend: 'Clima de ejemplo', dato: true },
+      { ok: real('suelo'), txt: 'Suelo ISRIC SoilGrids del lote', pend: 'Suelo de ejemplo', dato: true },
+      { ok: real('terreno'), txt: 'Altitud y pendiente SRTM/NASADEM', pend: 'Terreno de ejemplo hasta recibir NASADEM (AppEEARS)', dato: true },
+      { ok: real('ndvi'), txt: 'Historial satelital HLS (NDVI)', pend: 'Aún sin historial satelital: se pide a AppEEARS', dato: true }
+    ];
+    const hechos = items.filter(i => i.ok).length;
+    const pct = Math.round(100 * hechos / items.length);
+    const prog = document.getElementById('informe-progreso');
+    if (prog) prog.textContent = `${hechos} de ${items.length}`;
+    const barra = document.getElementById('informe-barra-lleno');
+    if (barra) barra.style.width = `${pct}%`;
+    lista.innerHTML = items.map(i => `
+      <li class="${i.ok ? 'hecho' : (i.dato ? 'dato-pendiente' : 'pendiente')}">
+        <span class="informe-icono" aria-hidden="true">${i.ok ? '✅' : (i.dato ? '🛰️' : '⚪')}</span>
+        <span class="informe-txt"><strong>${i.txt}</strong>${i.ok ? '' : `<small>${i.pend}</small>`}</span>
+        ${!i.ok && i.ir ? `<button type="button" class="btn-link-sm informe-ir" data-tab-go="${i.ir}">Completar</button>` : ''}
+      </li>`).join('');
+    lista.querySelectorAll('[data-tab-go]').forEach(b => b.addEventListener('click', () => {
+      const t = b.getAttribute('data-tab-go');
+      const [tab, sub] = t.split(':');
+      document.querySelector(`.sidebar-item[data-tab-target="${tab}"]`)?.click();
+      if (sub) document.querySelector(`.subtab[data-subtab="${sub}"]`)?.click();
+    }));
+
+    const ops = document.getElementById('informe-opciones-lista');
+    if (ops) {
+      const todas = [...resultado.recomendadas, resultado.actual];
+      if (!state.informeRotId || !todas.some(r => r.id === state.informeRotId)) state.informeRotId = resultado.recomendadas[0]?.id;
+      ops.innerHTML = todas.map(r => `
+        <label class="informe-opcion${r.id === state.informeRotId ? ' activo' : ''}">
+          <input type="radio" name="informe-rot" value="${r.id}" ${r.id === state.informeRotId ? 'checked' : ''} />
+          <span><strong>${r.esActual ? 'Su práctica actual' : r.titulo.replace(/^Estrategia\s+(\d+)/i, 'Opción $1').replace(/\s+—.*$/, '')}</strong>
+            <small>${r.cultivos.map(c => c.nombre).join(' → ')} · puntaje ${r.irrPct}/100</small></span>
+        </label>`).join('');
+      ops.querySelectorAll('input[name="informe-rot"]').forEach(inp => inp.addEventListener('change', () => {
+        state.informeRotId = inp.value;
+        ops.querySelectorAll('.informe-opcion').forEach(l => l.classList.toggle('activo', l.querySelector('input').checked));
+      }));
+    }
   }
 
   /**
@@ -1964,6 +2028,7 @@
       inp.addEventListener('change', () => {
         const val = Number(inp.value) || 3;
         state.sliders[key] = val;
+        state.prioridadesTocadas = true;
         const p = obtenerParcelaActual();
         asegurarEsquemaDual(p);
         p.agricultor.prioridades[key] = val;
@@ -2062,8 +2127,46 @@
     }
   }
 
+  function configurarInformePDF() {
+    const btn = document.getElementById('btn-descargar-pdf');
+    const estado = document.getElementById('informe-estado');
+    if (!btn) return;
+    if (!window.InformePDF || !window.InformePDF.disponible()) {
+      btn.disabled = true;
+      if (estado) estado.textContent = 'No se pudo cargar el generador de PDF en este navegador.';
+      return;
+    }
+    btn.addEventListener('click', async () => {
+      const parcela = obtenerParcelaActual();
+      if (!state.ultimoResultado) return;
+      btn.disabled = true;
+      const textoOriginal = btn.innerHTML;
+      btn.innerHTML = '<span aria-hidden="true">⏳</span> Preparando su informe…';
+      try {
+        await window.InformePDF.descargar({
+          parcela,
+          resultado: state.ultimoResultado,
+          rotElegidaId: state.informeRotId,
+          opciones: state.opciones,
+          sliders: state.sliders,
+          avisos: state.avisosLote || [],
+          catalogo: state.catalogo,
+          nombreAgricultor: (document.getElementById('informe-nombre')?.value || '').trim()
+        });
+        if (estado) estado.textContent = '✅ Listo: el PDF se guardó en su carpeta de Descargas.';
+      } catch (e) {
+        console.error(e);
+        if (estado) estado.textContent = 'No se pudo crear el PDF. Intente de nuevo.';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+      }
+    });
+  }
+
   function configurarEventos() {
     configurarAyudasAccesibles();
+    configurarInformePDF();
     const chkRiego = document.getElementById('check-tiene-riego');
     if (chkRiego) {
       chkRiego.checked = Boolean(state.opciones.conRiego);

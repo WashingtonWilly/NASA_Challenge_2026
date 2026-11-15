@@ -344,6 +344,63 @@
       <span class="resumen-accion">Ver qué hacer →</span>`;
   }
 
+  /**
+   * Advertencias en formato lista + detalle: a la izquierda un botón por advertencia,
+   * a la derecha el porqué y las acciones de la elegida. Todo cabe en una pantalla.
+   */
+  function listaDetalleAdvertencias(lista) {
+    const orden = { riesgo: 0, alerta: 1, info: 2, ok: 3 };
+    const nivel = { riesgo: 'Cuidado', alerta: 'Atención', info: 'Dato', ok: 'Bien' };
+    const items = lista.slice().sort((a, b) => orden[a.clase] - orden[b.clase]);
+    if (!items.length) return '<p class="cal-ayuda">Sin advertencias para este lote.</p>';
+    const botones = items.map((a, i) => `
+      <button type="button" class="aviso-md-btn ${a.clase}${i === 0 ? ' activo' : ''}" role="tab"
+              id="aviso-tab-${i}" aria-controls="aviso-panel-${i}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">
+        <span class="aviso-md-emoji" aria-hidden="true">${a.icono}</span>
+        <span class="aviso-md-txt"><span class="aviso-nivel">${nivel[a.clase]}</span><strong>${esc(a.titulo)}</strong></span>
+      </button>`).join('');
+    const paneles = items.map((a, i) => `
+      <div class="aviso-md-panel aviso-agro ${a.clase}" role="tabpanel" id="aviso-panel-${i}" aria-labelledby="aviso-tab-${i}"${i === 0 ? '' : ' hidden'}>
+        <div class="aviso-cabeza">
+          <span class="aviso-emoji" aria-hidden="true">${a.icono}</span>
+          <div class="aviso-titulos"><span class="aviso-nivel">${nivel[a.clase]}</span><strong>${esc(a.titulo)}</strong></div>
+        </div>
+        ${a.porque ? `<p class="aviso-porque">${esc(a.porque)}</p>` : ''}
+        ${a.tecnico ? `<p class="aviso-tecnico solo-tecnico">📐 ${esc(a.tecnico)}</p>` : ''}
+        ${a.acciones.length ? `
+          <div class="aviso-acciones aviso-acciones-fijas">
+            <p class="aviso-acciones-titulo">✅ ¿Qué puede hacer?</p>
+            <ul>${a.acciones.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+          </div>` : '<p class="aviso-porque">No necesita hacer nada especial.</p>'}
+      </div>`).join('');
+    return `<div class="avisos-md">
+      <div class="avisos-md-lista" role="tablist" aria-orientation="vertical" aria-label="Advertencias">${botones}</div>
+      <div class="avisos-md-detalle">${paneles}</div>
+    </div>`;
+  }
+
+  function activarListaDetalle(raiz) {
+    const btns = Array.from(raiz.querySelectorAll('.aviso-md-btn'));
+    const elegir = b => btns.forEach(x => {
+      const on = x === b;
+      x.classList.toggle('activo', on);
+      x.setAttribute('aria-selected', on ? 'true' : 'false');
+      x.tabIndex = on ? 0 : -1;
+      const pn = raiz.querySelector('#' + x.getAttribute('aria-controls'));
+      if (pn) pn.hidden = !on;
+    });
+    btns.forEach((b, i) => {
+      b.addEventListener('click', () => elegir(b));
+      b.addEventListener('keydown', e => {
+        const d = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+        if (!d) return;
+        e.preventDefault();
+        const sig = btns[(i + d + btns.length) % btns.length];
+        sig.focus(); elegir(sig);
+      });
+    });
+  }
+
   function tarjetasAdvertencias(lista, opciones) {
     const abrirTodo = Boolean(opciones && opciones.abrir);
     const orden = { riesgo: 0, alerta: 1, info: 2, ok: 3 };
@@ -617,7 +674,7 @@
   }
 
   window.AyudaAgricultor = {
-    barra, circulo, medidoresLote, advertenciasLote, tarjetasAdvertencias, resumenRiesgos,
+    barra, circulo, medidoresLote, advertenciasLote, tarjetasAdvertencias, resumenRiesgos, listaDetalleAdvertencias, activarListaDetalle,
     remediosVeto, leer, puedeHablar, textoAdvertencias,
     calendarioSiembra, mejoresMeses, filaCalendario, textoPlanWhatsApp, enlaceWhatsApp, MESES_LARGOS, tablaClimaTecnica
   };

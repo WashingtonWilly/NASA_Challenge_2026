@@ -76,6 +76,12 @@
               <span>Mi plan de siembra</span>
             </span>
           </button>
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-informe">
+            <span class="sidebar-item-left">
+              <i data-lucide="file-down" class="icono"></i>
+              <span>Mi informe PDF</span>
+            </span>
+          </button>
           <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-satelites">
             <span class="sidebar-item-left">
               <i data-lucide="satellite" class="icono"></i>
@@ -505,9 +511,19 @@
           <div class="step-header">
             <div class="mono"><i data-lucide="shield-alert" class="icono"></i> Paso 2</div>
             <h2>Riesgos de su lote y qué hacer</h2>
-            <p>Lo que los satélites detectaron en su lote y las acciones concretas para evitarlo o contrarrestarlo.</p>
+            <p>Toque cada advertencia para ver por qué pasa y qué puede hacer para evitarlo o contrarrestarlo.</p>
           </div>
-              <div class="vulnerability-card riesgos-card">
+
+          <div class="subtabs" role="tablist" aria-label="Secciones" data-subtabs="riesgos">
+            <button type="button" class="subtab activo" role="tab" id="st-riesgos-avisos" aria-selected="true" aria-controls="sp-riesgos-avisos" data-subtab="riesgos-avisos">
+              <span aria-hidden="true">⚠️</span> Advertencias <span class="subtab-cuenta" id="cuenta-avisos">–</span>
+            </button>
+            <button type="button" class="subtab" role="tab" id="st-riesgos-vetados" aria-selected="false" aria-controls="sp-riesgos-vetados" data-subtab="riesgos-vetados">
+              <span aria-hidden="true">🚫</span> Cultivos que no conviene <span class="subtab-cuenta" id="cuenta-vetados">–</span>
+            </button>
+          </div>
+          <div class="subpanel" id="sp-riesgos-avisos" role="tabpanel" aria-labelledby="st-riesgos-avisos" data-subpanel="riesgos-avisos">
+            <div class="vulnerability-card riesgos-card">
                 <div class="vuln-cabeza">
                   <h3><i data-lucide="shield-check" class="icono"></i> Advertencias de su lote</h3>
                   <button type="button" id="btn-escuchar-avisos" class="btn-escuchar" aria-label="Escuchar las advertencias en voz alta">
@@ -518,8 +534,8 @@
                   <!-- Poblado dinámicamente por app.js -->
                 </div>
               </div>
-
-
+          </div>
+          <div class="subpanel" id="sp-riesgos-vetados" role="tabpanel" aria-labelledby="st-riesgos-vetados" data-subpanel="riesgos-vetados" hidden>
           <!-- Inspector de Cultivos Vetados -->
           <div class="vetados-section">
             <div class="panel-card-header">
@@ -534,7 +550,7 @@
               <!-- Generado dinámicamente por app.js -->
             </div>
           </div>
-
+          </div>
 
           <div class="paso-siguiente">
             <button type="button" class="btn btn-siguiente" data-tab-go="tab-rotaciones">Siguiente: ver mi plan de siembra →</button>
@@ -757,6 +773,54 @@
 
           </div>
 
+          <div class="paso-siguiente">
+            <button type="button" class="btn btn-siguiente" data-tab-go="tab-informe">Siguiente: descargar mi informe PDF →</button>
+          </div>
+        </section>
+
+        <!-- MÓDULO 4: MI INFORME PDF -->
+        <section id="tab-informe" class="step-section tab-panel" data-tab-panel="tab-informe" role="tabpanel" hidden>
+          <div class="step-header">
+            <div class="mono"><i data-lucide="file-down" class="icono"></i> Paso 4</div>
+            <h2>Mi informe en PDF</h2>
+            <p>Revise que la información esté completa y descargue su plan con los datos de la NASA de su lote, listo para
+              imprimir o enviar al técnico.</p>
+          </div>
+
+          <div class="informe-grid">
+            <div class="panel-card informe-checklist">
+              <div class="panel-card-header">
+                <h3><i data-lucide="list-checks" class="icono"></i> ¿Está todo listo?</h3>
+                <span id="informe-progreso" class="informe-progreso tabular-nums">–</span>
+              </div>
+              <div class="informe-barra" aria-hidden="true"><span id="informe-barra-lleno"></span></div>
+              <ul id="informe-lista" class="informe-lista"></ul>
+            </div>
+
+            <div class="panel-card informe-descarga">
+              <div class="panel-card-header">
+                <h3><i data-lucide="file-text" class="icono"></i> Descargar mi informe</h3>
+              </div>
+              <div class="field-group">
+                <label for="informe-nombre">Nombre del agricultor (opcional)</label>
+                <input type="text" id="informe-nombre" class="field-input" autocomplete="name" placeholder="Ej. María Guamán" />
+              </div>
+              <fieldset class="informe-opciones">
+                <legend>¿Qué plan quiere en el informe?</legend>
+                <div id="informe-opciones-lista"></div>
+              </fieldset>
+              <button type="button" id="btn-descargar-pdf" class="btn btn-pdf">
+                <span aria-hidden="true">📄</span> Descargar PDF
+              </button>
+              <p id="informe-estado" class="informe-estado" role="status" aria-live="polite"></p>
+              <ul class="informe-incluye">
+                <li>Datos del lote: altitud, pendiente, suelo y clima mes a mes (NASA POWER, SRTM, ISRIC).</li>
+                <li>Plan de 3 años con el mejor mes de siembra y la ganancia estimada.</li>
+                <li>Advertencias y qué hacer, calendario de siembra y comparación de opciones.</li>
+                <li>Origen de cada dato: los que aún no son reales salen marcados, nunca inventados.</li>
+              </ul>
+            </div>
+          </div>
         </section>
 
         <!-- MÓDULO 4: DATOS NASA (satélites + metodología) -->
@@ -1015,6 +1079,9 @@
   <script src="js/datos_vivo.js"></script>
   <script src="js/ecuador_dpa.js"></script>
   <script src="js/ayuda_agricultor.js"></script>
+  <script src="js/vendor/jspdf.umd.min.js"></script>
+  <script src="js/vendor/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/informe_pdf.js"></script>
   <script src="js/app.js"></script>
 </body>
 
