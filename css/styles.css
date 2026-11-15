@@ -2497,3 +2497,847 @@ body.guided-drawing-active .map-wrapper {
   font-weight: 700;
   font-size: 12px;
 }
+
+/* ==========================================================================
+   Ayudas para el agricultor: medidores, avisos con "¿Qué puede hacer?",
+   barritas de prioridad, letra grande y lectura en voz alta
+   ========================================================================== */
+:root {
+  --info: #3F5A73;
+  --info-bg: #E3E9EE;
+}
+
+/* Letra grande (botón A+): todo lo que usa rem crece */
+html.letra-grande { font-size: 19px; }
+html.letra-grande body { font-size: 19px; }
+html.letra-grande .sidebar-item { font-size: 16px; padding-top: 13px; padding-bottom: 13px; }
+html.letra-grande .estado { font-size: 0.85rem; }
+#btn-letra-grande[aria-pressed="true"] {
+  background-color: var(--oliva);
+  border-color: var(--oliva);
+  color: #FFFFFF;
+}
+
+/* --- Medidores del lote --- */
+.card-medidores h3 { margin-bottom: 10px; }
+.medidores-lote { display: flex; flex-direction: column; gap: 14px; }
+.medidores-barras { display: flex; flex-direction: column; gap: 14px; }
+
+.medidor-cabeza {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+.medidor-titulo { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--tinta); }
+.medidor-emoji { font-size: 1.15rem; line-height: 1; }
+.medidor-valor { font-weight: 700; font-size: 1.05rem; color: var(--oliva); }
+
+.medidor-pista {
+  position: relative;
+  display: flex;
+  height: 14px;
+  margin: 6px 0 4px;
+  border-radius: 999px;
+  overflow: visible;
+  background: var(--banda);
+}
+.medidor-seg { height: 100%; }
+.medidor-seg:first-child { border-radius: 999px 0 0 999px; }
+.medidor-seg:nth-last-child(2) { border-radius: 0 999px 999px 0; }
+.medidor-seg.ok { background: #9DB873; }
+.medidor-seg.alerta { background: #E3B65E; }
+.medidor-seg.riesgo { background: #C9684F; }
+.medidor-seg.info { background: #8FA6B8; }
+
+.medidor-marca {
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 4px solid var(--tinta);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transform: translate(-50%, -50%);
+}
+
+.medidor-veredicto { font-size: 0.88rem; font-weight: 600; }
+.medidor-veredicto.ok { color: var(--ok); }
+.medidor-veredicto.alerta { color: var(--alerta); }
+.medidor-veredicto.riesgo { color: var(--riesgo); }
+.medidor-veredicto.info { color: var(--info); }
+
+.medidores-circulos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--borde);
+}
+
+/* --- Círculo que se llena --- */
+.medidor-circulo { display: flex; align-items: center; gap: 12px; }
+.anillo {
+  --p: 0;
+  --c: var(--oliva);
+  position: relative;
+  flex-shrink: 0;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: conic-gradient(var(--c) calc(var(--p) * 1%), var(--banda) 0);
+  display: grid;
+  place-items: center;
+}
+.anillo::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: var(--campo);
+}
+.anillo.ok { --c: var(--ok); }
+.anillo.alerta { --c: #D69A2D; }
+.anillo.riesgo { --c: var(--riesgo); }
+.anillo-centro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  font-size: 0.8rem;
+}
+.anillo-centro b { font-size: 1.05rem; color: var(--tinta); }
+.anillo-texto { display: flex; flex-direction: column; font-size: 0.85rem; color: var(--texto-2); line-height: 1.35; }
+.anillo-texto strong { color: var(--tinta); font-size: 0.95rem; }
+
+/* --- Avisos con "¿Qué puede hacer?" --- */
+.vuln-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.vuln-cabeza h3 { margin: 0; }
+.avisos-lista { align-items: stretch; gap: 10px; margin-top: 10px; }
+
+.aviso-agro {
+  border: 1px solid var(--borde);
+  border-left: 6px solid var(--ok);
+  background: var(--campo);
+  padding: 10px 12px;
+  border-radius: 4px;
+}
+.aviso-agro.alerta { border-left-color: #D69A2D; background: #FBF5E8; }
+.aviso-agro.riesgo { border-left-color: var(--riesgo); background: #FBF0EC; }
+.aviso-agro.info { border-left-color: var(--info); background: #F2F5F7; }
+.aviso-agro.ok { padding: 8px 12px; }
+
+.aviso-cabeza { display: flex; align-items: center; gap: 10px; }
+.aviso-emoji { font-size: 1.6rem; line-height: 1; }
+.aviso-titulos { display: flex; flex-direction: column; line-height: 1.25; }
+.aviso-titulos strong { font-size: 1rem; color: var(--tinta); }
+.aviso-nivel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.aviso-agro.ok .aviso-nivel { color: var(--ok); }
+.aviso-agro.alerta .aviso-nivel { color: var(--alerta); }
+.aviso-agro.riesgo .aviso-nivel { color: var(--riesgo); }
+.aviso-agro.info .aviso-nivel { color: var(--info); }
+.aviso-porque { margin: 6px 0 0; font-size: 0.9rem; color: var(--texto-2); }
+
+.aviso-acciones { margin-top: 8px; }
+.aviso-acciones summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 2px solid var(--oliva);
+  border-radius: 999px;
+  background: var(--campo);
+  color: var(--oliva);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  list-style: none;
+}
+.aviso-acciones summary::-webkit-details-marker { display: none; }
+.aviso-acciones summary:hover { background: var(--ok-bg); }
+.aviso-acciones summary:focus-visible { outline: 3px solid var(--tierra); outline-offset: 2px; }
+.aviso-acciones[open] summary { background: var(--oliva); color: #FFFFFF; }
+.aviso-acciones ul {
+  margin: 10px 0 2px;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.aviso-acciones li {
+  position: relative;
+  padding-left: 30px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+.aviso-acciones li::before {
+  content: "👉";
+  position: absolute;
+  left: 2px;
+  top: 0;
+}
+.aviso-acciones-suelto { margin: 8px 0 4px; }
+
+.vetado-motivo { margin: 2px 0 4px; font-weight: 700; color: var(--riesgo); font-size: 0.95rem; }
+
+/* --- Botón Escuchar --- */
+.btn-escuchar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 16px;
+  border: 2px solid var(--tierra);
+  border-radius: 999px;
+  background: var(--campo);
+  color: var(--tierra);
+  font: 700 0.95rem var(--fuente);
+  cursor: pointer;
+}
+.btn-escuchar:hover { background: #F6E7DF; }
+.btn-escuchar:focus-visible { outline: 3px solid var(--oliva); outline-offset: 2px; }
+.btn-escuchar.hablando { background: var(--tierra); color: #FFFFFF; animation: pulso-voz 1.2s ease-in-out infinite; }
+@keyframes pulso-voz { 50% { box-shadow: 0 0 0 6px rgba(166, 81, 43, 0.18); } }
+
+/* --- Barritas de prioridad --- */
+.ayuda-gesto { margin: 4px 0 0; font-size: 0.88rem; color: var(--texto-2); }
+.priority-simple-item { flex-wrap: wrap; }
+.prio-slider-wrap { flex: 1 1 220px; min-width: 200px; }
+.prio-slider {
+  --lleno: 50%;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.prio-slider::-webkit-slider-runnable-track {
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--oliva) 0 var(--lleno), var(--banda) var(--lleno) 100%);
+  border: 1px solid var(--borde);
+}
+.prio-slider::-moz-range-track {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--banda);
+  border: 1px solid var(--borde);
+}
+.prio-slider::-moz-range-progress { height: 14px; border-radius: 999px; background: var(--oliva); }
+.prio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 34px;
+  height: 34px;
+  margin-top: -11px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 4px solid var(--tierra);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.prio-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 4px solid var(--tierra);
+}
+.prio-slider:focus-visible { outline: 3px solid var(--tierra); outline-offset: 4px; border-radius: 999px; }
+.prio-slider-escala {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--texto-2);
+  margin-top: -2px;
+}
+.prio-slider-estado { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.prio-iconos { font-size: 1.05rem; letter-spacing: 1px; min-height: 1.4em; }
+.prio-texto { font-size: 1rem; color: var(--oliva); }
+
+/* --- Tarjetas de rotación: círculo de puntaje y mini barras --- */
+.rot-simple-medidores {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px 16px;
+  align-items: center;
+  margin: 6px 0 10px;
+}
+.rot-simple-medidores .medidor-circulo .anillo-texto { display: none; }
+.rot-mini-barras { display: flex; flex-direction: column; gap: 8px; }
+.rot-mini-barra { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 8px; font-size: 0.88rem; }
+.rot-mini-pista { height: 12px; border-radius: 999px; background: var(--banda); overflow: hidden; }
+.rot-mini-lleno { display: block; height: 100%; border-radius: 999px; }
+.rot-mini-lleno.ok { background: var(--ok); }
+.rot-mini-lleno.alerta { background: #D69A2D; }
+.rot-mini-lleno.riesgo { background: var(--riesgo); }
+.card-footer-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* Botones más fáciles de tocar en la vista agricultor */
+body:not(.modo-tecnico) .soil-simple-btn,
+body:not(.modo-tecnico) .btn,
+body:not(.modo-tecnico) .btn-sec { min-height: 44px; }
+body:not(.modo-tecnico) .checkbox-row input[type="checkbox"] { width: 22px; height: 22px; }
+
+@media (max-width: 520px) {
+  .rot-simple-medidores { grid-template-columns: 1fr; justify-items: center; }
+  .rot-mini-barras { width: 100%; }
+  .medidores-circulos { grid-template-columns: 1fr; }
+}
+
+/* --- ¿Cuándo sembrar? --- */
+.calendario-siembra { margin-top: 16px; }
+.cal-ayuda { margin: 6px 0 8px; font-size: 0.9rem; color: var(--texto-2); }
+.cal-leyenda { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.85rem; margin-bottom: 8px; }
+.cal-leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+.cal-leyenda .cal-celda { width: 18px; height: 18px; min-height: 0; }
+.cal-filas { display: flex; flex-direction: column; gap: 10px; }
+.cal-fila {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(300px, 2fr);
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px dashed var(--borde);
+}
+.cal-nombre { display: flex; flex-direction: column; font-size: 0.85rem; color: var(--texto-2); line-height: 1.35; }
+.cal-nombre strong { font-size: 1rem; color: var(--tinta); }
+.cal-celdas { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; }
+.cal-celda {
+  display: inline-grid;
+  place-items: center;
+  min-height: 36px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-style: normal;
+  cursor: pointer;
+}
+.cal-celda.ok { background: #9DB873; color: #213010; }
+.cal-celda.alerta { background: #E9C77E; color: #4A3507; }
+.cal-celda.riesgo { background: #D99A88; color: #4A140B; }
+.cal-celda:focus-visible { outline: 3px solid var(--tinta); outline-offset: 1px; }
+.cal-detalle { min-height: 1.4em; margin: 8px 0 0; font-weight: 600; color: var(--oliva); }
+
+/* --- Botón WhatsApp --- */
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: #1F7A4D;
+  color: #FFFFFF;
+  font: 700 0.95rem var(--fuente);
+  text-decoration: none;
+}
+.btn-whatsapp:hover { background: #17603C; color: #FFFFFF; }
+.btn-whatsapp:focus-visible { outline: 3px solid var(--tierra); outline-offset: 2px; }
+
+@media (max-width: 700px) {
+  .cal-fila { grid-template-columns: 1fr; }
+  .cal-celda { min-height: 30px; font-size: 0.72rem; }
+}
+.aviso-acciones,
+.aviso-acciones[open] { border: 0; padding: 0; background: transparent; box-shadow: none; }
+.priority-simple-item:has(.prio-slider-wrap) { flex-direction: column; align-items: stretch; gap: 6px; }
+.priority-simple-item:has(.prio-slider-wrap) .prio-slider-wrap { flex: 1 1 auto; min-width: 0; width: 100%; }
+.priority-simple-label strong { font-size: 1rem; }
+
+/* --- Vista técnica: datos exactos --- */
+.aviso-tecnico {
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  border-left: 3px solid var(--borde);
+  background: rgba(255, 255, 255, 0.55);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--texto-2);
+}
+.cal-celda { grid-template-rows: auto; }
+.cal-pct { font-size: 0.62rem; font-weight: 500; line-height: 1; }
+body.modo-tecnico .cal-celda { min-height: 44px; align-content: center; gap: 2px; }
+body.modo-tecnico .cal-pct.solo-tecnico { display: block !important; }
+.tabla-scroll { overflow-x: auto; }
+.tabla-clima { font-size: 0.8rem; min-width: 520px; }
+.tabla-clima th, .tabla-clima td { padding: 4px 6px; text-align: right; border-bottom: 1px solid var(--borde); }
+.tabla-clima th[scope="row"], .tabla-clima thead th:first-child { text-align: left; }
+.tabla-clima thead th { font-size: 0.72rem; color: var(--texto-2); font-weight: 600; }
+.tabla-clima td.neg { color: var(--riesgo); font-weight: 600; }
+.tabla-clima td.pos { color: var(--ok); }
+.tabla-clima td.aviso { color: var(--alerta); font-weight: 600; }
+.tabla-clima tfoot th, .tabla-clima tfoot td { font-weight: 700; border-top: 2px solid var(--borde); }
+.tabla-nota { margin: 6px 0 0; font-size: 0.75rem; color: var(--texto-2); }
+
+/* ==========================================================================
+   Navegación por pasos: pestañitas internas y distribución de cada módulo
+   ========================================================================== */
+
+/* --- Pestañitas internas (tipo segmento) --- */
+.subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 18px;
+  padding: 5px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: var(--banda);
+  width: fit-content;
+  max-width: 100%;
+}
+.subtab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--texto-2);
+  font: 600 0.95rem var(--fuente);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.subtab:hover { background: rgba(255, 255, 255, 0.55); color: var(--tinta); }
+.subtab.activo {
+  background: var(--campo);
+  color: var(--oliva);
+  box-shadow: 0 1px 3px rgba(43, 42, 34, 0.14), inset 0 -3px 0 var(--tierra);
+}
+.subtab:focus-visible { outline: 3px solid var(--tierra); outline-offset: 2px; }
+.subpanel[hidden] { display: none !important; }
+.subpanel { animation: aparecer 0.18s ease-out; }
+@keyframes aparecer { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* --- Mi lote: resumen de riesgos junto al mapa --- */
+.resumen-riesgos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--borde);
+  border-left: 6px solid var(--ok);
+  background: var(--campo);
+  color: var(--tinta);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.resumen-riesgos:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(43, 42, 34, 0.1); }
+.resumen-riesgos:focus-visible { outline: 3px solid var(--tierra); outline-offset: 2px; }
+.resumen-riesgos:has(.resumen-cabeza.riesgo) { border-left-color: var(--riesgo); background: #FBF0EC; }
+.resumen-riesgos:has(.resumen-cabeza.alerta) { border-left-color: #D69A2D; background: #FBF5E8; }
+.resumen-cabeza { display: flex; align-items: center; gap: 10px; font-size: 1.02rem; }
+.resumen-semaforo { width: 14px; height: 14px; border-radius: 50%; background: var(--ok); flex-shrink: 0; }
+.resumen-cabeza.alerta .resumen-semaforo { background: #D69A2D; }
+.resumen-cabeza.riesgo .resumen-semaforo { background: var(--riesgo); box-shadow: 0 0 0 4px rgba(155, 44, 31, 0.15); }
+.resumen-lista { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; font-size: 0.9rem; color: var(--texto-2); }
+.resumen-accion { align-self: flex-start; font-weight: 700; color: var(--tierra); font-size: 0.95rem; }
+
+/* --- Mi lote: pestañita «Mi tierra» --- */
+.lote-tierra-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(260px, 2fr);
+  gap: 20px;
+  align-items: start;
+}
+.lote-tierra-aside { display: flex; flex-direction: column; gap: 14px; }
+.btn-siguiente { justify-content: center; min-height: 50px; font-size: 1rem; }
+.paso-siguiente { display: flex; justify-content: flex-end; margin-top: 20px; }
+
+/* --- Riesgos y qué hacer: avisos en cuadrícula --- */
+.riesgos-card { padding: 18px 20px; }
+.riesgos-card .vuln-cabeza h3 { font-size: 1.1rem; }
+.riesgos-card .avisos-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  align-items: start;
+  gap: 14px;
+}
+.riesgos-card .aviso-agro { height: 100%; }
+#tab-riesgos .vetados-grid { align-items: start; }
+
+/* --- Mi plan de siembra: prioridades en una franja horizontal --- */
+.plan-prioridades { margin-bottom: 18px; }
+.plan-prioridades .panel-card-header { flex-wrap: wrap; }
+.plan-prioridades .panel-card-header h3 { margin: 0; }
+.plan-prioridades .ayuda-gesto { flex-basis: 100%; }
+.plan-prioridades .priority-simple-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.plan-prioridades .sliders-list {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+body:not(.modo-tecnico) .plan-prioridades .sliders-list { display: none !important; }
+.plan-prioridades .scenario-box { grid-column: 1 / -1; }
+#sp-plan-calendario .calendario-siembra { margin-top: 0; }
+#sp-plan-graficos .charts-grid { margin-top: 0; }
+
+@media (max-width: 1100px) {
+  .terreno-grid, .lote-tierra-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .plan-prioridades .priority-simple-list,
+  .plan-prioridades .sliders-list { grid-template-columns: 1fr; }
+  .riesgos-card .avisos-lista { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .subtabs { width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; overflow-x: auto; }
+  .subtab { justify-content: center; padding: 8px 10px; font-size: 0.85rem; flex-direction: column; gap: 2px; text-align: center; line-height: 1.2; }
+  .subtab span[aria-hidden] { font-size: 1.2rem; }
+  .paso-siguiente { justify-content: stretch; }
+  .paso-siguiente .btn { width: 100%; }
+}
+
+/* Mes de siembra dentro de la receta y grupo de cultivos por altitud */
+.rot-mes-siembra { display: block; margin-top: 4px; font-size: 0.8rem; font-weight: 600; color: var(--tierra); }
+.vetado-grupo { grid-column: 1 / -1; border-left-color: #D69A2D; }
+.vetado-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.chip-cultivo { padding: 3px 10px; border-radius: 999px; background: var(--banda); border: 1px solid var(--borde); font-size: 0.85rem; }
+.terreno-telemetry .anillo { width: 74px; height: 74px; }
+.terreno-telemetry .anillo::before { inset: 9px; }
+
+/* --- Advertencias: lista + detalle (sin bajar) --- */
+.subtab-cuenta {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--tierra);
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.avisos-md {
+  display: grid;
+  grid-template-columns: minmax(240px, 5fr) minmax(0, 7fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 12px;
+}
+.avisos-md-lista { display: flex; flex-direction: column; gap: 8px; }
+.aviso-md-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-left: 6px solid var(--ok);
+  border-radius: 6px;
+  background: var(--campo);
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.aviso-md-btn.alerta { border-left-color: #D69A2D; }
+.aviso-md-btn.riesgo { border-left-color: var(--riesgo); }
+.aviso-md-btn.info { border-left-color: var(--info); }
+.aviso-md-btn:hover { background: #FFFFFF; }
+.aviso-md-btn.activo {
+  background: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(43, 42, 34, 0.12), inset 0 0 0 2px var(--oliva);
+  transform: translateX(4px);
+}
+.aviso-md-btn:focus-visible { outline: 3px solid var(--tierra); outline-offset: 2px; }
+.aviso-md-emoji { font-size: 1.6rem; line-height: 1; }
+.aviso-md-txt { display: flex; flex-direction: column; line-height: 1.25; }
+.aviso-md-txt strong { font-size: 0.95rem; }
+.aviso-md-btn.ok .aviso-nivel { color: var(--ok); }
+.aviso-md-btn.alerta .aviso-nivel { color: var(--alerta); }
+.aviso-md-btn.riesgo .aviso-nivel { color: var(--riesgo); }
+.aviso-md-btn.info .aviso-nivel { color: var(--info); }
+.avisos-md-detalle { position: sticky; top: 12px; }
+.aviso-md-panel { padding: 18px 20px; min-height: 100%; }
+.aviso-md-panel .aviso-titulos strong { font-size: 1.15rem; }
+.aviso-md-panel .aviso-emoji { font-size: 2.2rem; }
+.aviso-acciones-fijas { margin-top: 12px; }
+.aviso-acciones-titulo {
+  display: inline-flex;
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--oliva);
+  color: #FFFFFF;
+  font-weight: 700;
+}
+.aviso-acciones-fijas ul { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.aviso-acciones-fijas li { position: relative; padding-left: 30px; font-size: 1rem; line-height: 1.45; }
+.aviso-acciones-fijas li::before { content: "👉"; position: absolute; left: 2px; top: 0; }
+@media (max-width: 760px) {
+  .avisos-md { grid-template-columns: 1fr; }
+  .avisos-md-lista { flex-direction: row; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; }
+  .aviso-md-btn { flex: 0 0 auto; width: auto; max-width: 240px; min-height: 56px; scroll-snap-align: start; }
+  .aviso-md-btn.activo { transform: none; }
+  .aviso-md-txt strong { font-size: 0.85rem; }
+  .avisos-md-detalle { position: static; }
+}
+.riesgos-card .avisos-lista { display: block; }
+
+/* --- Paso 4: Mi informe PDF --- */
+.informe-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.informe-progreso { font-weight: 700; color: var(--oliva); font-size: 1rem; }
+.informe-barra { height: 12px; border-radius: 999px; background: var(--banda); overflow: hidden; margin: 2px 0 12px; }
+.informe-barra span { display: block; height: 100%; width: 0; background: var(--oliva); border-radius: 999px; transition: width 0.3s ease; }
+.informe-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.informe-lista li {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: var(--campo);
+}
+.informe-lista li.hecho { background: #EEF2E2; }
+.informe-lista li.pendiente { border-left: 4px solid #D69A2D; }
+.informe-lista li.dato-pendiente { border-left: 4px solid var(--info); }
+.informe-icono { font-size: 1.25rem; text-align: center; }
+.informe-txt { display: flex; flex-direction: column; line-height: 1.3; }
+.informe-txt strong { font-size: 0.95rem; }
+.informe-txt small { color: var(--texto-2); font-size: 0.82rem; }
+.informe-ir { min-height: 40px; padding: 4px 12px; border: 2px solid var(--oliva); border-radius: 999px; background: #FFFFFF; color: var(--oliva); font-weight: 700; cursor: pointer; }
+.informe-descarga { gap: 14px; }
+.informe-opciones { border: 0; margin: 0; padding: 0; }
+.informe-opciones legend { font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
+#informe-opciones-lista { display: flex; flex-direction: column; gap: 8px; }
+.informe-opcion {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 2px solid var(--borde);
+  border-radius: 8px;
+  background: var(--campo);
+  cursor: pointer;
+}
+.informe-opcion.activo { border-color: var(--oliva); background: #FFFFFF; }
+.informe-opcion input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--oliva); }
+.informe-opcion > span { display: flex; flex-direction: column; line-height: 1.3; }
+.informe-opcion small { color: var(--texto-2); }
+.btn-pdf {
+  justify-content: center;
+  min-height: 64px;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 0 var(--tierra-hover);
+}
+.btn-pdf:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--tierra-hover); }
+.btn-pdf[disabled] { opacity: 0.6; cursor: wait; }
+.informe-estado { margin: 0; font-weight: 700; color: var(--oliva); min-height: 1.3em; }
+.informe-incluye { margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--texto-2); display: flex; flex-direction: column; gap: 4px; }
+@media (max-width: 900px) { .informe-grid { grid-template-columns: 1fr; } }
+
+/* --- Capas de la NASA sobre el mapa --- */
+.capas-nasa {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--borde);
+  border-top: 0;
+  background: var(--campo);
+}
+.capas-cabeza { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.capas-cabeza strong { font-size: 0.98rem; color: var(--oliva); }
+.capas-fecha { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--texto-2); }
+.capas-fecha input { min-height: 36px; padding: 2px 8px; border: 1px solid var(--borde); border-radius: 6px; font: inherit; background: #FFFFFF; }
+.capas-fila { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.capas-etiqueta { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texto-2); min-width: 38px; }
+.capa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: var(--tinta);
+  font: 600 0.85rem var(--fuente);
+  cursor: pointer;
+}
+.capa-chip:hover { border-color: var(--oliva); }
+.capa-chip.activo { background: var(--oliva); border-color: var(--oliva); color: #FFFFFF; }
+.capa-chip:focus-visible { outline: 3px solid var(--tierra); outline-offset: 2px; }
+.capas-leyenda {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--papel);
+}
+.capas-leyenda[hidden] { display: none; }
+.capas-leyenda-txt { display: flex; flex-direction: column; gap: 2px; font-size: 0.85rem; }
+.capas-leyenda-txt span:first-of-type { font-family: var(--mono); font-size: 0.75rem; color: var(--texto-2); }
+.capas-leyenda-ctrl { display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; }
+.capas-leyenda-ctrl label { display: flex; align-items: center; gap: 8px; }
+.capas-leyenda-ctrl input[type="range"] { flex: 1; accent-color: var(--oliva); }
+.capas-gradiente { display: block; height: 10px; border-radius: 999px; }
+.capas-gradiente[hidden] { display: none; }
+.capas-leyenda-ctrl a { color: var(--tierra); font-weight: 700; }
+.capas-aviso { color: var(--alerta); font-weight: 600; }
+@media (max-width: 700px) { .capas-leyenda { grid-template-columns: 1fr; } }
+
+/* --- Esta semana en su lote (pronóstico) --- */
+.pronostico-card { padding: 12px 14px; border: 1px solid var(--borde); background: var(--campo); }
+.pron-cabeza { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.pron-cabeza strong { color: var(--oliva); font-size: 0.98rem; }
+.pron-fuente { font-family: var(--mono); font-size: 0.7rem; color: var(--texto-2); }
+.pron-dias { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.pron-dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 2px;
+  border-radius: 8px;
+  background: var(--papel);
+  font-size: 0.78rem;
+  text-align: center;
+}
+.pron-dia.alerta { background: #FBEFCF; box-shadow: inset 0 0 0 2px #D69A2D; }
+.pron-dia.riesgo { background: #F6DCD4; box-shadow: inset 0 0 0 2px var(--riesgo); }
+.pron-nombre { font-weight: 700; }
+.pron-emoji { font-size: 1.35rem; line-height: 1.2; }
+.pron-temp b { color: var(--tierra); }
+.pron-temp span { color: #3F5A73; }
+.pron-lluvia { font-size: 0.7rem; color: #3F5A73; }
+.pron-nota { margin: 0; font-size: 0.85rem; color: var(--texto-2); }
+
+/* --- Inicio: valores de RotaSat y 4 pasos --- */
+.hero-valores {
+  list-style: none;
+  margin: 18px 0 4px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.hero-valores li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--campo);
+}
+.hero-valores li > span { grid-row: 1 / 3; font-size: 1.5rem; text-align: center; }
+.hero-valores strong { font-size: 0.95rem; color: var(--tinta); line-height: 1.2; }
+.hero-valores small { font-size: 0.8rem; color: var(--texto-2); line-height: 1.3; }
+.pasos-strip .pasos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .pasos-strip .pasos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .hero-valores, .pasos-strip .pasos { grid-template-columns: 1fr; } }
+
+/* ==========================================================================
+   Iconografía coherente (Lucide) en lugar de emojis
+   ========================================================================== */
+.icono { width: 1.1em; height: 1.1em; stroke-width: 2; vertical-align: -0.18em; flex-shrink: 0; }
+.medidor-ico { color: var(--oliva); width: 1.25em; height: 1.25em; }
+.anillo-ico { width: 1em; height: 1em; color: var(--texto-2); margin-bottom: 1px; }
+.aviso-md-ico { width: 30px; height: 30px; padding: 6px; border-radius: 10px; background: var(--ok-bg); color: var(--ok); stroke-width: 2.2; }
+.aviso-md-btn.alerta .aviso-md-ico { background: var(--alerta-bg); color: var(--alerta); }
+.aviso-md-btn.riesgo .aviso-md-ico { background: var(--riesgo-bg); color: var(--riesgo); }
+.aviso-md-btn.info .aviso-md-ico { background: var(--info-bg); color: var(--info); }
+.aviso-ico { width: 40px; height: 40px; padding: 8px; border-radius: 12px; background: var(--ok-bg); color: var(--ok); }
+.aviso-agro.alerta .aviso-ico { background: var(--alerta-bg); color: var(--alerta); }
+.aviso-agro.riesgo .aviso-ico { background: var(--riesgo-bg); color: var(--riesgo); }
+.aviso-agro.info .aviso-ico { background: var(--info-bg); color: var(--info); }
+.aviso-acciones-titulo .icono, .aviso-acciones summary .icono { width: 1.1em; height: 1.1em; }
+/* Viñetas de acciones: marca de verificación dibujada con CSS */
+.aviso-acciones-fijas li::before,
+.aviso-acciones li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.32em;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ok-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234F6B1F' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 11px no-repeat;
+}
+.resumen-lista .icono { width: 1em; height: 1em; color: var(--texto-2); }
+.pron-ico { width: 26px; height: 26px; color: var(--tierra); margin: 2px 0; }
+.pron-dia.alerta .pron-ico, .pron-dia.riesgo .pron-ico { color: #3F5A73; }
+.capa-chip .icono { width: 1em; height: 1em; }
+.hero-valores .hv-ico { grid-row: 1 / 3; width: 34px; height: 34px; padding: 7px; border-radius: 10px; background: var(--ok-bg); color: var(--oliva); }
+.rot-mini-et .icono { color: var(--oliva); }
+.rot-mes-siembra .icono { width: 0.95em; height: 0.95em; }
+.vetado-motivo .icono { color: var(--riesgo); }
+.informe-icono { width: 24px; height: 24px; justify-self: center; color: var(--texto-2); }
+.informe-lista li.hecho .informe-icono { color: var(--ok); }
+.informe-lista li.dato-pendiente .informe-icono { color: var(--info); }
+.subtab .icono { width: 1.15em; height: 1.15em; }
+.girando { animation: girar 1s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+/* Indicador de prioridad: 5 segmentos */
+.prio-iconos { display: inline-flex; gap: 3px; }
+.prio-seg { width: 14px; height: 8px; border-radius: 3px; background: var(--banda); border: 1px solid var(--borde); }
+.prio-seg.lleno { background: var(--oliva); border-color: var(--oliva); }
+.btn-escuchar .icono, .btn-whatsapp .icono, .btn-pdf .icono { width: 1.15em; height: 1.15em; }
+
+/* --- Paso 4: conveniencia de cada plan --- */
+.informe-opcion-cuerpo { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.informe-opcion-titulo { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.sello-mejor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--oliva);
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.sello-mejor .icono { width: 0.9em; height: 0.9em; fill: currentColor; }
+.informe-opcion.mejor { border-color: var(--oliva); }
+.conveniencia { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin-top: 2px; }
+.conveniencia-pista { height: 12px; border-radius: 999px; background: var(--banda); overflow: hidden; }
+.conveniencia-lleno { display: block; height: 100%; border-radius: 999px; }
+.conveniencia-lleno.ok { background: var(--ok); }
+.conveniencia-lleno.alerta { background: #D69A2D; }
+.conveniencia-lleno.riesgo { background: var(--riesgo); }
+.conveniencia b { font-size: 1.05rem; color: var(--tinta); min-width: 3.2em; text-align: right; }
+
+.informe-opcion { text-align: left; }
+.informe-opcion-titulo { flex-direction: row !important; }
+.conveniencia-pista { display: block; }

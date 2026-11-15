@@ -20,6 +20,7 @@
     },
     opciones: {
       escenarioLluviaPct: 0,
+      conRiego: false,
       retiraForraje: false,
       priorizarForraje: false
     },
@@ -30,11 +31,33 @@
     drawnItems: null,
     activePolygonLayer: null,
     chartBalance: null,
-    chartHLS: null
+    chartHLS: null,
+    tokenLote: 0,
+    renderEconToken: 0,
+    sensorBackups: {},
+    prioridadesTocadas: false,
+    informeRotId: null
   };
 
   function clonar(obj) {
     return JSON.parse(JSON.stringify(obj));
+  }
+
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function setLocationStatus(texto) {
+    const statusEl = document.getElementById('location-search-status');
+    if (statusEl) {
+      statusEl.hidden = false;
+      statusEl.textContent = texto;
+    }
   }
 
   function haACuadras(ha) {
@@ -129,6 +152,82 @@
     return state.parcelasActivas[state.parcelaActualId];
   }
 
+  function syncToolbarPressedStates(modo) {
+    const btnPoly = document.getElementById('btn-guided-draw');
+    const btnRect = document.getElementById('btn-draw-rectangle');
+    const btnEdit = document.getElementById('btn-edit-layers');
+    const btnEditTxt = document.getElementById('btn-edit-layers-text');
+    const btnFinish = document.getElementById('btn-finish-draw');
+    const btnUndo = document.getElementById('btn-undo-draw');
+    const btnSaveEdit = document.getElementById('btn-save-edit');
+    if (btnPoly) btnPoly.setAttribute('aria-pressed', modo === 'polygon' ? 'true' : 'false');
+    if (btnRect) btnRect.setAttribute('aria-pressed', modo === 'rectangle' ? 'true' : 'false');
+    if (btnEdit) btnEdit.setAttribute('aria-pressed', modo === 'edit' ? 'true' : 'false');
+    if (btnEditTxt) btnEditTxt.textContent = modo === 'edit' ? 'Guardar bordes' : 'Editar bordes';
+    if (btnFinish) btnFinish.hidden = modo !== 'polygon';
+    if (btnUndo) btnUndo.hidden = modo !== 'polygon';
+    if (btnSaveEdit) btnSaveEdit.hidden = modo !== 'edit';
+  }
+
+  function obtenerAccionLeafletDrawActiva(tituloSubcadena) {
+    const selectorBase = state.activeDrawType === 'edit'
+      ? '.leaflet-draw-edit-edit'
+      : '.leaflet-draw-draw-polygon, .leaflet-draw-draw-rectangle';
+    const btnModo = document.querySelector(`#mapa-parcela ${selectorBase}`);
+    const seccion = btnModo && btnModo.closest('.leaflet-draw-section');
+    if (seccion) {
+      const enlace = seccion.querySelector(`.leaflet-draw-actions li a[title*="${tituloSubcadena}"]`);
+      if (enlace) return enlace;
+    }
+    const accionesVisibles = Array.from(
+      document.querySelectorAll('#mapa-parcela .leaflet-draw-actions')
+    ).find(ul => ul.style.display !== 'none');
+    return accionesVisibles
+      ? accionesVisibles.querySelector(`li a[title*="${tituloSubcadena}"]`)
+      : null;
+  }
+
+  function cancelarAccionLeafletDrawActiva() {
+    const cancelBtn = obtenerAccionLeafletDrawActiva('Cancelar');
+    if (cancelBtn) {
+      cancelBtn.click();
+    }
+    state.guidedVertices = [];
+    state.activeDrawType = null;
+    state.rectStartLatLng = null;
+    syncToolbarPressedStates(null);
+    document.body.classList.remove('guided-drawing-active');
+    const banner = document.getElementById('guided-draw-banner');
+    const tooltip = document.getElementById('guided-draw-tooltip');
+    if (banner) banner.hidden = true;
+    if (tooltip) tooltip.hidden = true;
+  }
+
+  function limpiarMarcadorSensorUI(restaurarParcela) {
+    if (state.sensorMarker && state.map) {
+      state.map.removeLayer(state.sensorMarker);
+      state.sensorMarker = null;
+    }
+    const sensorPanel = document.getElementById('sensor-node-panel');
+    if (sensorPanel) sensorPanel.hidden = true;
+    if (restaurarParcela) {
+      const p = obtenerParcelaActual();
+      if (p) {
+        const backup = state.sensorBackups && state.sensorBackups[p.id];
+        if (backup) {
+          if (Array.isArray(backup.clima_mensual) && backup.clima_mensual.length) {
+            p.clima_mensual = clonar(backup.clima_mensual);
+          }
+          if (p.tecnico) {
+            p.tecnico.suelo_laboratorio = clonar(backup.suelo_lab);
+          }
+          delete state.sensorBackups[p.id];
+        }
+        p.sensor_local_activo = false;
+      }
+    }
+  }
+
   /**
    * Inicializa el mapa satelital Leaflet con Esri World Imagery + OpenStreetMap + Leaflet.draw
    */
@@ -144,20 +243,17 @@
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       {
         maxZoom: 19,
-        attribution: 'Imágenes Esri, Maxar | Datos NASA POWER, SRTM, HLS, GPM'
+        attribution: 'Imágenes © Esri, Maxar, Earthstar Geographics'
       }
     );
 
-    const osmCalle = L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      {
-        maxZoom: 19,
-        attribution: 'OpenStreetMap contributors'
-      }
-    );
+    const osmCalle = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    });
 
     state.wmsCatastro = L.tileLayer.wms(
-      'http://geoportal.agricultura.gob.ec/sigtierras/catastro_rural/wms',
+      'https://geoportal.agricultura.gob.ec/sigtierras/catastro_rural/wms',
       {
         layers: 'catastro_rural',
         format: 'image/png',
@@ -247,23 +343,6 @@
       state.drawControl = drawControl;
       state.map.addControl(drawControl);
 
-      const syncToolbarPressedStates = (modo) => {
-        const btnPoly = document.getElementById('btn-guided-draw');
-        const btnRect = document.getElementById('btn-draw-rectangle');
-        const btnEdit = document.getElementById('btn-edit-layers');
-        const btnEditTxt = document.getElementById('btn-edit-layers-text');
-        const btnFinish = document.getElementById('btn-finish-draw');
-        const btnUndo = document.getElementById('btn-undo-draw');
-        const btnSaveEdit = document.getElementById('btn-save-edit');
-        if (btnPoly) btnPoly.setAttribute('aria-pressed', modo === 'polygon' ? 'true' : 'false');
-        if (btnRect) btnRect.setAttribute('aria-pressed', modo === 'rectangle' ? 'true' : 'false');
-        if (btnEdit) btnEdit.setAttribute('aria-pressed', modo === 'edit' ? 'true' : 'false');
-        if (btnEditTxt) btnEditTxt.textContent = modo === 'edit' ? 'Guardar bordes' : 'Editar bordes';
-        if (btnFinish) btnFinish.hidden = modo !== 'polygon';
-        if (btnUndo) btnUndo.hidden = modo !== 'polygon';
-        if (btnSaveEdit) btnSaveEdit.hidden = modo !== 'edit';
-      };
-
       state.map.on(L.Draw.Event.DRAWSTART, function (e) {
         state.guidedVertices = [];
         state.activeDrawType = e.layerType || 'polygon';
@@ -347,6 +426,32 @@
           if (!latlngs || latlngs.length < 3) return;
           const centro = layer.getBounds().getCenter();
           const p = obtenerParcelaActual();
+          const dentro = parcelaQueContiene(centro.lat, centro.lng);
+
+          if (p.id !== 'lote_dibujado' && dentro && dentro !== p.id) {
+            seleccionarParcelaPorId(dentro);
+            const pd = obtenerParcelaActual();
+            pd.area_ha = calcularAreaPoligonoHa(latlngs);
+            dibujarPoligonoParcelaActual(false);
+            actualizarTodo();
+            return;
+          }
+
+          if (p.id !== 'lote_dibujado' && !dentro) {
+            limpiarMarcadorSensorUI(false);
+            const lote = crearLoteDibujado(p, latlngs, centro);
+            state.parcelasActivas[lote.id] = lote;
+            state.parcelasOriginales[lote.id] = clonar(lote);
+            state.parcelaActualId = lote.id;
+            state.rotacionSeleccionadaGraficoId = 'recomendada_1';
+            state.informeRotId = null;
+            layer.setPopupContent(crearPopupParcelaHtml(lote));
+            sincronizarControlesPaso2ConParcela();
+            actualizarTodo();
+            cargarDatosLoteEnVivo(lote, layer, { actualizarOriginal: true });
+            return;
+          }
+
           p.area_ha = calcularAreaPoligonoHa(latlngs);
           p.centroide = { lat: Number(centro.lat.toFixed(5)), lon: Number(centro.lng.toFixed(5)) };
           p.geometria = {
@@ -356,10 +461,13 @@
                 .concat([[Number(latlngs[0].lng.toFixed(5)), Number(latlngs[0].lat.toFixed(5))]])
             ]
           };
+          if (state.sensorBackups && state.sensorBackups[p.id]) {
+            delete state.sensorBackups[p.id];
+          }
           layer.setPopupContent(crearPopupParcelaHtml(p));
           sincronizarControlesPaso2ConParcela();
           actualizarTodo();
-          cargarDatosLoteEnVivo(p, layer);
+          cargarDatosLoteEnVivo(p, layer, { actualizarOriginal: false });
         });
       });
 
@@ -424,6 +532,7 @@
           seleccionarParcelaPorId(dentro);
           const pd = obtenerParcelaActual();
           pd.area_ha = calcularAreaPoligonoHa(latlngs);
+          dibujarPoligonoParcelaActual(false);
           actualizarTodo();
           return;
         }
@@ -432,11 +541,16 @@
         state.parcelasOriginales[lote.id] = clonar(lote);
         state.parcelaActualId = lote.id;
         state.rotacionSeleccionadaGraficoId = 'recomendada_1';
+        state.informeRotId = null;
 
         sincronizarControlesPaso2ConParcela();
-        layer.bindPopup(crearPopupParcelaHtml(lote)).openPopup();
+        dibujarPoligonoParcelaActual(false);
+        const capaCreada = state.drawnItems && state.drawnItems.getLayers()[0];
+        if (capaCreada && typeof capaCreada.openPopup === 'function') {
+          capaCreada.openPopup();
+        }
         actualizarTodo();
-        cargarDatosLoteEnVivo(lote, layer);
+        cargarDatosLoteEnVivo(lote, capaCreada || layer);
       });
     }
 
@@ -445,14 +559,17 @@
 
   function crearPopupParcelaHtml(parcela) {
     const cuadras = haACuadras(parcela.area_ha);
+    const nombreSeguro = escapeHtml(parcela.nombre);
+    const ubicacionSegura = escapeHtml(parcela.ubicacion_texto);
+    const texturaSegura = escapeHtml((parcela.suelo && parcela.suelo.textura) || '');
     return `
       <div style="font-family: 'Public Sans', sans-serif; min-width: 210px; color: #2B2A22;">
-        <strong style="font-size: 0.92rem; color: #3E4A1E;">${parcela.nombre}</strong>
+        <strong style="font-size: 0.92rem; color: #3E4A1E;">${nombreSeguro}</strong>
         <div style="font-size: 0.82rem; color: #5A5440; margin-top: 4px; font-variant-numeric: tabular-nums;">
-          Ubicación: ${parcela.ubicacion_texto}<br/>
+          Ubicación: ${ubicacionSegura}<br/>
           Superficie: <b>${fmtMiles(haAM2(parcela.area_ha))} m²</b> (${cuadras} cuadras)<br/>
-          Altitud: <b>${fmtMiles(parcela.terreno.elev_m)} m s.n.m.</b> · Pendiente: <b>${parcela.terreno.pendiente_pct} %</b><br/>
-          Suelo: <b>${parcela.suelo.textura}</b> (SOC: ${parcela.suelo.soc_pct} %, pH ${parcela.suelo.ph})
+          Altitud: <b>${fmtMiles(parcela.terreno && parcela.terreno.elev_m)} m s.n.m.</b> · Pendiente: <b>${parcela.terreno && parcela.terreno.pendiente_pct} %</b><br/>
+          Suelo: <b>${texturaSegura}</b> (SOC: ${parcela.suelo && parcela.suelo.soc_pct} %, pH ${parcela.suelo && parcela.suelo.ph})
         </div>
       </div>
     `;
@@ -487,6 +604,7 @@
   function abrirLoteEnPunto(lat, lon, ladoM) {
     const dentro = parcelaQueContiene(lat, lon);
     if (dentro) { seleccionarParcelaPorId(dentro); return; }
+    limpiarMarcadorSensorUI(false);
     const lado = ladoM || 140;
     const dlat = lado / 2 / 111320, dlon = lado / 2 / (111320 * Math.cos(lat * Math.PI / 180));
     const latlngs = [
@@ -498,11 +616,46 @@
     state.parcelasOriginales[lote.id] = clonar(lote);
     state.parcelaActualId = lote.id;
     state.rotacionSeleccionadaGraficoId = 'recomendada_1';
+    state.informeRotId = null;
     sincronizarControlesPaso2ConParcela();
     dibujarPoligonoParcelaActual(true);
     actualizarTodo();
     const capa = state.drawnItems && state.drawnItems.getLayers()[0];
     cargarDatosLoteEnVivo(lote, capa || null);
+  }
+
+  function ubicarPorGeolocalizacion(opts) {
+    const o = opts || {};
+    if (!navigator.geolocation) {
+      setLocationStatus('Geolocalización no disponible en este navegador.');
+      return;
+    }
+    setLocationStatus(o.mensajeEspera || 'Obteniendo ubicación actual...');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        if (state.map) state.map.setView([latitude, longitude], 18);
+        if (o.llenarInputBuscar) {
+          const inpBuscar = document.getElementById('input-buscar-ubicacion');
+          if (inpBuscar) inpBuscar.value = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+        }
+        abrirLoteEnPunto(latitude, longitude, 50);
+        setLocationStatus(o.mensajeExito || 'Ubicación GPS activa: lote sugerido de 50×50 m (2 500 m²).');
+      },
+      () => {
+        if (o.fallbackVistaActual) {
+          const p = obtenerParcelaActual();
+          const lat = p && p.centroide ? p.centroide.lat : -1.8014;
+          const lon = p && p.centroide ? p.centroide.lon : -78.6119;
+          if (state.map) state.map.setView([lat, lon], 18);
+          abrirLoteEnPunto(lat, lon, 50);
+          setLocationStatus('Permiso GPS no concedido: se trazó parcela de 50×50 m (2 500 m²) en la vista actual.');
+        } else {
+          setLocationStatus('No se pudo acceder a la ubicación actual.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: o.timeoutMs || 10000 }
+    );
   }
 
   function crearLoteDibujado(base, latlngs, center) {
@@ -520,8 +673,7 @@
     };
     const cargando = 'EJEMPLO (consultando datos en vivo; mientras tanto, valores de la parcela de demo)';
     lote.estado_datos = {
-      clima: cargando, anomalia: cargando, suelo: cargando, terreno: cargando,
-      ndvi: 'SIN DATO: lote nuevo; el historial HLS se pide a AppEEARS (tarda horas)', smap: 'sin dato'
+      clima: cargando, anomalia: cargando, suelo: cargando, terreno: cargando
     };
     lote.anomalia = Object.assign({}, lote.anomalia, { fuente: 'EJEMPLO (consultando NASA POWER…)' });
     lote.suelo = Object.assign({}, lote.suelo, { fuente: 'EJEMPLO (consultando SoilGrids…)', editado_por_usuario: false });
@@ -529,7 +681,11 @@
     lote.historia_inferida = [];
     lote.historia_declarada = ['', ''];
     lote.nematodo_declarado = false;
+    lote.sensor_local_activo = false;
     delete lote.smap;
+    delete lote.agricultor;
+    delete lote.tecnico;
+    delete lote.satelite_nasa;
     return lote;
   }
 
@@ -537,20 +693,20 @@
     const el = document.getElementById('estado-datos-vivo');
     if (!el) return;
     el.hidden = false;
-    const icono = v => v === null ? '⏳' : (v ? '✅' : '⚠️');
+    const icono = v => `<i data-lucide="${v === null ? 'loader-circle' : (v ? 'circle-check' : 'triangle-alert')}" class="icono${v === null ? ' girando' : ''}" aria-hidden="true"></i>`;
     el.innerHTML = `<strong>${mensaje}</strong><ul>` +
       filas.map(f => `<li>${icono(f.ok)} ${f.texto}</li>`).join('') + '</ul>';
+    refrescarIconosLucide();
   }
 
-  async function cargarDatosLoteEnVivo(lote, layer) {
+  async function cargarDatosLoteEnVivo(lote, layer, opts) {
     if (!window.DatosVivo) return;
     const token = (state.tokenLote = (state.tokenLote || 0) + 1);
     const filas = {
       terreno: { texto: 'Altitud y pendiente · SRTM 30 m (OpenTopoData / Open-Elevation / Open-Meteo)', ok: null },
       clima: { texto: 'Clima 2015–actualidad · NASA POWER', ok: null },
       anomalia: { texto: 'Anomalía de lluvia · NASA POWER', ok: null },
-      suelo: { texto: 'Suelo · ISRIC SoilGrids 250 m', ok: null },
-      ndvi: { texto: 'Historial satelital HLS: solo con pedido a AppEEARS (tarda horas)', ok: false }
+      suelo: { texto: 'Suelo · ISRIC SoilGrids 250 m', ok: null }
     };
     const pintar = msg => mostrarEstadoDatosVivo(Object.values(filas), msg);
     pintar('Consultando datos de la NASA para su lote…');
@@ -564,6 +720,8 @@
 
     const p = state.parcelasActivas[lote.id];
     if (!p) return;
+    if (!p.terreno) p.terreno = {};
+    if (!p.estado_datos) p.estado_datos = {};
     const falla = 'EJEMPLO (no respondió el servicio; se mantienen valores de la parcela de demo)';
     if (r.terreno && !r.terreno.aproximado) {
       const { fuente, ...t } = r.terreno;
@@ -585,17 +743,27 @@
     if (r.anomalia) {
       p.anomalia = r.anomalia;
       p.estado_datos.anomalia = `NASA POWER PRECTOTCORR, ${r.anomalia.ventana} vs ${r.anomalia.anios_referencia}`;
-    } else { p.estado_datos.anomalia = falla; p.anomalia.fuente = falla; }
+    } else {
+      p.estado_datos.anomalia = falla;
+      if (!p.anomalia) p.anomalia = {};
+      p.anomalia.fuente = falla;
+    }
     if (r.suelo) {
       p.suelo = r.suelo;
       p.estado_datos.suelo = 'ISRIC SoilGrids 250 m (0–30 cm)';
-    } else { p.estado_datos.suelo = falla; p.suelo.fuente = falla; }
+    } else {
+      p.estado_datos.suelo = falla;
+      if (!p.suelo) p.suelo = {};
+      p.suelo.fuente = falla;
+    }
     delete p.satelite_nasa;
     if (p.agricultor && !p.agricultor.editado_tierra) {
       p.agricultor.tipo_tierra = inferirTipoTierraSimple(p.suelo && p.suelo.textura);
     }
     asegurarEsquemaDual(p);
-    state.parcelasOriginales[lote.id] = clonar(p);
+    if (lote.id === 'lote_dibujado' && (!opts || opts.actualizarOriginal !== false)) {
+      state.parcelasOriginales[lote.id] = clonar(p);
+    }
 
     const nOk = ['terreno', 'clima', 'anomalia', 'suelo'].filter(k => r[k] && !(k === 'terreno' && r[k].aproximado)).length;
     pintar(nOk === 4
@@ -603,6 +771,9 @@
       : `Se cargaron ${nOk} de 4 fuentes; lo demás queda marcado como EJEMPLO.`);
     sincronizarControlesPaso2ConParcela();
     if (layer) layer.setPopupContent(crearPopupParcelaHtml(p));
+    if (state.activeDrawType !== 'edit' && state.parcelaActualId === p.id) {
+      dibujarPoligonoParcelaActual(false);
+    }
     actualizarTodo();
   }
 
@@ -704,14 +875,39 @@
   function renderizarParcelaActiva(parcela) {
     const el = document.getElementById('parcela-activa');
     if (!el) return;
-    const conSat = (parcela.ndvi_mensual || []).length > 0 && !esEjemplo(parcela, 'ndvi');
-    const esDemo = parcela.id !== 'lote_dibujado';
-    const etiqueta = conSat
-      ? '<span class="pill-sat ok">🛰️ Con historial satelital (HLS vía AppEEARS)</span>'
-      : (esDemo
-        ? '<span class="pill-sat warn">🛰️ Parcela de demo · historial satelital pendiente de AppEEARS</span>'
-        : '<span class="pill-sat warn">📡 Lote nuevo · clima, suelo y relieve en vivo · sin historial satelital</span>');
-    el.innerHTML = `<strong>${parcela.nombre}</strong> <span class="unidad">· ${parcela.ubicacion_texto || ''}</span> ${etiqueta}`;
+    // La etiqueta de historial satelital solo aplica a los lotes con pedido en NASA AppEEARS
+    let etiqueta = '';
+    if (window.AyudaAgricultor && window.AyudaAgricultor.esParcelaSatelital(parcela)) {
+      const conSat = (parcela.ndvi_mensual || []).length > 0 && !esEjemplo(parcela, 'ndvi');
+      etiqueta = conSat
+        ? '<span class="pill-sat ok"><i data-lucide="satellite" class="icono"></i> Con historial satelital HLS (NASA AppEEARS)</span>'
+        : '<span class="pill-sat warn"><i data-lucide="satellite" class="icono"></i> Historial satelital pedido a NASA AppEEARS</span>';
+    }
+    el.innerHTML = `<strong>${escapeHtml(parcela.nombre)}</strong> <span class="unidad">· ${escapeHtml(parcela.ubicacion_texto || '')}</span> ${etiqueta}`;
+  }
+
+
+  /** Pide el pronóstico de 7 días del lote una sola vez por ubicación y vuelve a pintar al llegar. */
+  function solicitarPronostico(parcela) {
+    const card = document.getElementById('pronostico-card');
+    if (!window.Pronostico || !card || !parcela.centroide) return;
+    const clave = `${parcela.centroide.lat},${parcela.centroide.lon}`;
+    if (state.pronosticoClave === clave) {
+      card.innerHTML = window.Pronostico.tarjeta(state.pronostico, state.pronosticoError);
+      return;
+    }
+    if (state.pronosticoPidiendo === clave) return;
+    state.pronosticoPidiendo = clave;
+    card.innerHTML = window.Pronostico.tarjeta(null);
+    window.Pronostico.cargar(parcela.centroide.lat, parcela.centroide.lon, parcela.terreno?.elev_m)
+      .then(p => { state.pronostico = p; state.pronosticoError = false; })
+      .catch(() => { state.pronostico = null; state.pronosticoError = true; })
+      .finally(() => {
+        state.pronosticoClave = clave;
+        state.pronosticoPidiendo = null;
+        const actual = obtenerParcelaActual();
+        if (actual && `${actual.centroide?.lat},${actual.centroide?.lon}` === clave) actualizarTodo();
+      });
   }
 
   function renderizarPaso1Terreno(parcela) {
@@ -723,6 +919,11 @@
 
     const tagBal = document.getElementById('tag-chart-balance');
     if (tagBal) tagBal.hidden = !esEjemplo(parcela, 'clima');
+    const esSat = window.AyudaAgricultor ? window.AyudaAgricultor.esParcelaSatelital(parcela) : true;
+    const tagHist = document.getElementById('tag-historia');
+    if (tagHist) tagHist.hidden = !esSat;
+    const cardHls = document.getElementById('chart-hls-ndvi')?.closest('.chart-card');
+    if (cardHls) cardHls.hidden = !esSat;
     const tagHls = document.getElementById('tag-chart-hls');
     if (tagHls) {
       tagHls.hidden = !(esEjemplo(parcela, 'ndvi') || sinDato(parcela, 'ndvi'));
@@ -822,10 +1023,27 @@
     const badgesHtml = badges
       .map(b => `<span class="estado ${b.clase}">${b.texto}</span>`)
       .join('');
-    vulnContainer.innerHTML = badgesHtml;
-
-    const vulnMirror = document.getElementById('vuln-badges-mirror');
-    if (vulnMirror) vulnMirror.innerHTML = badgesHtml;
+    const AY = window.AyudaAgricultor;
+    if (AY) {
+      const clavePron = `${parcela.centroide?.lat},${parcela.centroide?.lon}`;
+      const pron = state.pronosticoClave === clavePron ? state.pronostico : null;
+      const avisos = AY.advertenciasLote(parcela, state.opciones)
+        .concat(window.Pronostico ? window.Pronostico.avisos(pron) : []);
+      solicitarPronostico(parcela);
+      state.avisosLote = avisos;
+      vulnContainer.innerHTML = AY.listaDetalleAdvertencias(avisos);
+      AY.activarListaDetalle(vulnContainer);
+      const resumen = document.getElementById('resumen-riesgos');
+      if (resumen) resumen.innerHTML = AY.resumenRiesgos(avisos);
+      const cnt = document.getElementById('cuenta-avisos');
+      if (cnt) cnt.textContent = avisos.filter(x => x.clase === 'riesgo' || x.clase === 'alerta').length;
+      const medEl = document.getElementById('medidores-lote');
+      if (medEl) medEl.innerHTML = AY.medidoresLote(parcela, state.opciones);
+      const tabEl = document.getElementById('tabla-clima-tecnica');
+      if (tabEl) tabEl.innerHTML = AY.tablaClimaTecnica(parcela, state.opciones);
+    } else {
+      vulnContainer.innerHTML = badgesHtml;
+    }
 
     // Actualizar tarjeta "Parcela en memoria" y badge de vulnerabilidades en la barra lateral
     const sbNombre = document.getElementById('sidebar-parcela-nombre');
@@ -839,8 +1057,9 @@
 
     const sbVuln = document.getElementById('sidebar-vuln-badge');
     if (sbVuln) {
-      const tieneAlto = badges.some(b => b.clase === 'riesgo');
-      const tieneMedio = badges.some(b => b.clase === 'alerta');
+      const fuenteNivel = state.avisosLote || badges;
+      const tieneAlto = fuenteNivel.some(b => b.clase === 'riesgo');
+      const tieneMedio = fuenteNivel.some(b => b.clase === 'alerta');
       const nivel = tieneAlto ? 'Alto' : (tieneMedio ? 'Medio' : 'Bajo');
       const claseExtra = tieneAlto ? '' : (tieneMedio ? ' medio' : ' bajo');
       sbVuln.className = `sidebar-badge-status${claseExtra}`;
@@ -875,10 +1094,10 @@
     if (!parcela.agricultor) {
       parcela.agricultor = {
         tipo_tierra: inferirTipoTierraSimple(parcela.suelo && parcela.suelo.textura),
-        historia_cultivos: clonar(parcela.historia_declarada || ['papa', 'papa']),
+        historia_cultivos: clonar(parcela.historia_declarada || ['', '']),
         vio_nematodos: Boolean(parcela.nematodo_declarado),
         manejo_rastrojo: state.opciones.retiraForraje ? 'retirar_ganado' : 'dejar_en_suelo',
-        prioridades: clonar(state.sliders)
+        prioridades: { agua: 3, suelo: 3, ganar: 3 }
       };
     }
     if (!parcela.tecnico) {
@@ -941,7 +1160,27 @@
     };
   }
 
+  const TEXTO_PRIORIDAD = ['', 'Poco', 'Algo', 'Normal', 'Bastante', 'Mucho'];
+
+  function pintarPrioSlider(wrap, val) {
+    const key = wrap.getAttribute('data-simple-slider');
+    const inp = wrap.querySelector('.prio-slider');
+    if (!inp) return;
+    inp.value = String(val);
+    inp.style.setProperty('--lleno', `${((val - 1) / 4) * 100}%`);
+    inp.setAttribute('aria-valuetext', TEXTO_PRIORIDAD[val]);
+    const txt = wrap.querySelector('.prio-texto');
+    if (txt) txt.textContent = TEXTO_PRIORIDAD[val];
+    const ic = wrap.querySelector('.prio-iconos');
+    if (ic) ic.innerHTML = [1, 2, 3, 4, 5].map(n => `<span class="prio-seg${n <= val ? ' lleno' : ''}"></span>`).join('');
+    wrap.dataset.nivel = String(val);
+  }
+
   function sincronizarBotonesPrioridadSimple() {
+    document.querySelectorAll('.prio-slider-wrap[data-simple-slider]').forEach(wrap => {
+      const key = wrap.getAttribute('data-simple-slider');
+      pintarPrioSlider(wrap, Math.max(1, Math.min(5, Number(state.sliders[key] || 3))));
+    });
     document.querySelectorAll('.priority-btn-group[data-simple-slider]').forEach(group => {
       const key = group.getAttribute('data-simple-slider');
       const val = Number(state.sliders[key] || 3);
@@ -1012,14 +1251,15 @@
     const selHist1 = document.getElementById('select-historia-1');
     const selHist2 = document.getElementById('select-historia-2');
     if (selHist1 && selHist2 && state.catalogo) {
-      const opcionesHtml = state.catalogo.cultivos
-        .map(c => `<option value="${c.id}">${c.nombre} (${c.familia})</option>`)
-        .join('');
+      const opcionesHtml = '<option value="">Sin especificar (lote nuevo / sin dato)</option>' +
+        state.catalogo.cultivos
+          .map(c => `<option value="${c.id}">${escapeHtml(c.nombre)} (${escapeHtml(c.familia)})</option>`)
+          .join('');
       selHist1.innerHTML = opcionesHtml;
       selHist2.innerHTML = opcionesHtml;
 
-      const h1 = (parcela.historia_declarada && parcela.historia_declarada[0]) || 'papa';
-      const h2 = (parcela.historia_declarada && parcela.historia_declarada[1]) || h1;
+      const h1 = (parcela.historia_declarada && parcela.historia_declarada[0]) || '';
+      const h2 = (parcela.historia_declarada && parcela.historia_declarada[1]) || '';
       selHist1.value = h1;
       selHist2.value = h2;
     }
@@ -1028,6 +1268,11 @@
     if (chkNem) {
       chkNem.checked = Boolean(parcela.nematodo_declarado);
     }
+
+    const pr = (parcela.agricultor && parcela.agricultor.prioridades) || { agua: 3, suelo: 3, ganar: 3 };
+    state.sliders.agua = Math.max(1, Math.min(5, Number(pr.agua) || 3));
+    state.sliders.suelo = Math.max(1, Math.min(5, Number(pr.suelo) || 3));
+    state.sliders.ganar = Math.max(1, Math.min(5, Number(pr.ganar) || 3));
 
     const sliderAgua = document.getElementById('slider-agua');
     const sliderSuelo = document.getElementById('slider-suelo');
@@ -1048,23 +1293,28 @@
     if (!cultivos.length) return [];
 
     const catalogoLista = (state.catalogo && state.catalogo.cultivos) || [];
-    const histIds = (parcela && parcela.historia_declarada) || ['papa'];
-    const cultivoPrevio = catalogoLista.find(c => c.id === histIds[0]) || { nombre: 'Papa', familia: 'Solanáceas' };
+    const histIds = (parcela && parcela.historia_declarada) || [];
+    const prevId = histIds[1] || histIds[0] || '';
+    const cultivoPrevio = prevId ? catalogoLista.find(c => c.id === prevId) : null;
 
     const razones = [];
 
     // 1. Ruptura del ciclo de plagas según familia previa y familias reales de la rotación
     const familiasRot = [...new Set(cultivos.map(c => c.familia))];
     const nombresRot = cultivos.map(c => c.nombre.toLowerCase()).join(', ');
-    const repiteFamPreviaAnio1 = cultivos[0] && cultivos[0].familia === cultivoPrevio.familia;
+    const repiteFamPreviaAnio1 = cultivoPrevio && cultivos[0] && cultivos[0].familia === cultivoPrevio.familia;
 
-    if (!repiteFamPreviaAnio1) {
+    if (cultivoPrevio && !repiteFamPreviaAnio1) {
       razones.push(
         `Rompe el ciclo de plagas y enfermedades de las ${cultivoPrevio.familia.toLowerCase()} (${cultivoPrevio.nombre.toLowerCase()}) al alternar ${familiasRot.length} familias distintas (${nombresRot}).`
       );
-    } else {
+    } else if (cultivoPrevio) {
       razones.push(
         `Diversifica la parcela alternando ${nombresRot} para reducir la presión de plagas específicas del suelo.`
+      );
+    } else {
+      razones.push(
+        `Alterna ${familiasRot.length} familias botánicas distintas (${nombresRot}) para evitar la acumulación de plagas del suelo desde el inicio del ciclo.`
       );
     }
 
@@ -1138,23 +1388,43 @@
   };
 
   let cachePreciosMag = null;
+  let promesaPreciosMag = null;
+  const econSeqPorContenedor = {};
+
+  function obtenerPreciosMag() {
+    if (cachePreciosMag) return Promise.resolve(cachePreciosMag);
+    if (!promesaPreciosMag) {
+      promesaPreciosMag = fetch('precios_mag.json')
+        .then((respuesta) => {
+          if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+          return respuesta.json();
+        })
+        .then((datos) => {
+          cachePreciosMag = datos;
+          return cachePreciosMag;
+        })
+        .catch(() => {
+          cachePreciosMag = PRECIOS_MAG_FALLBACK;
+          return cachePreciosMag;
+        })
+        .finally(() => {
+          promesaPreciosMag = null;
+        });
+    }
+    return promesaPreciosMag;
+  }
 
   /**
    * Motor de Fusión Económica (SIPA MAG-Ecuador + área real de parcela):
    * Cruza el área de la parcela en metros cuadrados con precios_mag.json
-   * para calcular el ingreso promedio anual de la rotación e inyectarlo en el DOM.
+   * para calcular el ingreso bruto promedio anual de la rotación e inyectarlo en el DOM.
    */
-  async function calcularEstimacionEconomica(idContenedor, cultivosArreglo, areaMetros) {
+  async function calcularEstimacionEconomica(idContenedor, cultivosArreglo, areaMetros, renderToken) {
+    const reqSeq = (econSeqPorContenedor[idContenedor] = (econSeqPorContenedor[idContenedor] || 0) + 1);
     try {
-      if (!cachePreciosMag) {
-        try {
-          const respuesta = await fetch('precios_mag.json');
-          if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
-          cachePreciosMag = await respuesta.json();
-        } catch (_errFetch) {
-          cachePreciosMag = PRECIOS_MAG_FALLBACK;
-        }
-      }
+      const precios = await obtenerPreciosMag();
+      if (reqSeq !== econSeqPorContenedor[idContenedor]) return 0;
+      if (renderToken !== undefined && renderToken !== state.renderEconToken) return 0;
 
       const areaHectareas = Number(areaMetros || 0) / 10000;
       const lista = Array.isArray(cultivosArreglo) ? cultivosArreglo : [];
@@ -1163,7 +1433,7 @@
       let totalRotacionUsd = 0;
       lista.forEach((item) => {
         const clave = typeof item === 'string' ? item : (item && item.id);
-        const registro = (clave && cachePreciosMag[clave]) || (clave && PRECIOS_MAG_FALLBACK[clave]);
+        const registro = (clave && precios[clave]) || (clave && PRECIOS_MAG_FALLBACK[clave]);
         if (registro) {
           const ingresoCultivo = Number(registro.rendimiento_ha_kg) * areaHectareas * Number(registro.precio_kg_usd);
           totalRotacionUsd += ingresoCultivo;
@@ -1179,6 +1449,9 @@
 
       const contenedor = document.getElementById(idContenedor);
       if (contenedor) {
+        if (renderToken !== undefined && contenedor.dataset.econToken !== String(renderToken)) {
+          return 0;
+        }
         contenedor.textContent = `~${formatoMoneda} USD/año`;
       }
       return promedioAnualUsd;
@@ -1216,13 +1489,14 @@
     }
 
     const todasLasTarjetas = [...resultado.recomendadas, resultado.actual];
+    const econToken = (state.renderEconToken = (state.renderEconToken || 0) + 1);
     const areaHa = parcela.area_ha || 1.0;
     const modoGlobalTec = document.body.classList.contains('modo-tecnico');
     const hayAlgunaTecnica = modoGlobalTec || todasLasTarjetas.some(r => Boolean(state.tarjetasTecnicas[r.id]));
 
     const chartsGrid = document.getElementById('charts-grid-rotaciones');
     if (chartsGrid) {
-      chartsGrid.hidden = !hayAlgunaTecnica;
+      chartsGrid.hidden = false; // vive en la pestañita «Gráficos NASA»
       if (hayAlgunaTecnica) {
         setTimeout(() => {
           if (state.chartBalance) state.chartBalance.resize();
@@ -1250,12 +1524,17 @@
       const ingresoTotalLoteAnual = Math.round(rot.detalles.rentabilidad.margenAnualPromedioUsdHa * areaHa);
 
       // Vista Simple: Receta (solo años y cultivo)
-      const recetaSimpleHtml = rot.cultivos.map((c, i) => `
+      const AYr = window.AyudaAgricultor;
+      const recetaSimpleHtml = rot.cultivos.map((c, i) => {
+        const mej = AYr ? AYr.mejoresMeses(AYr.calendarioSiembra(c, parcela, state.opciones), 1)[0] : null;
+        return `
         <div class="rot-simple-step">
           <span class="year-label">${anosCortos[i]}</span>
           <strong>${c.nombre}</strong>
+          ${mej ? `<span class="rot-mes-siembra"><i data-lucide="calendar" class="icono" aria-hidden="true"></i> Siembre en ${AYr.MESES_LARGOS[mej.mes - 1]}</span>` : ''}
         </div>
-      `).join('');
+      `;
+      }).join('');
 
       // Vista Simple: Beneficios resumidos en lenguaje cotidiano
       const cobAgua = rot.balanceHidrico.coberturaAguaPct;
@@ -1280,7 +1559,15 @@
       const alertaFitoHtml = rot.violaReglasFitosanitarias
         ? `<div class="estado riesgo" style="padding:6px 10px;">
              Alto · ${rot.motivoRiesgoFitosanitario}
-           </div>`
+           </div>
+           <details class="aviso-acciones aviso-acciones-suelto" open>
+             <summary><i data-lucide="list-checks" class="icono" aria-hidden="true"></i> ¿Qué puede hacer?</summary>
+             <ul>
+               <li>Cambie a una de las opciones recomendadas: alternan familias y cortan el ciclo de plagas.</li>
+               <li>Si va a repetir, use semilla sana o certificada y arranque las plantas que rebrotan solas.</li>
+               <li>Revise las raíces al cosechar: si ve "bolitas" (nematodos), deje descansar el lote 3 o 4 años de esa familia.</li>
+             </ul>
+           </details>`
         : '';
 
       // Vista Técnica: Secuencia completa, IRR, barras de subíndices, 5 puntos NASA
@@ -1409,15 +1696,40 @@
           ${alertaFitoHtml}
 
           ${!isTechnicalMode ? `
+            <div class="rot-simple-medidores">
+              ${window.AyudaAgricultor ? window.AyudaAgricultor.circulo({
+                titulo: rot.esActual ? 'Su práctica actual' : 'Qué tan buena es para su lote',
+                pct: rot.irrPct,
+                color: rot.irrPct >= 70 ? 'ok' : (rot.irrPct >= 50 ? 'alerta' : 'riesgo'),
+                centro: `${rot.irrPct}`,
+                texto: rot.irrPct >= 70 ? 'Muy buena opción' : (rot.irrPct >= 50 ? 'Opción regular' : 'Opción débil')
+              }) : ''}
+              <div class="rot-mini-barras">
+                ${[['droplet', 'Agua', rot.subindices.agua], ['sprout', 'Tierra', (rot.subindices.nitrogeno + rot.subindices.materiaOrganica) / 2], ['coins', 'Ganancia', rot.subindices.rentabilidad]]
+                  .map(([ic, et, v]) => {
+                    const pc = Math.round(Math.max(0, Math.min(1, v)) * 100);
+                    const cl = pc >= 70 ? 'ok' : (pc >= 45 ? 'alerta' : 'riesgo');
+                    return `<div class="rot-mini-barra" role="img" aria-label="${et}: ${pc} de 100">
+                      <span class="rot-mini-et"><i data-lucide="${ic}" class="icono" aria-hidden="true"></i> ${et}</span>
+                      <span class="rot-mini-pista"><span class="rot-mini-lleno ${cl}" style="width:${pc}%"></span></span>
+                    </div>`;
+                  }).join('')}
+              </div>
+            </div>
+
             <div class="rot-simple-recipe">${recetaSimpleHtml}</div>
 
             <div class="rot-simple-profit-box">
               <div class="rot-simple-profit">
                 <span class="rot-simple-profit-label">
                   <i data-lucide="coins" class="icono"></i>
-                  <span>Ganancia estimada en ${fmtMiles(haAM2(areaHa))} m²</span>
+                  <span>Ingreso bruto anual (SIPA-MAG) en ${fmtMiles(haAM2(areaHa))} m²</span>
                 </span>
-                <span id="ganancia-estimada-${rot.id}" class="rot-simple-profit-val tabular-nums">~$${fmtMiles(ingresoTotalLoteAnual)} USD/año</span>
+                <span id="ganancia-estimada-${rot.id}" data-econ-token="${econToken}" class="rot-simple-profit-val tabular-nums">Calculando…</span>
+              </div>
+              <div class="rot-simple-neto" style="font-size:12.5px; color:var(--tinta); padding:0 2px;">
+                <strong>Ganancia neta estimada (descontando costos):</strong>
+                <span class="tabular-nums">~$${fmtMiles(ingresoTotalLoteAnual)} USD/año</span>
               </div>
               <small class="rot-profit-fusion-badge">
                 Fusión de datos: Proyección calculada integrando viabilidad climática satelital (NASA) y datos históricos de rendimiento y precio a nivel productor del SIPA (MAG-Ecuador). Sujeto a volatilidad del mercado.
@@ -1449,6 +1761,16 @@
           ${panelTecnicoHtml}
 
           <div class="card-footer-actions">
+            ${window.AyudaAgricultor ? `
+              <a class="btn-whatsapp" target="_blank" rel="noopener"
+                 href="${window.AyudaAgricultor.enlaceWhatsApp(window.AyudaAgricultor.textoPlanWhatsApp({ parcela, rot, areaHa, opciones: state.opciones, avisos: state.avisosLote }))}"
+                 aria-label="Enviar este plan por WhatsApp">
+                <i data-lucide="message-circle" class="icono" aria-hidden="true"></i> Enviar por WhatsApp
+              </a>` : ''}
+            ${window.AyudaAgricultor && window.AyudaAgricultor.puedeHablar() ? `
+              <button type="button" class="btn-escuchar" data-escuchar-rot="${rot.id}" aria-label="Escuchar esta opción en voz alta">
+                <i data-lucide="volume-2" class="icono" aria-hidden="true"></i> Escuchar
+              </button>` : ''}
             ${!modoGlobalTec ? `
               <button type="button" class="btn-sec btn-toggle-tecnico" data-toggle-tech="${rot.id}" aria-expanded="${isTechnicalMode ? 'true' : 'false'}">
                 <i data-lucide="satellite" class="icono"></i>
@@ -1469,6 +1791,21 @@
       });
     });
 
+    grid.querySelectorAll('[data-escuchar-rot]').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const rot = todasLasTarjetas.find(r => r.id === this.getAttribute('data-escuchar-rot'));
+        if (!rot || !window.AyudaAgricultor) return;
+        const titulo = rot.esActual ? 'Su práctica actual' : rot.titulo.replace(/^Estrategia\s+(\d+)/i, 'Opción $1');
+        const pasos = rot.cultivos.map((c, i) => `año ${i + 1}, ${c.nombre}`).join('; ');
+        const ganancia = Math.round(rot.detalles.rentabilidad.margenAnualPromedioUsdHa * areaHa);
+        const riesgos = (rot.explicacion.riesgosLocales || []).filter(r => !/SoilGrids|250\s*m|NASA|satelital/i.test(r)).slice(0, 2).join(' ');
+        window.AyudaAgricultor.leer(
+          `${titulo}. Puntaje ${rot.irrPct} de 100. Siembre: ${pasos}. ` +
+          `Ganancia estimada: unos ${ganancia} dólares al año en su lote. ` +
+          `La lluvia cubre el ${rot.balanceHidrico.coberturaAguaPct} por ciento del agua que necesita. ${riesgos}`, this);
+      });
+    });
+
     grid.querySelectorAll('[data-select-rot]').forEach(btn => {
       btn.addEventListener('click', function () {
         state.rotacionSeleccionadaGraficoId = this.getAttribute('data-select-rot');
@@ -1481,7 +1818,7 @@
     const areaMetrosLote = haAM2(areaHa);
     todasLasTarjetas.forEach(rot => {
       const idsCultivos = (rot.cultivos || []).map(c => c.id);
-      calcularEstimacionEconomica(`ganancia-estimada-${rot.id}`, idsCultivos, areaMetrosLote);
+      calcularEstimacionEconomica(`ganancia-estimada-${rot.id}`, idsCultivos, areaMetrosLote, econToken);
     });
 
     refrescarIconosLucide();
@@ -1725,25 +2062,57 @@
     if (countBadge) {
       countBadge.textContent = `${vetados.length} cultivos descartados`;
     }
+    const cntV = document.getElementById('cuenta-vetados');
+    if (cntV) cntV.textContent = vetados.length;
 
     const ordenados = vetados.slice().sort((a, b) => {
       if (a.tipoVeto === b.tipoVeto) return 0;
       return a.tipoVeto === 'fitosanitario' ? -1 : 1;
     });
 
-    cont.innerHTML = ordenados.map(item => {
+    const idsVetados = new Set(vetados.map(v => v.cultivo.id));
+    const sugeribles = (resultado.cultivosAptos || []).filter(c => !idsVetados.has(c.id));
+    const soloAltitud = ordenados.filter(it => it.razones.length && it.razones.every(r => /^Altitud fuera de rango/i.test(r)));
+    const resto = ordenados.filter(it => !soloAltitud.includes(it));
+    const elevLote = obtenerParcelaActual()?.terreno?.elev_m;
+    const tarjetaAltitud = soloAltitud.length ? `
+      <div class="vetado-item vetado-grupo">
+        <div class="vetado-head">
+          <span><i data-lucide="mountain-snow" class="icono" aria-hidden="true"></i> No se dan a ${fmtMiles(elevLote)} m de altura</span>
+          <span class="estado alerta solo-tecnico">Medio · Límite altitudinal</span>
+        </div>
+        <p class="vetado-chips">${soloAltitud.map(it => `<span class="chip-cultivo" title="${it.razones[0]}">${it.cultivo.nombre}</span>`).join('')}</p>
+        <details class="aviso-acciones">
+          <summary><i data-lucide="list-checks" class="icono" aria-hidden="true"></i> ¿Qué puede hacer?</summary>
+          <ul>
+            <li>La altura no se puede cambiar: elija entre los cultivos que sí se dan aquí (${sugeribles.slice(0, 6).map(c => c.nombre).join(', ')}${sugeribles.length > 6 ? '…' : ''}).</li>
+            <li>Pregunte en INIAP o al técnico por variedades adaptadas a su piso de altura.</li>
+          </ul>
+        </details>
+      </div>` : '';
+
+    cont.innerHTML = tarjetaAltitud + resto.map(item => {
       const c = item.cultivo;
       const etiquetaTipo = item.tipoVeto === 'fitosanitario'
         ? '<span class="estado riesgo">Alto · Pausa fitosanitaria</span>'
         : '<span class="estado alerta">Medio · Límite biofísico</span>';
 
+      const rem = window.AyudaAgricultor
+        ? window.AyudaAgricultor.remediosVeto(item.razones, c, sugeribles)
+        : null;
       return `
         <div class="vetado-item">
           <div class="vetado-head">
             <span><i data-lucide="wheat" class="icono"></i> ${c.nombre} <small class="unidad">(${c.familia})</small></span>
             ${etiquetaTipo}
           </div>
+          ${rem ? `<p class="vetado-motivo"><i data-lucide="ban" class="icono" aria-hidden="true"></i> ${rem.motivo}</p>` : ''}
           <p class="vetado-reason">${item.razones.join(' ')}</p>
+          ${rem ? `
+            <details class="aviso-acciones">
+              <summary><i data-lucide="list-checks" class="icono" aria-hidden="true"></i> ¿Qué puede hacer?</summary>
+              <ul>${rem.acciones.map(a => `<li>${a}</li>`).join('')}</ul>
+            </details>` : ''}
         </div>
       `;
     }).join('');
@@ -1777,13 +2146,115 @@
     actualizarGraficoBalance36m();
     actualizarGraficoHLS(parcela);
     renderizarCultivosVetados(resultado);
+    renderizarCalendarioSiembra(resultado, parcela);
+    renderizarPanelInforme(resultado, parcela);
     refrescarIconosLucide();
+  }
+
+  /**
+   * Paso 4: lista de revisión (qué falta) y opciones del informe PDF.
+   */
+  function renderizarPanelInforme(resultado, parcela) {
+    const lista = document.getElementById('informe-lista');
+    if (!lista) return;
+    asegurarEsquemaDual(parcela);
+    const est = parcela.estado_datos || {};
+    const real = c => typeof est[c] === 'string' && !/^EJEMPLO|^sin dato/i.test(est[c]);
+    const hist = (parcela.historia_declarada || []).filter(Boolean);
+    const items = [
+      { ok: true, txt: `Lote ubicado: ${escapeHtml(parcela.nombre)} (${parcela.area_ha} ha)`, ir: 'tab-terreno:lote-mapa' },
+      { ok: Boolean(parcela.agricultor && parcela.agricultor.editado_tierra), txt: 'Tipo de tierra confirmado por usted', pend: 'Se usa el dato de ISRIC SoilGrids', ir: 'tab-terreno:lote-tierra' },
+      { ok: hist.length === 2, txt: 'Cultivos de los últimos 2 años', pend: 'Indique qué sembró en 2024 y 2025', ir: 'tab-terreno:lote-tierra' },
+      { ok: Boolean(state.prioridadesTocadas), txt: 'Sus prioridades (agua, tierra, ganancia)', pend: 'Se usan valores normales', ir: 'tab-rotaciones' },
+      { ok: real('clima'), txt: 'Clima NASA POWER del lote', pend: 'Clima de ejemplo', dato: true },
+      { ok: real('suelo'), txt: 'Suelo ISRIC SoilGrids del lote', pend: 'Suelo de ejemplo', dato: true },
+      { ok: real('terreno'), txt: 'Altitud y pendiente SRTM/NASADEM', pend: 'Terreno de ejemplo hasta recibir NASADEM (AppEEARS)', dato: true },
+      ...(window.AyudaAgricultor && window.AyudaAgricultor.esParcelaSatelital(parcela)
+        ? [{ ok: real('ndvi'), txt: 'Historial satelital HLS (NDVI)', pend: 'Pedido a NASA AppEEARS; llega en horas', dato: true }]
+        : [])
+    ];
+    const hechos = items.filter(i => i.ok).length;
+    const pct = Math.round(100 * hechos / items.length);
+    const prog = document.getElementById('informe-progreso');
+    if (prog) prog.textContent = `${hechos} de ${items.length}`;
+    const barra = document.getElementById('informe-barra-lleno');
+    if (barra) barra.style.width = `${pct}%`;
+    lista.innerHTML = items.map(i => `
+      <li class="${i.ok ? 'hecho' : (i.dato ? 'dato-pendiente' : 'pendiente')}">
+        <i data-lucide="${i.ok ? 'circle-check' : (i.dato ? 'satellite' : 'circle')}" class="icono informe-icono" aria-hidden="true"></i>
+        <span class="informe-txt"><strong>${i.txt}</strong>${i.ok ? '' : `<small>${i.pend}</small>`}</span>
+        ${!i.ok && i.ir ? `<button type="button" class="btn-link-sm informe-ir" data-tab-go="${i.ir}">Completar</button>` : ''}
+      </li>`).join('');
+    lista.querySelectorAll('[data-tab-go]').forEach(b => b.addEventListener('click', () => {
+      const t = b.getAttribute('data-tab-go');
+      const [tab, sub] = t.split(':');
+      document.querySelector(`.sidebar-item[data-tab-target="${tab}"]`)?.click();
+      if (sub) document.querySelector(`.subtab[data-subtab="${sub}"]`)?.click();
+    }));
+
+    const ops = document.getElementById('informe-opciones-lista');
+    if (ops) {
+      const todas = [...resultado.recomendadas, resultado.actual].slice().sort((x, y) => y.irrPct - x.irrPct);
+      const mejor = todas[0];
+      if (!state.informeRotId || !todas.some(r => r.id === state.informeRotId)) state.informeRotId = mejor?.id;
+      ops.innerHTML = todas.map(r => {
+        const nivel = r.irrPct >= 70 ? 'ok' : (r.irrPct >= 50 ? 'alerta' : 'riesgo');
+        const nombre = r.esActual ? 'Su práctica actual' : r.titulo.replace(/^Estrategia\s+(\d+)/i, 'Opción $1').replace(/\s+—.*$/, '');
+        return `
+        <label class="informe-opcion${r.id === state.informeRotId ? ' activo' : ''}${r === mejor ? ' mejor' : ''}">
+          <input type="radio" name="informe-rot" value="${r.id}" ${r.id === state.informeRotId ? 'checked' : ''} />
+          <span class="informe-opcion-cuerpo">
+            <span class="informe-opcion-titulo"><strong>${nombre}</strong>${r === mejor ? '<span class="sello-mejor"><i data-lucide="star" class="icono" aria-hidden="true"></i> Le conviene más</span>' : ''}</span>
+            <small>${r.cultivos.map(c => c.nombre).join(' → ')}</small>
+            <span class="conveniencia" role="img" aria-label="Le conviene en un ${r.irrPct} por ciento">
+              <span class="conveniencia-pista"><span class="conveniencia-lleno ${nivel}" style="width:${r.irrPct}%"></span></span>
+              <b class="tabular-nums">${r.irrPct} %</b>
+            </span>
+          </span>
+        </label>`;
+      }).join('');
+      ops.querySelectorAll('input[name="informe-rot"]').forEach(inp => inp.addEventListener('change', () => {
+        state.informeRotId = inp.value;
+        ops.querySelectorAll('.informe-opcion').forEach(l => l.classList.toggle('activo', l.querySelector('input').checked));
+      }));
+    }
+  }
+
+  /**
+   * ¿Cuándo sembrar? Calendario de 12 meses por cultivo de las opciones recomendadas,
+   * con la climatología NASA POWER del lote (lluvia, ET0 y heladas).
+   */
+  function renderizarCalendarioSiembra(resultado, parcela) {
+    const cont = document.getElementById('calendario-filas');
+    const AY = window.AyudaAgricultor;
+    if (!cont || !AY) return;
+    const vistos = new Set();
+    const cultivos = [];
+    (resultado.recomendadas || []).forEach(r => r.cultivos.forEach(c => {
+      if (!vistos.has(c.id)) { vistos.add(c.id); cultivos.push(c); }
+    }));
+    const filas = cultivos.slice(0, 8).map(c => {
+      const cal = AY.calendarioSiembra(c, parcela, state.opciones);
+      return cal ? AY.filaCalendario(c, cal) : '';
+    }).join('');
+    cont.innerHTML = filas || '<p class="cal-ayuda">Sin datos de clima para este lote todavía.</p>';
+    const det = document.getElementById('cal-detalle');
+    if (det) det.textContent = '';
+    cont.querySelectorAll('.cal-celda').forEach(cel => {
+      cel.setAttribute('tabindex', '0');
+      const mostrar = () => { if (det) det.textContent = cel.getAttribute('title'); };
+      cel.addEventListener('click', mostrar);
+      cel.addEventListener('focus', mostrar);
+    });
   }
 
   function seleccionarParcelaPorId(nuevoId) {
     if (!state.parcelasActivas[nuevoId]) return;
+    cancelarAccionLeafletDrawActiva();
+    limpiarMarcadorSensorUI(false);
     state.parcelaActualId = nuevoId;
     state.rotacionSeleccionadaGraficoId = 'recomendada_1';
+    state.informeRotId = null;
     state.tokenLote = (state.tokenLote || 0) + 1;
     const estVivo = document.getElementById('estado-datos-vivo');
     if (estVivo) estVivo.hidden = true;
@@ -1830,7 +2301,7 @@
           const lon = Number(data[0].lon);
           if (state.map) state.map.setView([lat, lon], 14);
           abrirLoteEnPunto(lat, lon);
-          setStatus(`Ubicación encontrada: ${parr}, ${canton} (${prov}). Lote nuevo con datos en vivo; sin historial satelital.`);
+          setStatus(`Ubicación encontrada: ${parr}, ${canton} (${prov}). Lote nuevo con datos en vivo.`);
           return;
         }
       } catch (e) {
@@ -1917,7 +2388,7 @@
         abrirLoteEnPunto(lat, lon);
         setStatus(parcelaQueContiene(lat, lon)
           ? 'Ubicación encontrada: parcela con historial satelital de AppEEARS.'
-          : 'Ubicación encontrada. Lote nuevo: datos de clima, suelo y relieve en vivo; sin historial satelital.');
+          : 'Ubicación encontrada. Lote nuevo: datos de clima, suelo y relieve en vivo.');
         return;
       }
 
@@ -1942,7 +2413,7 @@
           const lon = Number(data[0].lon);
           if (state.map) state.map.setView([lat, lon], 15);
           abrirLoteEnPunto(lat, lon);
-          setStatus('Ubicación encontrada. Lote nuevo con datos en vivo; sin historial satelital.');
+          setStatus('Ubicación encontrada. Lote nuevo con datos en vivo.');
         } else {
           setStatus('No se encontraron resultados para esa dirección.');
         }
@@ -1965,28 +2436,13 @@
 
     if (btnMiUbicacion) {
       btnMiUbicacion.addEventListener('click', () => {
-        if (!navigator.geolocation) {
-          setStatus('Geolocalización no disponible en este navegador.');
-          return;
-        }
-        setStatus('Obteniendo ubicación actual...');
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const { latitude, longitude } = pos.coords;
-            if (state.map) {
-              state.map.setView([latitude, longitude], 18);
-            }
-            if (inpBuscar) {
-              inpBuscar.value = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-            }
-            abrirLoteEnPunto(latitude, longitude, 50);
-            setStatus('Ubicación GPS activa: parcela sugerida de 50×50 m (2 500 m²) centrada en tu posición.');
-          },
-          () => {
-            setStatus('No se pudo acceder a la ubicación actual.');
-          },
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
+        ubicarPorGeolocalizacion({
+          llenarInputBuscar: true,
+          fallbackVistaActual: false,
+          timeoutMs: 10000,
+          mensajeEspera: 'Obteniendo ubicación actual...',
+          mensajeExito: 'Ubicación GPS activa: parcela sugerida de 50×50 m (2 500 m²) centrada en tu posición.'
+        });
       });
     }
   }
@@ -2000,8 +2456,10 @@
     const tabButtons = document.querySelectorAll('.sidebar-item[data-tab-target]');
     const tabPanels = document.querySelectorAll('[data-tab-panel]');
 
-    function activarPestana(targetId) {
-      if (!targetId) return;
+    function activarPestana(targetIdCompleto) {
+      if (!targetIdCompleto) return;
+      const [targetId, subId] = String(targetIdCompleto).split(':');
+      if (subId) activarSubpestana(subId);
 
       tabButtons.forEach(btn => {
         const esActivo = btn.getAttribute('data-tab-target') === targetId;
@@ -2022,7 +2480,7 @@
         btnToggle.setAttribute('aria-expanded', 'false');
       }
 
-      if (targetId === 'tab-terreno' && state.map) {
+      if (targetId === 'tab-terreno' && state.map && !document.getElementById('sp-lote-mapa')?.hidden) {
         setTimeout(() => {
           state.map.invalidateSize();
           dibujarPoligonoParcelaActual(false);
@@ -2042,6 +2500,43 @@
     tabButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         activarPestana(btn.getAttribute('data-tab-target'));
+      });
+    });
+
+    // Pestañitas internas (Mi lote, Mi plan de siembra, Datos NASA)
+    function activarSubpestana(subId) {
+      const btn = document.querySelector(`.subtab[data-subtab="${subId}"]`);
+      if (!btn) return;
+      const grupo = btn.closest('[data-subtabs]');
+      grupo.querySelectorAll('.subtab').forEach(b => {
+        const on = b === btn;
+        b.classList.toggle('activo', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+        b.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(b.getAttribute('aria-controls'));
+        if (panel) panel.hidden = !on;
+      });
+      if (subId === 'lote-mapa' && state.map) {
+        setTimeout(() => { state.map.invalidateSize(); dibujarPoligonoParcelaActual(false); }, 60);
+      }
+      if (subId === 'plan-graficos') {
+        setTimeout(() => {
+          if (state.chartBalance) state.chartBalance.resize();
+          if (state.chartHLS) state.chartHLS.resize();
+        }, 60);
+      }
+    }
+    document.querySelectorAll('[data-subtabs]').forEach(grupo => {
+      const botones = Array.from(grupo.querySelectorAll('.subtab'));
+      botones.forEach((b, i) => {
+        b.tabIndex = b.classList.contains('activo') ? 0 : -1;
+        b.addEventListener('click', () => activarSubpestana(b.getAttribute('data-subtab')));
+        b.addEventListener('keydown', e => {
+          if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+          const sig = botones[(i + (e.key === 'ArrowRight' ? 1 : botones.length - 1)) % botones.length];
+          sig.focus();
+          activarSubpestana(sig.getAttribute('data-subtab'));
+        });
       });
     });
 
@@ -2082,11 +2577,27 @@
     const btnAdminReset = document.getElementById('btn-admin-reset');
     if (btnAdminReset) {
       btnAdminReset.addEventListener('click', () => {
+        cancelarAccionLeafletDrawActiva();
+        state.tokenLote = (state.tokenLote || 0) + 1;
+        state.sensorBackups = {};
+        limpiarMarcadorSensorUI(false);
+        const estVivo = document.getElementById('estado-datos-vivo');
+        if (estVivo) estVivo.hidden = true;
+
+        delete state.parcelasActivas.lote_dibujado;
+        delete state.parcelasOriginales.lote_dibujado;
         Object.keys(state.parcelasOriginales).forEach(id => {
           state.parcelasActivas[id] = clonar(state.parcelasOriginales[id]);
         });
+        if (state.parcelasActivas.parcela_licto) {
+          state.parcelaActualId = 'parcela_licto';
+        }
+        state.rotacionSeleccionadaGraficoId = 'recomendada_1';
+        state.informeRotId = null;
+        state.prioridadesTocadas = false;
         state.sliders = { agua: 3, suelo: 3, ganar: 3 };
         state.opciones.escenarioLluviaPct = 0;
+        state.opciones.conRiego = false;
         state.opciones.retiraForraje = false;
         state.opciones.priorizarForraje = false;
 
@@ -2096,6 +2607,7 @@
         const sliderEsc = document.getElementById('slider-escenario-lluvia');
         const badgeEsc = document.getElementById('badge-escenario-lluvia');
         const chkForraje = document.getElementById('check-retira-forraje');
+        const chkRiego = document.getElementById('check-tiene-riego');
 
         if (sliderAgua) sliderAgua.value = '3';
         if (sliderSuelo) sliderSuelo.value = '3';
@@ -2103,6 +2615,7 @@
         if (sliderEsc) sliderEsc.value = '0';
         if (badgeEsc) badgeEsc.textContent = '0 % (climatología normal)';
         if (chkForraje) chkForraje.checked = false;
+        if (chkRiego) chkRiego.checked = false;
 
         sincronizarControlesPaso2ConParcela();
         actualizarTodo();
@@ -2160,6 +2673,24 @@
       });
     });
 
+    // Modo Simple: barritas deslizables (1–5) sincronizadas con los pesos IRR
+    document.querySelectorAll('.prio-slider-wrap[data-simple-slider]').forEach(wrap => {
+      const key = wrap.getAttribute('data-simple-slider');
+      const inp = wrap.querySelector('.prio-slider');
+      if (!inp) return;
+      inp.addEventListener('input', () => pintarPrioSlider(wrap, Number(inp.value) || 3));
+      inp.addEventListener('change', () => {
+        const val = Number(inp.value) || 3;
+        state.sliders[key] = val;
+        state.prioridadesTocadas = true;
+        const p = obtenerParcelaActual();
+        asegurarEsquemaDual(p);
+        p.agricultor.prioridades[key] = val;
+        sincronizarControlesPaso2ConParcela();
+        actualizarTodo();
+      });
+    });
+
     // Modo Simple: botones Poco / Normal / Mucho sincronizados con sliders IRR
     document.querySelectorAll('.priority-btn-group[data-simple-slider]').forEach(group => {
       const key = group.getAttribute('data-simple-slider');
@@ -2167,6 +2698,7 @@
         btn.addEventListener('click', () => {
           const val = Number(btn.getAttribute('data-val')) || 3;
           state.sliders[key] = val;
+          state.prioridadesTocadas = true;
           const p = obtenerParcelaActual();
           asegurarEsquemaDual(p);
           p.agricultor.prioridades[key] = val;
@@ -2225,7 +2757,6 @@
     const btnUndoDraw = document.getElementById('btn-undo-draw');
     const btnSaveEdit = document.getElementById('btn-save-edit');
     const btnCancelGuided = document.getElementById('btn-cancel-guided');
-    const banner = document.getElementById('guided-draw-banner');
 
     function clickLeafletDrawButton(selector) {
       const el = document.querySelector(`#mapa-parcela ${selector}`);
@@ -2236,32 +2767,24 @@
       return false;
     }
 
-    function cancelarAccionLeafletDrawActiva() {
-      const cancelBtn = document.querySelector(
-        '#mapa-parcela .leaflet-draw-actions li a[title*="Cancelar"]'
-      );
-      if (cancelBtn) {
-        cancelBtn.click();
-      }
-      document.body.classList.remove('guided-drawing-active');
-      if (banner) banner.hidden = true;
-    }
-
     if (btnFinishDraw) {
       btnFinishDraw.addEventListener('click', () => {
-        clickLeafletDrawButton('.leaflet-draw-actions li a[title*="Terminar"]');
+        const btn = obtenerAccionLeafletDrawActiva('Terminar');
+        if (btn) btn.click();
       });
     }
 
     if (btnUndoDraw) {
       btnUndoDraw.addEventListener('click', () => {
-        clickLeafletDrawButton('.leaflet-draw-actions li a[title*="Borrar"]');
+        const btn = obtenerAccionLeafletDrawActiva('Borrar');
+        if (btn) btn.click();
       });
     }
 
     if (btnSaveEdit) {
       btnSaveEdit.addEventListener('click', () => {
-        clickLeafletDrawButton('.leaflet-draw-actions li a[title*="Guardar"]');
+        const btn = obtenerAccionLeafletDrawActiva('Guardar');
+        if (btn) btn.click();
       });
     }
 
@@ -2294,9 +2817,7 @@
       btnEditLayers.addEventListener('click', () => {
         if (state.activeDrawType === 'edit') {
           // Si ya está editando, al pulsar de nuevo guarda los cambios
-          const saveBtn = document.querySelector(
-            '#mapa-parcela .leaflet-draw-actions li a[title*="Guardar"]'
-          );
+          const saveBtn = obtenerAccionLeafletDrawActiva('Guardar');
           if (saveBtn) {
             saveBtn.click();
           } else {
@@ -2319,45 +2840,13 @@
     const btnGps50m = document.getElementById('btn-gps-50m');
     if (btnGps50m) {
       btnGps50m.addEventListener('click', () => {
-        const statusEl = document.getElementById('ubicacion-status');
-        if (!navigator.geolocation) {
-          if (statusEl) {
-            statusEl.hidden = false;
-            statusEl.textContent = 'Geolocalización no disponible en este navegador.';
-          }
-          return;
-        }
-        if (statusEl) {
-          statusEl.hidden = false;
-          statusEl.textContent = 'Obteniendo señal GPS de alta precisión en campo...';
-        }
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const { latitude, longitude } = pos.coords;
-            if (state.map) {
-              state.map.setView([latitude, longitude], 18);
-            }
-            abrirLoteEnPunto(latitude, longitude, 50);
-            if (statusEl) {
-              statusEl.hidden = false;
-              statusEl.textContent = 'GPS centrado: lote sugerido de 50×50 m (2 500 m²). Puedes usar «Editar bordes» para ajustar sus esquinas.';
-            }
-          },
-          () => {
-            const p = obtenerParcelaActual();
-            const lat = p && p.centroide ? p.centroide.lat : 0.0412;
-            const lon = p && p.centroide ? p.centroide.lon : -78.1425;
-            if (state.map) {
-              state.map.setView([lat, lon], 18);
-            }
-            abrirLoteEnPunto(lat, lon, 50);
-            if (statusEl) {
-              statusEl.hidden = false;
-              statusEl.textContent = 'Permiso GPS no concedido: se trazó parcela de 50×50 m (2 500 m²) en la vista actual.';
-            }
-          },
-          { enableHighAccuracy: true, timeout: 8000 }
-        );
+        ubicarPorGeolocalizacion({
+          llenarInputBuscar: false,
+          fallbackVistaActual: true,
+          timeoutMs: 8000,
+          mensajeEspera: 'Obteniendo señal GPS de alta precisión en campo...',
+          mensajeExito: 'GPS centrado: lote sugerido de 50×50 m (2 500 m²). Puedes usar «Editar bordes» para ajustar sus esquinas.'
+        });
       });
     }
 
@@ -2370,27 +2859,43 @@
     const inpSensorSoc = document.getElementById('sensor-soc-pct');
     const inpSensorPh = document.getElementById('sensor-ph');
 
+    function asegurarBackupSensor(p) {
+      if (!p) return;
+      asegurarEsquemaDual(p);
+      if (!state.sensorBackups[p.id]) {
+        state.sensorBackups[p.id] = {
+          clima_mensual: clonar(p.clima_mensual || []),
+          suelo_lab: clonar((p.tecnico && p.tecnico.suelo_laboratorio) || { textura: null, soc_pct: null, ph: null })
+        };
+      }
+    }
+
     function sincronizarInputsSensorConParcela(p) {
       if (!p) return;
-      const lluviaAnual = (p.clima_mensual || []).reduce((acc, m) => acc + (m.precip_mm || 0), 0);
+      const lluviaAnual = (p.clima_mensual || []).reduce((acc, m) => acc + (m.P_mm || 0), 0);
       if (inpSensorLluvia) inpSensorLluvia.value = Math.round(lluviaAnual);
-      if (inpSensorSoc) inpSensorSoc.value = Number(p.suelo.soc_pct || 0).toFixed(2);
-      if (inpSensorPh) inpSensorPh.value = Number(p.suelo.ph || 0).toFixed(1);
+      if (inpSensorSoc) inpSensorSoc.value = Number((p.suelo && p.suelo.soc_pct) || 0).toFixed(2);
+      if (inpSensorPh) inpSensorPh.value = Number((p.suelo && p.suelo.ph) || 0).toFixed(1);
     }
 
     function aplicarTelemetriaSensorLocal() {
       const p = obtenerParcelaActual();
       if (!p) return;
-      asegurarEsquemaDual(p);
+      asegurarBackupSensor(p);
 
       // Calibrar lluvia de NASA POWER con el pluviómetro local
       const nuevaLluvia = inpSensorLluvia ? parseFloat(inpSensorLluvia.value) : NaN;
       if (!isNaN(nuevaLluvia) && nuevaLluvia >= 0 && Array.isArray(p.clima_mensual)) {
-        const lluviaActual = p.clima_mensual.reduce((acc, m) => acc + (m.precip_mm || 0), 0);
+        const backup = state.sensorBackups[p.id];
+        const baseClima = (backup && Array.isArray(backup.clima_mensual) && backup.clima_mensual.length)
+          ? backup.clima_mensual
+          : p.clima_mensual;
+        const lluviaActual = baseClima.reduce((acc, m) => acc + (m.P_mm || 0), 0);
         if (lluviaActual > 0) {
           const factor = nuevaLluvia / lluviaActual;
-          p.clima_mensual.forEach((m) => {
-            m.precip_mm = Math.round(m.precip_mm * factor * 10) / 10;
+          p.clima_mensual.forEach((m, idx) => {
+            const pBase = (baseClima[idx] && baseClima[idx].P_mm) || 0;
+            m.P_mm = Math.round(pBase * factor * 10) / 10;
           });
         }
       }
@@ -2414,6 +2919,7 @@
       btnAddSensor.addEventListener('click', () => {
         if (!state.map) return;
         const p = obtenerParcelaActual();
+        asegurarBackupSensor(p);
         const lat = p.centroide ? p.centroide.lat : 0.0412;
         const lon = p.centroide ? p.centroide.lon : -78.1425;
 
@@ -2455,13 +2961,8 @@
 
     if (btnRemoveSensor) {
       btnRemoveSensor.addEventListener('click', () => {
-        if (state.sensorMarker && state.map) {
-          state.map.removeLayer(state.sensorMarker);
-          state.sensorMarker = null;
-        }
-        if (sensorPanel) sensorPanel.hidden = true;
-        const p = obtenerParcelaActual();
-        if (p) p.sensor_local_activo = false;
+        limpiarMarcadorSensorUI(true);
+        sincronizarControlesPaso2ConParcela();
         actualizarTodo();
       });
     }
@@ -2480,10 +2981,17 @@
         if (!file) return;
 
         const reader = new FileReader();
+        reader.onerror = () => {
+          const msg = 'No se pudo leer el archivo seleccionado.';
+          setLocationStatus(msg);
+          mostrarEstadoDatosVivo([{ texto: msg, ok: false }], 'Error al importar archivo de dron');
+          inpImportDrone.value = '';
+        };
         reader.onload = (loadEv) => {
           const texto = String(loadEv.target.result || '');
           let coords = [];
           let ndviDron = null;
+          let parseError = false;
 
           try {
             if (file.name.toLowerCase().endsWith('.kml') || texto.trim().startsWith('<')) {
@@ -2513,11 +3021,11 @@
 
               const geom = feature && feature.geometry ? feature.geometry : geo;
               let ring = [];
-              if (geom.type === 'Polygon' && geom.coordinates && geom.coordinates[0]) {
+              if (geom && geom.type === 'Polygon' && geom.coordinates && geom.coordinates[0]) {
                 ring = geom.coordinates[0];
-              } else if (geom.type === 'MultiPolygon' && geom.coordinates && geom.coordinates[0] && geom.coordinates[0][0]) {
+              } else if (geom && geom.type === 'MultiPolygon' && geom.coordinates && geom.coordinates[0] && geom.coordinates[0][0]) {
                 ring = geom.coordinates[0][0];
-              } else if (geom.type === 'LineString' && geom.coordinates) {
+              } else if (geom && geom.type === 'LineString' && geom.coordinates) {
                 ring = geom.coordinates;
               }
               coords = ring
@@ -2525,6 +3033,7 @@
                 .filter((pt) => !isNaN(pt.lat) && !isNaN(pt.lng));
             }
           } catch (err) {
+            parseError = true;
             console.warn('Error leyendo archivo de dron:', err);
           }
 
@@ -2537,6 +3046,8 @@
               coords.pop();
             }
 
+            cancelarAccionLeafletDrawActiva();
+            limpiarMarcadorSensorUI(false);
             const latCentro = coords.reduce((acc, c) => acc + c.lat, 0) / coords.length;
             const lonCentro = coords.reduce((acc, c) => acc + c.lng, 0) / coords.length;
             const lote = crearLoteDibujado(obtenerParcelaActual(), coords, { lat: latCentro, lng: lonCentro });
@@ -2552,12 +3063,21 @@
             state.parcelasActivas[lote.id] = lote;
             state.parcelasOriginales[lote.id] = clonar(lote);
             state.parcelaActualId = lote.id;
+            state.rotacionSeleccionadaGraficoId = 'recomendada_1';
+            state.informeRotId = null;
 
-            dibujarPoligonoParcelaActual(true);
             sincronizarControlesPaso2ConParcela();
+            dibujarPoligonoParcelaActual(true);
             actualizarTodo();
+            setLocationStatus(`Vuelo de dron importado (${coords.length} vértices).`);
             const capa = state.drawnItems && state.drawnItems.getLayers()[0];
             cargarDatosLoteEnVivo(lote, capa || null);
+          } else {
+            const msg = parseError
+              ? 'El archivo no tiene un formato GeoJSON o KML válido.'
+              : 'El archivo no contiene un polígono con al menos 3 coordenadas válidas.';
+            setLocationStatus(msg);
+            mostrarEstadoDatosVivo([{ texto: msg, ok: false }], 'No se pudo importar el polígono de dron');
           }
           inpImportDrone.value = '';
         };
@@ -2569,7 +3089,90 @@
   /**
    * Configura todos los eventos de botones, sliders e inputs
    */
+  function configurarAyudasAccesibles() {
+    const btnLetra = document.getElementById('btn-letra-grande');
+    const aplicarLetra = on => {
+      document.documentElement.classList.toggle('letra-grande', on);
+      if (btnLetra) btnLetra.setAttribute('aria-pressed', on ? 'true' : 'false');
+      setTimeout(() => {
+        if (state.map) state.map.invalidateSize();
+        if (state.chartBalance) state.chartBalance.resize();
+        if (state.chartHLS) state.chartHLS.resize();
+      }, 60);
+    };
+    let guardada = false;
+    try { guardada = localStorage.getItem('rotasat_letra_grande') === '1'; } catch (e) { guardada = false; }
+    aplicarLetra(guardada);
+    if (btnLetra) {
+      btnLetra.addEventListener('click', () => {
+        const on = !document.documentElement.classList.contains('letra-grande');
+        aplicarLetra(on);
+        try { localStorage.setItem('rotasat_letra_grande', on ? '1' : '0'); } catch (e) { /* sin almacenamiento */ }
+      });
+    }
+
+    const btnAvisos = document.getElementById('btn-escuchar-avisos');
+    if (btnAvisos) {
+      if (!window.AyudaAgricultor || !window.AyudaAgricultor.puedeHablar()) {
+        btnAvisos.hidden = true;
+      } else {
+        btnAvisos.addEventListener('click', function () {
+          window.AyudaAgricultor.leer(window.AyudaAgricultor.textoAdvertencias(state.avisosLote || []), this);
+        });
+      }
+    }
+  }
+
+  function configurarInformePDF() {
+    const btn = document.getElementById('btn-descargar-pdf');
+    const estado = document.getElementById('informe-estado');
+    if (!btn) return;
+    if (!window.InformePDF || !window.InformePDF.disponible()) {
+      btn.disabled = true;
+      if (estado) estado.textContent = 'No se pudo cargar el generador de PDF en este navegador.';
+      return;
+    }
+    btn.addEventListener('click', async () => {
+      const parcela = obtenerParcelaActual();
+      if (!state.ultimoResultado) return;
+      btn.disabled = true;
+      const textoOriginal = btn.innerHTML;
+      btn.innerHTML = '<i data-lucide="loader-circle" class="icono girando" aria-hidden="true"></i> Preparando su informe…'; refrescarIconosLucide();
+      try {
+        await window.InformePDF.descargar({
+          parcela,
+          resultado: state.ultimoResultado,
+          rotElegidaId: state.informeRotId,
+          opciones: state.opciones,
+          sliders: state.sliders,
+          avisos: state.avisosLote || [],
+          catalogo: state.catalogo,
+          nombreAgricultor: (document.getElementById('informe-nombre')?.value || '').trim(),
+          pronostico: state.pronosticoClave === `${parcela.centroide?.lat},${parcela.centroide?.lon}` ? state.pronostico : null
+        });
+        if (estado) estado.textContent = 'Listo: el PDF se guardó en su carpeta de Descargas.';
+      } catch (e) {
+        console.error(e);
+        if (estado) estado.textContent = 'No se pudo crear el PDF. Intente de nuevo.';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+        refrescarIconosLucide();
+      }
+    });
+  }
+
   function configurarEventos() {
+    configurarAyudasAccesibles();
+    configurarInformePDF();
+    const chkRiego = document.getElementById('check-tiene-riego');
+    if (chkRiego) {
+      chkRiego.checked = Boolean(state.opciones.conRiego);
+      chkRiego.addEventListener('change', () => {
+        state.opciones.conRiego = chkRiego.checked;
+        actualizarTodo();
+      });
+    }
     configurarSidebarTabs();
     configurarModoDual();
     configurarPanelUbicacion();
@@ -2593,7 +3196,14 @@
     const btnResetSuelo = document.getElementById('btn-reset-parcela');
     if (btnResetSuelo) {
       btnResetSuelo.addEventListener('click', () => {
+        cancelarAccionLeafletDrawActiva();
+        state.tokenLote = (state.tokenLote || 0) + 1;
+        const estVivo = document.getElementById('estado-datos-vivo');
+        if (estVivo) estVivo.hidden = true;
         const id = state.parcelaActualId;
+        if (state.sensorBackups) delete state.sensorBackups[id];
+        limpiarMarcadorSensorUI(false);
+        state.informeRotId = null;
         state.parcelasActivas[id] = clonar(state.parcelasOriginales[id]);
         sincronizarControlesPaso2ConParcela();
         dibujarPoligonoParcelaActual(true);
@@ -2621,7 +3231,12 @@
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('input', function () {
-        state.sliders[key] = Number(this.value);
+        const val = Math.max(1, Math.min(5, Number(this.value) || 3));
+        state.sliders[key] = val;
+        state.prioridadesTocadas = true;
+        const p = obtenerParcelaActual();
+        asegurarEsquemaDual(p);
+        p.agricultor.prioridades[key] = val;
         sincronizarBotonesPrioridadSimple();
         actualizarTodo();
       });
