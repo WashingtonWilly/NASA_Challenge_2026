@@ -116,15 +116,41 @@
     return 'Riesgo fitosanitario por repetición de familia botánica.';
   }
 
-  function determinarSemaforo(irrScore, bal, violaPausaFitosanitaria) {
-    if (violaPausaFitosanitaria || irrScore < 0.45 || bal.coberturaAguaPct < 45) {
+  /**
+   * Propagación lineal de incertidumbre para el IRR compuesto:
+   * σ(w) = sqrt(Σ (w_i * σ_i)²), con z = 1.65 (banda de confianza al 90 % unilateral/bilateral).
+   */
+  function calcularIncertidumbreIRR(irr, pesos) {
+    const p = pesos || { w_h2o: 0.25, w_n: 0.14, w_mos: 0.11, w_rent: 0.50 };
+    const sigmaSub = { h2o: 0.06, n: 0.05, mos: 0.05, rent: 0.07 };
+    const varianza =
+      Math.pow((p.w_h2o || 0) * sigmaSub.h2o, 2) +
+      Math.pow((p.w_n || 0) * sigmaSub.n, 2) +
+      Math.pow((p.w_mos || 0) * sigmaSub.mos, 2) +
+      Math.pow((p.w_rent || 0) * sigmaSub.rent, 2);
+    const sigmaW = Math.sqrt(varianza);
+    const z90 = 1.65;
+    const margen90 = z90 * sigmaW;
+    return {
+      sigmaW: Number(sigmaW.toFixed(4)),
+      z: z90,
+      ic90Min: Number(Math.max(0, irr - margen90).toFixed(4)),
+      ic90Max: Number(Math.min(1, irr + margen90).toFixed(4))
+    };
+  }
+
+  function determinarSemaforo(irrScore, bal, violaPausaFitosanitaria, incertidumbre) {
+    const margen = incertidumbre ? (incertidumbre.z * incertidumbre.sigmaW) : 0;
+    const umbralRiesgo = Math.min(0.50, 0.45 + margen * 0.25);
+    const umbralAlerta = Math.min(0.64, 0.58 + margen * 0.25);
+    if (violaPausaFitosanitaria || irrScore < umbralRiesgo || bal.coberturaAguaPct < 45) {
       return {
         color: 'riesgo',
         etiqueta: 'Alto · Riesgo fitosanitario o hídrico',
         icono: ''
       };
     }
-    if (irrScore < 0.58 || bal.coberturaAguaPct < 62 || bal.mesesConDeficit > 12) {
+    if (irrScore < umbralAlerta || bal.coberturaAguaPct < 62 || bal.mesesConDeficit > 12) {
       return {
         color: 'alerta',
         etiqueta: 'Medio · Viable con precaución',
@@ -251,7 +277,7 @@
       ? null
       : diagnosticarRiesgoSecuencia(seqActual, historiaIds, catalogoMap, pausasFamilia, nematodoDeclarado);
 
-    const balRaw = Balance.balanceHidrico(seqActual, parcela, opciones.escenarioLluviaPct || 0, false);
+    const balRaw = Balance.balanceHidrico(seqActual, parcela, opciones.escenarioLluviaPct || 0, false, opciones.escenarioTempC || 0);
     const bal = enriquecerBalance(balRaw);
     const resIRR = IRR.calcularIRR(seqActual, bal, parcela, aptos, sliders, historiaObjs, opciones);
 
@@ -260,7 +286,8 @@
       irrAjustado = Math.max(0.15, Number((irrAjustado - 0.25).toFixed(4)));
     }
 
-    const semaforo = determinarSemaforo(irrAjustado, bal, !pasaSeq);
+    const incertidumbre = calcularIncertidumbreIRR(irrAjustado, resIRR.pesos);
+    const semaforo = determinarSemaforo(irrAjustado, bal, !pasaSeq, incertidumbre);
     const explicacion = construirExplicacion5Puntos(seqActual, parcela, bal, resIRR, historiaObjs, true, motivoRiesgo);
 
     return {
@@ -271,6 +298,7 @@
       irr: irrAjustado,
       irrPct: Math.round(irrAjustado * 100),
       irrSinPenalizar: resIRR.irr,
+      incertidumbre,
       subindices: resIRR.subindices,
       detalles: resIRR.detalles,
       pesos: resIRR.pesos,
@@ -286,6 +314,7 @@
     const t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     const opts = Object.assign({
       escenarioLluviaPct: 0,
+      escenarioTempC: 0,
       retiraForraje: false,
       priorizarForraje: false
     }, opciones || {});
@@ -312,7 +341,7 @@
           const esValida = Filtros.pasaFiltrosSecuencia(seq, historiaIds, catalogoMap, pausasFamilia, nematodoDeclarado);
           if (!esValida) continue;
 
-          const balLigero = Balance.balanceHidrico(seq, parcela, opts.escenarioLluviaPct, true);
+          const balLigero = Balance.balanceHidrico(seq, parcela, opts.escenarioLluviaPct, true, opts.escenarioTempC);
           const bal = enriquecerBalance(balLigero);
           const resIRR = IRR.calcularIRR(seq, bal, parcela, aptos, sliders, historiaObjs, opts);
 
@@ -349,9 +378,10 @@
 
       combinacionesVistas.add(clave);
       const balCompleto = enriquecerBalance(
-        Balance.balanceHidrico(cand.cultivos, parcela, opts.escenarioLluviaPct, false)
+        Balance.balanceHidrico(cand.cultivos, parcela, opts.escenarioLluviaPct, false, opts.escenarioTempC)
       );
-      const semaforo = determinarSemaforo(cand.irr, balCompleto, false);
+      const incertidumbre = calcularIncertidumbreIRR(cand.irr, cand.pesos);
+      const semaforo = determinarSemaforo(cand.irr, balCompleto, false, incertidumbre);
       const explicacion = construirExplicacion5Puntos(
         cand.cultivos, parcela, balCompleto, cand.resIRR, historiaObjs, false, null
       );
@@ -370,6 +400,7 @@
         cultivos: cand.cultivos,
         irr: cand.irr,
         irrPct: cand.irrPct,
+        incertidumbre,
         subindices: cand.subindices,
         detalles: cand.detalles,
         pesos: cand.pesos,
@@ -404,7 +435,8 @@
     clasificarCultivosParcela,
     evaluarRotacionActual,
     construirExplicacion5Puntos,
-    determinarSemaforo
+    determinarSemaforo,
+    calcularIncertidumbreIRR
   };
 
   if (typeof module !== 'undefined' && module.exports) {

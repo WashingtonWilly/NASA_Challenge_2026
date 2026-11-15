@@ -54,7 +54,7 @@
       );
     }
 
-    // 3. Filtro duro de heladas (Tmin_abs < 0 °C durante el ciclo del cultivo)
+    // 3. Filtro duro de heladas durante el ciclo del cultivo
     const ventana = elegirMejorVentana(cultivo, parcela);
     const mesesCiclo = obtenerMesesCiclo(ventana, cultivo.ciclo_meses || 5);
     const mesesHelada = clima.filter(m => mesesCiclo.includes(m.mes) && m.Tmin_abs < 0);
@@ -63,6 +63,14 @@
       razones.push(
         `Riesgo de helada (${nombresMeses} con mínimas < 0 °C): ${cultivo.nombre.toLowerCase()} no tolera heladas.`
       );
+    } else if (cultivo.tolera_helada === "Moderada") {
+      const mesesHeladaSevera = clima.filter(m => mesesCiclo.includes(m.mes) && m.Tmin_abs < -2.0);
+      if (mesesHeladaSevera.length > 0) {
+        const nombresMeses = mesesHeladaSevera.map(m => m.nombre_mes || `Mes ${m.mes}`).join(", ");
+        razones.push(
+          `Helada severa (${nombresMeses} con mínimas < -2 °C): supera la tolerancia moderada de ${cultivo.nombre.toLowerCase()}.`
+        );
+      }
     }
 
     // 4. Verificar si está vetado en el Año 1 por pausa fitosanitaria respecto a la historia reciente

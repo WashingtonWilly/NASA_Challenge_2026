@@ -32,11 +32,19 @@
    * - Si cultivo i tiene C/N > 40 ("alto") y cultivo i+1 también es gramínea/cereal exigente:
    *   penalización -0.15 por hambre transitoria de nitrógeno (inmovilización microbiana).
    */
-  function indiceNitrogeno(seq, historiaObjs) {
+  const CREDITO_ULTIMO_CULTIVO_DEFAULT = 0.5;
+
+  function indiceNitrogeno(seq, historiaObjs, opciones) {
+    const opts = opciones || {};
+    const pesoUltimoCredito = Number.isFinite(opts.creditoUltimoCultivo)
+      ? clip(opts.creditoUltimoCultivo, 0, 1)
+      : CREDITO_ULTIMO_CULTIVO_DEFAULT;
     let creditos = 0;
     let extracciones = 0;
     for (let i = 0; i < seq.length; i++) {
-      creditos += (seq[i].credito_n_kg ?? seq[i].n_credito_kg_ha ?? 0);
+      const cred = (seq[i].credito_n_kg ?? seq[i].n_credito_kg_ha ?? 0);
+      const factorCred = (i === seq.length - 1) ? pesoUltimoCredito : 1;
+      creditos += cred * factorCred;
       extracciones += (seq[i].extraccion_n_kg ?? seq[i].n_extraccion_kg_ha ?? 0);
     }
     const balanceNetoN = creditos - extracciones;
@@ -216,7 +224,7 @@
   function calcularIRR(seq, bal, parcela, aptos, sliders, historiaObjs, opciones) {
     const opts = opciones || {};
     const iH2O = indiceAgua(bal);
-    const infoN = indiceNitrogeno(seq, historiaObjs);
+    const infoN = indiceNitrogeno(seq, historiaObjs, opts);
     const infoMOS = indiceMateriaOrganica(seq, parcela, bal, opts);
     const infoRent = indiceRentabilidad(seq, aptos);
     const pesos = calcularPesos(sliders, parcela, opts.escenarioLluviaPct);

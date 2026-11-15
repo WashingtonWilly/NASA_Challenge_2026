@@ -1,0 +1,42 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "parcela_el_oro",
+        "nombre": "Parcela 3 — Santa Rosa (El Oro, Costa)",
+        "area_ha": 2.0,
+        "elev_m": 18,
+        "pendiente_pct": 2.0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -79.96233,
+              -3.44797
+            ],
+            [
+              -79.96107,
+              -3.44797
+            ],
+            [
+              -79.96107,
+              -3.44923
+            ],
+            [
+              -79.96233,
+              -3.44923
+            ],
+            [
+              -79.96233,
+              -3.44797
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

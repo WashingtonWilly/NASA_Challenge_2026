@@ -45,98 +45,134 @@
     {
       "mes": 1,
       "nombre_mes": "Ene",
-      "P_mm": 135.5,
-      "ET0_mm": 97.3,
+      "P_mm": 140.5,
+      "ET0_mm": 76.2,
       "Tmin_abs": 4.6,
-      "Tmed": 12.4
+      "Tmed": 12.4,
+      "Rs_MJ": 14.3,
+      "Viento_ms": 1.8,
+      "HR_pct": 85
     },
     {
       "mes": 2,
       "nombre_mes": "Feb",
-      "P_mm": 146.0,
-      "ET0_mm": 88.9,
+      "P_mm": 157.0,
+      "ET0_mm": 65.8,
       "Tmin_abs": 6.1,
-      "Tmed": 12.7
+      "Tmed": 12.6,
+      "Rs_MJ": 13.3,
+      "Viento_ms": 1.8,
+      "HR_pct": 87
     },
     {
       "mes": 3,
       "nombre_mes": "Mar",
-      "P_mm": 173.0,
-      "ET0_mm": 96.7,
+      "P_mm": 183.6,
+      "ET0_mm": 70.1,
       "Tmin_abs": 6.0,
-      "Tmed": 12.5
+      "Tmed": 12.5,
+      "Rs_MJ": 12.8,
+      "Viento_ms": 1.7,
+      "HR_pct": 88
     },
     {
       "mes": 4,
       "nombre_mes": "Abr",
-      "P_mm": 194.2,
-      "ET0_mm": 89.7,
+      "P_mm": 192.3,
+      "ET0_mm": 69.3,
       "Tmin_abs": 5.4,
-      "Tmed": 12.4
+      "Tmed": 12.4,
+      "Rs_MJ": 13.5,
+      "Viento_ms": 2.0,
+      "HR_pct": 87
     },
     {
       "mes": 5,
       "nombre_mes": "May",
-      "P_mm": 166.9,
-      "ET0_mm": 88.3,
+      "P_mm": 166.8,
+      "ET0_mm": 68.6,
       "Tmin_abs": 4.6,
-      "Tmed": 12.1
+      "Tmed": 12.1,
+      "Rs_MJ": 13.2,
+      "Viento_ms": 2.5,
+      "HR_pct": 86
     },
     {
       "mes": 6,
       "nombre_mes": "Jun",
-      "P_mm": 155.0,
-      "ET0_mm": 80.7,
+      "P_mm": 162.9,
+      "ET0_mm": 63.8,
       "Tmin_abs": 2.8,
-      "Tmed": 11.1
+      "Tmed": 11.1,
+      "Rs_MJ": 13.0,
+      "Viento_ms": 3.1,
+      "HR_pct": 85
     },
     {
       "mes": 7,
       "nombre_mes": "Jul",
-      "P_mm": 99.7,
-      "ET0_mm": 85.7,
+      "P_mm": 102.9,
+      "ET0_mm": 67.8,
       "Tmin_abs": 2.0,
-      "Tmed": 10.7
+      "Tmed": 10.8,
+      "Rs_MJ": 13.1,
+      "Viento_ms": 3.5,
+      "HR_pct": 83
     },
     {
       "mes": 8,
       "nombre_mes": "Ago",
-      "P_mm": 99.5,
-      "ET0_mm": 95.8,
+      "P_mm": 100.2,
+      "ET0_mm": 77.1,
       "Tmin_abs": 2.3,
-      "Tmed": 11.0
+      "Tmed": 11.1,
+      "Rs_MJ": 14.7,
+      "Viento_ms": 3.3,
+      "HR_pct": 81
     },
     {
       "mes": 9,
       "nombre_mes": "Sep",
-      "P_mm": 65.8,
-      "ET0_mm": 101.6,
+      "P_mm": 68.4,
+      "ET0_mm": 81.9,
       "Tmin_abs": 1.9,
-      "Tmed": 11.5
+      "Tmed": 11.6,
+      "Rs_MJ": 15.6,
+      "Viento_ms": 2.8,
+      "HR_pct": 79
     },
     {
       "mes": 10,
       "nombre_mes": "Oct",
-      "P_mm": 118.9,
-      "ET0_mm": 105.6,
+      "P_mm": 151.4,
+      "ET0_mm": 84.0,
       "Tmin_abs": 3.7,
-      "Tmed": 12.3
+      "Tmed": 12.5,
+      "Rs_MJ": 15.5,
+      "Viento_ms": 1.9,
+      "HR_pct": 82
     },
     {
       "mes": 11,
       "nombre_mes": "Nov",
-      "P_mm": 120.3,
-      "ET0_mm": 97.5,
-      "Tmin_abs": 5.6,
-      "Tmed": 12.5
+      "P_mm": 130.2,
+      "ET0_mm": 79.6,
+      "Tmin_abs": 5.3,
+      "Tmed": 12.6,
+      "Rs_MJ": 15.3,
+      "Viento_ms": 1.7,
+      "HR_pct": 83
     },
     {
       "mes": 12,
       "nombre_mes": "Dic",
-      "P_mm": 139.3,
-      "ET0_mm": 98.3,
+      "P_mm": 135.0,
+      "ET0_mm": 77.6,
       "Tmin_abs": 4.6,
-      "Tmed": 12.6
+      "Tmed": 12.6,
+      "Rs_MJ": 14.4,
+      "Viento_ms": 1.8,
+      "HR_pct": 84
     }
   ],
   "anomalia": {
@@ -387,9 +423,9 @@
     "papa"
   ],
   "nematodo_declarado": false,
-  "clima_metodo_et0": "Hargreaves FAO-56 (solo temperatura)",
+  "clima_metodo_et0": "Penman-Monteith FAO-56 (radiación, viento y humedad de NASA POWER)",
   "estado_datos": {
-    "clima": "NASA POWER 2015–2024 (diario, AG); T corregida +0.6 °C por altitud (celda a 2983.94 m)",
+    "clima": "NASA POWER 2015–2026 (diario, AG); T corregida +0.6 °C por altitud (celda a 2983.94 m)",
     "anomalia": "NASA POWER PRECTOTCORR, ago–oct 2026 vs 2001–2025",
     "suelo": "ISRIC SoilGrids 250 m (0–30 cm)",
     "ndvi": "EJEMPLO (dato provisional, falta dato real)",

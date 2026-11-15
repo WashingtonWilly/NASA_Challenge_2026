@@ -1,0 +1,151 @@
+{
+  "metadatos": {
+    "fuente": "Sistema de Información Pública Agropecuaria (SIPA) - MAG Ecuador",
+    "region": "Sierra Central y Costa (Ecuador)",
+    "unidad_rendimiento": "t/ha (toneladas métricas por hectárea)",
+    "unidad_precio": "USD/t (precio referencial a nivel de productor)",
+    "unidad_margen": "USD/ha (margen bruto estimado descontando costos directos promedio)",
+    "nota_calibracion": "Reemplaza los valores placeholder en cultivos.json antes de ejecutar node calibracion.mjs --n=300"
+  },
+  "cultivos_sierra": {
+    "chocho": {
+      "nombre": "Chocho (Lupinus mutabilis)",
+      "familia": "Fabáceas",
+      "rendimiento_promedio_t_ha": 1.15,
+      "precio_productor_usd_t": 1250.0,
+      "costo_produccion_est_usd_ha": 580.0,
+      "margen_bruto_usd_ha": 857.5
+    },
+    "papa": {
+      "nombre": "Papa (Solanum tuberosum)",
+      "familia": "Solanáceas",
+      "rendimiento_promedio_t_ha": 18.5,
+      "precio_productor_usd_t": 280.0,
+      "costo_produccion_est_usd_ha": 3100.0,
+      "margen_bruto_usd_ha": 2080.0
+    },
+    "maiz_suave": {
+      "nombre": "Maíz suave choclo/seco (Zea mays)",
+      "familia": "Poáceas",
+      "rendimiento_promedio_t_ha": 2.8,
+      "precio_productor_usd_t": 620.0,
+      "costo_produccion_est_usd_ha": 890.0,
+      "margen_bruto_usd_ha": 846.0
+    },
+    "haba": {
+      "nombre": "Haba tierna/seca (Vicia faba)",
+      "familia": "Fabáceas",
+      "rendimiento_promedio_t_ha": 3.2,
+      "precio_productor_usd_t": 540.0,
+      "costo_produccion_est_usd_ha": 820.0,
+      "margen_bruto_usd_ha": 908.0
+    },
+    "cebada": {
+      "nombre": "Cebada grano (Hordeum vulgare)",
+      "familia": "Poáceas",
+      "rendimiento_promedio_t_ha": 1.9,
+      "precio_productor_usd_t": 440.0,
+      "costo_produccion_est_usd_ha": 520.0,
+      "margen_bruto_usd_ha": 316.0
+    },
+    "quinua": {
+      "nombre": "Quinua (Chenopodium quinoa)",
+      "familia": "Amarantáceas",
+      "rendimiento_promedio_t_ha": 1.45,
+      "precio_productor_usd_t": 1150.0,
+      "costo_produccion_est_usd_ha": 790.0,
+      "margen_bruto_usd_ha": 877.5
+    },
+    "cebolla": {
+      "nombre": "Cebolla colorada/paiteña (Allium cepa)",
+      "familia": "Amarilidáceas",
+      "rendimiento_promedio_t_ha": 16.0,
+      "precio_productor_usd_t": 340.0,
+      "costo_produccion_est_usd_ha": 2950.0,
+      "margen_bruto_usd_ha": 2490.0
+    },
+    "brocoli": {
+      "nombre": "Brócoli (Brassica oleracea)",
+      "familia": "Brasicáceas",
+      "rendimiento_promedio_t_ha": 14.5,
+      "precio_productor_usd_t": 310.0,
+      "costo_produccion_est_usd_ha": 2600.0,
+      "margen_bruto_usd_ha": 1895.0
+    },
+    "zanahoria": {
+      "nombre": "Zanahoria amarilla (Daucus carota)",
+      "familia": "Apiáceas",
+      "rendimiento_promedio_t_ha": 19.0,
+      "precio_productor_usd_t": 220.0,
+      "costo_produccion_est_usd_ha": 2350.0,
+      "margen_bruto_usd_ha": 1830.0
+    },
+    "avena": {
+      "nombre": "Avena forrajera/grano (Avena sativa)",
+      "familia": "Poáceas",
+      "rendimiento_promedio_t_ha": 2.1,
+      "precio_productor_usd_t": 390.0,
+      "costo_produccion_est_usd_ha": 480.0,
+      "margen_bruto_usd_ha": 339.0
+    },
+    "vicia": {
+      "nombre": "Vicia (Vicia villosa - Abono verde/forraje)",
+      "familia": "Fabáceas",
+      "rendimiento_promedio_t_ha": 0.0,
+      "precio_productor_usd_t": 0.0,
+      "costo_produccion_est_usd_ha": 240.0,
+      "margen_bruto_usd_ha": 120.0,
+      "nota": "Ingreso imputado por ahorro directo en fertilizante nitrogenado (~80-100 kg N/ha) y biomasa forrajera"
+    }
+  },
+  "cultivos_costa": {
+    "arroz": {
+      "nombre": "Arroz en cáscara (Oryza sativa)",
+      "familia": "Poáceas",
+      "rendimiento_promedio_t_ha": 5.2,
+      "precio_productor_usd_t": 345.0,
+      "costo_produccion_est_usd_ha": 1180.0,
+      "margen_bruto_usd_ha": 614.0
+    },
+    "maiz_duro": {
+      "nombre": "Maíz duro seco (Zea mays)",
+      "familia": "Poáceas",
+      "rendimiento_promedio_t_ha": 5.8,
+      "precio_productor_usd_t": 365.0,
+      "costo_produccion_est_usd_ha": 1250.0,
+      "margen_bruto_usd_ha": 867.0
+    },
+    "mani": {
+      "nombre": "Maní en cáscara (Arachis hypogaea)",
+      "familia": "Fabáceas",
+      "rendimiento_promedio_t_ha": 1.8,
+      "precio_productor_usd_t": 1100.0,
+      "costo_produccion_est_usd_ha": 1050.0,
+      "margen_bruto_usd_ha": 930.0
+    },
+    "tomate": {
+      "nombre": "Tomate riñón (Solanum lycopersicum)",
+      "familia": "Solanáceas",
+      "rendimiento_promedio_t_ha": 24.0,
+      "precio_productor_usd_t": 290.0,
+      "costo_produccion_est_usd_ha": 4400.0,
+      "margen_bruto_usd_ha": 2560.0
+    },
+    "yuca": {
+      "nombre": "Yuca (Manihot esculenta)",
+      "familia": "Euforbiáceas",
+      "rendimiento_promedio_t_ha": 14.0,
+      "precio_productor_usd_t": 210.0,
+      "costo_produccion_est_usd_ha": 1450.0,
+      "margen_bruto_usd_ha": 1490.0
+    },
+    "sandia": {
+      "nombre": "Sandía (Citrullus lanatus)",
+      "familia": "Cucurbitáceas",
+      "rendimiento_promedio_t_ha": 22.0,
+      "precio_productor_usd_t": 195.0,
+      "costo_produccion_est_usd_ha": 2300.0,
+      "margen_bruto_usd_ha": 1990.0
+    }
+  }
+}

@@ -20,10 +20,12 @@
     },
     opciones: {
       escenarioLluviaPct: 0,
+      escenarioTempC: 0,
       conRiego: false,
       retiraForraje: false,
       priorizarForraje: false
     },
+    lang: 'es',
     ultimoResultado: null,
     rotacionSeleccionadaGraficoId: 'recomendada_1',
     tarjetasTecnicas: {},
@@ -138,10 +140,11 @@
     return Promise.all([
       fetch('data/cultivos.json').then(r => r.json()),
       fetch('data/parcelas/parcela_licto.json').then(r => r.json()),
-      fetch('data/parcelas/parcela_guano.json').then(r => r.json())
-    ]).then(([cat, p1, p2]) => {
+      fetch('data/parcelas/parcela_guano.json').then(r => r.json()),
+      fetch('data/parcelas/parcela_el_oro.json').then(r => r.json()).catch(() => null)
+    ]).then(([cat, p1, p2, p3]) => {
       state.catalogo = cat;
-      [p1, p2].forEach(p => {
+      [p1, p2, p3].filter(Boolean).forEach(p => {
         state.parcelasOriginales[p.id] = clonar(p);
         state.parcelasActivas[p.id] = clonar(p);
       });
@@ -283,6 +286,11 @@
 
     state.drawnItems = new L.FeatureGroup();
     state.map.addLayer(state.drawnItems);
+
+    const capasPanel = document.getElementById('capas-nasa-panel');
+    if (capasPanel && window.CapasNASA && typeof window.CapasNASA.montar === 'function') {
+      window.CapasNASA.montar(state.map, capasPanel);
+    }
 
     if (L.Control && L.Control.Draw) {
       if (L.drawLocal) {
@@ -2597,6 +2605,7 @@
         state.prioridadesTocadas = false;
         state.sliders = { agua: 3, suelo: 3, ganar: 3 };
         state.opciones.escenarioLluviaPct = 0;
+        state.opciones.escenarioTempC = 0;
         state.opciones.conRiego = false;
         state.opciones.retiraForraje = false;
         state.opciones.priorizarForraje = false;
@@ -2606,6 +2615,8 @@
         const sliderGanar = document.getElementById('slider-ganar');
         const sliderEsc = document.getElementById('slider-escenario-lluvia');
         const badgeEsc = document.getElementById('badge-escenario-lluvia');
+        const sliderTemp = document.getElementById('slider-escenario-temp');
+        const badgeTemp = document.getElementById('badge-escenario-temp');
         const chkForraje = document.getElementById('check-retira-forraje');
         const chkRiego = document.getElementById('check-tiene-riego');
 
@@ -2614,6 +2625,8 @@
         if (sliderGanar) sliderGanar.value = '3';
         if (sliderEsc) sliderEsc.value = '0';
         if (badgeEsc) badgeEsc.textContent = '0 % (climatología normal)';
+        if (sliderTemp) sliderTemp.value = '0';
+        if (badgeTemp) badgeTemp.textContent = '+0.0 °C (clima base)';
         if (chkForraje) chkForraje.checked = false;
         if (chkRiego) chkRiego.checked = false;
 
@@ -3257,6 +3270,64 @@
             : `${val > 0 ? '+' : ''}${val} % de lluvia`;
         }
         actualizarTodo();
+      });
+    }
+
+    const sliderTemp = document.getElementById('slider-escenario-temp');
+    const badgeTemp = document.getElementById('badge-escenario-temp');
+    if (sliderTemp) {
+      sliderTemp.addEventListener('input', function () {
+        const val = Number(this.value);
+        state.opciones.escenarioTempC = val;
+        if (badgeTemp) {
+          badgeTemp.textContent = val === 0
+            ? '+0.0 °C (clima base)'
+            : `+${val.toFixed(1)} °C (estrés térmico)`;
+        }
+        actualizarTodo();
+      });
+    }
+
+    const btnLang = document.getElementById('btn-lang-switch');
+    if (btnLang) {
+      const i18nMap = {
+        es: {
+          nav: {
+            'tab-lote': '1. Mi lote',
+            'tab-riesgos': '2. Riesgos y qué hacer',
+            'tab-plan': '3. Mi plan de 3 años',
+            'tab-calendario': '4. Cuándo sembrar',
+            'tab-metodologia': '5. Metodología NASA'
+          },
+          banner: 'Proyecto para NASA International Space Apps Challenge 2026 · Riobamba',
+          btnModo: 'Vista: Agricultor · Modo técnico'
+        },
+        en: {
+          nav: {
+            'tab-lote': '1. My Plot',
+            'tab-riesgos': '2. Risks & Actions',
+            'tab-plan': '3. 3-Year Plan',
+            'tab-calendario': '4. Planting Calendar',
+            'tab-metodologia': '5. NASA Methodology'
+          },
+          banner: 'NASA International Space Apps Challenge 2026 Project · Riobamba',
+          btnModo: 'View: Farmer · Technical Mode'
+        }
+      };
+      btnLang.addEventListener('click', function () {
+        state.lang = state.lang === 'es' ? 'en' : 'es';
+        const dict = i18nMap[state.lang];
+        document.documentElement.lang = state.lang;
+        btnLang.setAttribute('aria-pressed', state.lang === 'en' ? 'true' : 'false');
+        btnLang.innerHTML = state.lang === 'es' ? '<strong>ES</strong> / EN' : 'ES / <strong>EN</strong>';
+        const bannerSpan = document.querySelector('.banda-top-inner > span');
+        if (bannerSpan) bannerSpan.textContent = dict.banner;
+        const modoTxt = document.getElementById('btn-modo-usuario-texto');
+        if (modoTxt && !document.body.classList.contains('modo-tecnico')) modoTxt.textContent = dict.btnModo;
+        Object.entries(dict.nav).forEach(([tabId, label]) => {
+          const btn = document.querySelector(`[data-tab-target="${tabId}"] span`);
+          if (btn) btn.textContent = label;
+        });
       });
     }
 

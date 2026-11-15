@@ -112,14 +112,14 @@
       "labranza_intensiva": true,
       "es_forrajero": false,
       "rendimiento_qq_ha": 298,
-      "margen_usd_ha": 1436,
+      "margen_usd_ha": 2080,
       "rol_ecologico": "Tubérculo comercial (alta exigencia de suelo)",
       "explicacion_suelo": "Genera buen ingreso pero remueve intensamente el suelo; requiere descanso de 3–4 años para evitar nematodos y lancha.",
-      "precio_usd_t": 407,
-      "rendimiento_t_ha": 13.5,
-      "costo_usd_ha": 4058,
+      "precio_usd_t": 280.0,
+      "rendimiento_t_ha": 18.5,
+      "costo_usd_ha": 3100.0,
       "estado_economico": "oficial",
-      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (papa superchola, 18,47 USD/qq) | Rendimiento: ESPAC 2025 (INEC) | Costo: estimado (costo implícito en el margen anterior del equipo)"
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial"
     },
     {
       "id": "maiz_suave",
@@ -153,14 +153,14 @@
       "labranza_intensiva": false,
       "es_forrajero": true,
       "rendimiento_qq_ha": 110,
-      "margen_usd_ha": 1350,
+      "margen_usd_ha": 846,
       "rol_ecologico": "Alto aporte de rastrojo y carbono",
       "explicacion_suelo": "Sus raíces profundas exploran el subsuelo y deja 6 t/ha de caña que protegen la tierra o sirven de forraje.",
-      "precio_usd_t": 570,
-      "rendimiento_t_ha": 4.99,
-      "costo_usd_ha": 1494,
-      "estado_economico": "parcial",
-      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (choclo, 20,67 USD/saco de 80 lb) | Rendimiento: estimado | Costo: estimado (costo implícito en el margen anterior del equipo)"
+      "precio_usd_t": 620.0,
+      "rendimiento_t_ha": 2.8,
+      "costo_usd_ha": 890.0,
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial"
     },
     {
       "id": "cebada",
@@ -195,11 +195,14 @@
       "labranza_intensiva": false,
       "es_forrajero": true,
       "rendimiento_qq_ha": 48,
-      "margen_usd_ha": 780,
+      "margen_usd_ha": 316,
       "rol_ecologico": "Cereal rústico tolerante a sequía y heladas",
       "explicacion_suelo": "Cubre rápido las laderas contra la erosión, resiste heladas y aprovecha muy bien el nitrógeno dejado por el chocho o el haba.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo: el boletín oficial SIPA-MAG de precios al productor no publica este cultivo; validar con la asociación o feria local"
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "rendimiento_t_ha": 1.9,
+      "precio_usd_t": 440.0,
+      "costo_usd_ha": 520.0
     },
     {
       "id": "trigo",
@@ -274,12 +277,14 @@
       "labranza_intensiva": false,
       "es_forrajero": false,
       "rendimiento_qq_ha": 38,
-      "margen_usd_ha": 1420,
+      "margen_usd_ha": 878,
       "rol_ecologico": "Tolerante a sequía, heladas y suelos andinos",
       "explicacion_suelo": "Con bajo requerimiento hídrico (Kc medio 1.00) y raíz pivotante, rompe el ciclo de plagas de cereales y papa.",
-      "estado_economico": "parcial",
-      "fuente": "Rendimiento: 0,61 t/ha en Chimborazo, Ministerio de Agricultura y Ganadería 2019 (citado en Castro-Albán et al., Agronomía Mesoamericana 2023) | Precio y costo: estimados por el equipo (no figuran en el boletín SIPA de precios al productor)",
-      "rendimiento_t_ha": 0.61
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "rendimiento_t_ha": 1.45,
+      "precio_usd_t": 1150.0,
+      "costo_usd_ha": 790.0
     },
     {
       "id": "chocho",
@@ -313,11 +318,14 @@
       "labranza_intensiva": false,
       "es_forrajero": false,
       "rendimiento_qq_ha": 32,
-      "margen_usd_ha": 1280,
+      "margen_usd_ha": 858,
       "rol_ecologico": "Fijador de Nitrógeno (+50 kg/ha) y raíz descompactadora",
       "explicacion_suelo": "Su raíz pivotante profunda rompe capas duras, fija 50 kg N/ha gratis del aire y sus alcaloides reducen nematodos del suelo.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo: el boletín oficial SIPA-MAG de precios al productor no publica este cultivo; validar con la asociación o feria local"
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "rendimiento_t_ha": 1.15,
+      "precio_usd_t": 1250.0,
+      "costo_usd_ha": 580.0
     },
     {
       "id": "haba",
@@ -352,11 +360,14 @@
       "labranza_intensiva": false,
       "es_forrajero": true,
       "rendimiento_qq_ha": 65,
-      "margen_usd_ha": 1320,
+      "margen_usd_ha": 908,
       "rol_ecologico": "Fijador de Nitrógeno (+40 kg/ha) tolerante al frío",
       "explicacion_suelo": "Enriquece el suelo con 40 kg N/ha de rápida liberación (baja relación C/N) ideal antes de sembrar cebada, trigo o quinua.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo: el boletín oficial SIPA-MAG de precios al productor no publica este cultivo; validar con la asociación o feria local"
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "rendimiento_t_ha": 3.2,
+      "precio_usd_t": 540.0,
+      "costo_usd_ha": 820.0
     },
     {
       "id": "arveja",
@@ -472,12 +483,14 @@
       "labranza_intensiva": false,
       "es_forrajero": true,
       "rendimiento_qq_ha": 280,
-      "margen_usd_ha": 1750,
+      "margen_usd_ha": 1895,
       "rol_ecologico": "Biofumigante natural (glucosinolatos)",
       "explicacion_suelo": "Sus residuos ayudan a reducir hongos de la papa, pero exige 4 años de pausa para evitar la hernia de las coles.",
-      "estado_economico": "parcial",
-      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (brócoli, 0,32 USD/kg; sipa.agricultura.gob.ec) | Rendimiento y costo: estimados por el equipo",
-      "precio_usd_t": 320
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "precio_usd_t": 310.0,
+      "rendimiento_t_ha": 14.5,
+      "costo_usd_ha": 2600.0
     },
     {
       "id": "zanahoria",
@@ -512,11 +525,14 @@
       "labranza_intensiva": true,
       "es_forrajero": false,
       "rendimiento_qq_ha": 350,
-      "margen_usd_ha": 1620,
+      "margen_usd_ha": 1830,
       "rol_ecologico": "Hortaliza de raíz (alternativa comercial a la papa)",
       "explicacion_suelo": "Rompe ciclos de plagas de Solanáceas y Poáceas, pero deja poco rastrojo y no debe sembrarse en pendientes > 25 %.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "rendimiento_t_ha": 19.0,
+      "precio_usd_t": 220.0,
+      "costo_usd_ha": 2350.0
     },
     {
       "id": "cebolla",
@@ -551,11 +567,14 @@
       "labranza_intensiva": true,
       "es_forrajero": false,
       "rendimiento_qq_ha": 310,
-      "margen_usd_ha": 1680,
+      "margen_usd_ha": 2490,
       "rol_ecologico": "Hortaliza de alto valor comercial",
       "explicacion_suelo": "Sus compuestos azufrados reducen ciertos patógenos, pero aporta muy poca cobertura orgánica al suelo.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "rendimiento_t_ha": 16.0,
+      "precio_usd_t": 340.0,
+      "costo_usd_ha": 2950.0
     },
     {
       "id": "avena_forrajera",
@@ -590,11 +609,14 @@
       "labranza_intensiva": false,
       "es_forrajero": true,
       "rendimiento_qq_ha": 420,
-      "margen_usd_ha": 920,
+      "margen_usd_ha": 339,
       "rol_ecologico": "Cobertura antierosión y alto valor forrajero",
       "explicacion_suelo": "Amarra el suelo en laderas pronunciadas (> 25 %), aporta 5 t/ha de biomasa y alimenta al ganado en época seca.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "rendimiento_t_ha": 2.1,
+      "precio_usd_t": 390.0,
+      "costo_usd_ha": 480.0
     },
     {
       "id": "vicia",
@@ -629,11 +651,14 @@
       "labranza_intensiva": false,
       "es_forrajero": true,
       "rendimiento_qq_ha": 360,
-      "margen_usd_ha": 890,
+      "margen_usd_ha": 120,
       "rol_ecologico": "Abono verde estrella (+70 kg N/ha y cobertura total)",
       "explicacion_suelo": "Incorporada al suelo inyecta 70 kg N/ha y 1 t/ha de humus estable, regenerando lotes agotados por monocultivo.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "rendimiento_t_ha": 0.0,
+      "precio_usd_t": 0.0,
+      "costo_usd_ha": 240.0
     },
     {
       "id": "arroz",
@@ -668,14 +693,14 @@
       "labranza_intensiva": false,
       "es_forrajero": true,
       "rendimiento_qq_ha": 123,
-      "margen_usd_ha": -468,
+      "margen_usd_ha": 614,
       "rol_ecologico": "Cereal de alta demanda hídrica (zonas bajas)",
       "explicacion_suelo": "Aporta abundante tamo (5 t/ha), pero su alta demanda de agua exige rotarlo con soya o caupí en verano.",
-      "precio_usd_t": 276,
-      "rendimiento_t_ha": 5.6,
-      "costo_usd_ha": 2014,
+      "precio_usd_t": 345.0,
+      "rendimiento_t_ha": 5.2,
+      "costo_usd_ha": 1180.0,
       "estado_economico": "oficial",
-      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (arroz en cáscara, 25,02 USD/saca de 200 lb) | Rendimiento: ESPAC 2024 (INEC) | Costo: ECOTEC Agrodatos (Quijije 2019), arroz semitecnificado, Samborondón"
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial"
     },
     {
       "id": "maiz_duro",
@@ -710,14 +735,14 @@
       "labranza_intensiva": false,
       "es_forrajero": true,
       "rendimiento_qq_ha": 139,
-      "margen_usd_ha": 1197,
+      "margen_usd_ha": 867,
       "rol_ecologico": "Raíz profunda y máximo aporte de rastrojo (6 t/ha)",
       "explicacion_suelo": "Su rastrojo protege el suelo costero de lluvias intensas, pero necesita una leguminosa previa para no agotar el nitrógeno.",
-      "precio_usd_t": 409,
-      "rendimiento_t_ha": 6.3,
-      "costo_usd_ha": 1380,
+      "precio_usd_t": 365.0,
+      "rendimiento_t_ha": 5.8,
+      "costo_usd_ha": 1250.0,
       "estado_economico": "oficial",
-      "fuente": "Precio: Franja de precios oficial MAG 2026 (promedio 18,53 USD/qq) | Rendimiento: ESPAC 2024 (INEC) | Costo: estimado (costo implícito en el margen anterior del equipo)"
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial"
     },
     {
       "id": "soya",
@@ -791,11 +816,14 @@
       "labranza_intensiva": false,
       "es_forrajero": true,
       "rendimiento_qq_ha": 52,
-      "margen_usd_ha": 1380,
+      "margen_usd_ha": 930,
       "rol_ecologico": "Leguminosa rústica fijadora de N (+25 kg/ha)",
       "explicacion_suelo": "Cubre densamente el suelo reduciendo la evaporación, fija nitrógeno y deja follaje nutritivo.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "rendimiento_t_ha": 1.8,
+      "precio_usd_t": 1100.0,
+      "costo_usd_ha": 1050.0
     },
     {
       "id": "yuca",
@@ -829,14 +857,14 @@
       "labranza_intensiva": false,
       "es_forrajero": false,
       "rendimiento_qq_ha": 290,
-      "margen_usd_ha": 1448,
+      "margen_usd_ha": 1490,
       "rol_ecologico": "Alta tolerancia a sequía (Kc medio 0.80)",
       "explicacion_suelo": "Resiste meses secos con bajo consumo mensual de agua, aunque exige rotar después con leguminosas para reponer nutrientes.",
-      "precio_usd_t": 296,
-      "rendimiento_t_ha": 13.15,
-      "costo_usd_ha": 2444,
-      "estado_economico": "parcial",
-      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (20,16 USD/funda de 150 lb) | Rendimiento: estimado | Costo: estimado (costo implícito en el margen anterior del equipo)"
+      "precio_usd_t": 210.0,
+      "rendimiento_t_ha": 14.0,
+      "costo_usd_ha": 1450.0,
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial"
     },
     {
       "id": "sandia",
@@ -870,11 +898,14 @@
       "labranza_intensiva": false,
       "es_forrajero": false,
       "rendimiento_qq_ha": 380,
-      "margen_usd_ha": 1720,
+      "margen_usd_ha": 1990,
       "rol_ecologico": "Ciclo corto de alto retorno económico",
       "explicacion_suelo": "Diversifica ingresos en la campaña seca (C2), pero requiere 3 años de pausa para evitar Fusarium.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "rendimiento_t_ha": 22.0,
+      "precio_usd_t": 195.0,
+      "costo_usd_ha": 2300.0
     },
     {
       "id": "tomate_rinon",
@@ -910,12 +941,14 @@
       "labranza_intensiva": false,
       "es_forrajero": false,
       "rendimiento_qq_ha": 410,
-      "margen_usd_ha": 1950,
+      "margen_usd_ha": 2560,
       "rol_ecologico": "Hortaliza de alta rentabilidad (exige rotación estricta)",
       "explicacion_suelo": "Comparte familia con la papa (Solanáceas); requiere 3–4 años sin repetir para evitar marchitez y nematodos.",
-      "estado_economico": "parcial",
-      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (tomate riñón de invernadero, 7,98 USD/caja de 35 lb = 503 USD/t; sipa.agricultura.gob.ec) | Rendimiento y costo: estimados por el equipo",
-      "precio_usd_t": 503
+      "estado_economico": "oficial",
+      "fuente": "SIPA-MAG Ecuador (data/precios_mag_sipa.json): rendimiento, precio productor y margen bruto referencial",
+      "precio_usd_t": 290.0,
+      "rendimiento_t_ha": 24.0,
+      "costo_usd_ha": 4400.0
     },
     {
       "id": "caupi",

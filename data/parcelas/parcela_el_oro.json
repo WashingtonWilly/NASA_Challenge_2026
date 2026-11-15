@@ -1,0 +1,435 @@
+{
+  "id": "parcela_el_oro",
+  "nombre": "Parcela 3 — Santa Rosa (El Oro, Costa)",
+  "region": "Costa",
+  "ubicacion_texto": "Santa Rosa, El Oro",
+  "geometria": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -79.96233,
+          -3.44797
+        ],
+        [
+          -79.96107,
+          -3.44797
+        ],
+        [
+          -79.96107,
+          -3.44923
+        ],
+        [
+          -79.96233,
+          -3.44923
+        ],
+        [
+          -79.96233,
+          -3.44797
+        ]
+      ]
+    ]
+  },
+  "area_ha": 2.0,
+  "centroide": {
+    "lat": -3.4486,
+    "lon": -79.9617
+  },
+  "terreno": {
+    "elev_m": 18,
+    "pendiente_pct": 2.0,
+    "pendiente_max_pct": 4.0,
+    "orientacion": "O"
+  },
+  "clima_mensual": [
+    {
+      "mes": 1,
+      "nombre_mes": "Ene",
+      "P_mm": 58.4,
+      "ET0_mm": 128.3,
+      "Tmin_abs": 23.0,
+      "Tmed": 28.0,
+      "Rs_MJ": 14.1,
+      "Viento_ms": 2.5,
+      "HR_pct": 72
+    },
+    {
+      "mes": 2,
+      "nombre_mes": "Feb",
+      "P_mm": 103.0,
+      "ET0_mm": 109.1,
+      "Tmin_abs": 23.5,
+      "Tmed": 28.1,
+      "Rs_MJ": 13.8,
+      "Viento_ms": 2.5,
+      "HR_pct": 77
+    },
+    {
+      "mes": 3,
+      "nombre_mes": "Mar",
+      "P_mm": 133.4,
+      "ET0_mm": 115.9,
+      "Tmin_abs": 23.8,
+      "Tmed": 28.0,
+      "Rs_MJ": 14.3,
+      "Viento_ms": 2.2,
+      "HR_pct": 79
+    },
+    {
+      "mes": 4,
+      "nombre_mes": "Abr",
+      "P_mm": 67.6,
+      "ET0_mm": 113.5,
+      "Tmin_abs": 23.0,
+      "Tmed": 28.0,
+      "Rs_MJ": 14.5,
+      "Viento_ms": 2.0,
+      "HR_pct": 77
+    },
+    {
+      "mes": 5,
+      "nombre_mes": "May",
+      "P_mm": 34.8,
+      "ET0_mm": 118.2,
+      "Tmin_abs": 22.2,
+      "Tmed": 28.3,
+      "Rs_MJ": 13.6,
+      "Viento_ms": 2.0,
+      "HR_pct": 73
+    },
+    {
+      "mes": 6,
+      "nombre_mes": "Jun",
+      "P_mm": 27.6,
+      "ET0_mm": 113.8,
+      "Tmin_abs": 20.6,
+      "Tmed": 27.8,
+      "Rs_MJ": 13.4,
+      "Viento_ms": 2.0,
+      "HR_pct": 70
+    },
+    {
+      "mes": 7,
+      "nombre_mes": "Jul",
+      "P_mm": 12.5,
+      "ET0_mm": 125.1,
+      "Tmin_abs": 20.8,
+      "Tmed": 27.8,
+      "Rs_MJ": 13.7,
+      "Viento_ms": 2.0,
+      "HR_pct": 66
+    },
+    {
+      "mes": 8,
+      "nombre_mes": "Ago",
+      "P_mm": 7.4,
+      "ET0_mm": 139.2,
+      "Tmin_abs": 20.5,
+      "Tmed": 27.9,
+      "Rs_MJ": 15.2,
+      "Viento_ms": 2.1,
+      "HR_pct": 64
+    },
+    {
+      "mes": 9,
+      "nombre_mes": "Sep",
+      "P_mm": 10.7,
+      "ET0_mm": 143.6,
+      "Tmin_abs": 20.6,
+      "Tmed": 28.0,
+      "Rs_MJ": 15.8,
+      "Viento_ms": 2.3,
+      "HR_pct": 64
+    },
+    {
+      "mes": 10,
+      "nombre_mes": "Oct",
+      "P_mm": 64.6,
+      "ET0_mm": 137.3,
+      "Tmin_abs": 21.5,
+      "Tmed": 27.5,
+      "Rs_MJ": 15.4,
+      "Viento_ms": 2.3,
+      "HR_pct": 68
+    },
+    {
+      "mes": 11,
+      "nombre_mes": "Nov",
+      "P_mm": 43.7,
+      "ET0_mm": 132.4,
+      "Tmin_abs": 21.2,
+      "Tmed": 27.2,
+      "Rs_MJ": 16.0,
+      "Viento_ms": 2.3,
+      "HR_pct": 69
+    },
+    {
+      "mes": 12,
+      "nombre_mes": "Dic",
+      "P_mm": 37.5,
+      "ET0_mm": 131.7,
+      "Tmin_abs": 21.9,
+      "Tmed": 27.7,
+      "Rs_MJ": 14.6,
+      "Viento_ms": 2.4,
+      "HR_pct": 70
+    }
+  ],
+  "anomalia": {
+    "fuente": "NASA POWER · PRECTOTCORR",
+    "res_km": 50,
+    "pct": 1506,
+    "ventana": "ago–oct 2026",
+    "lluvia_reciente_mm": 571,
+    "lluvia_normal_mm": 36,
+    "anios_referencia": "2001–2025",
+    "mensaje": "Su zona viene 1506 % más lluviosa que un año normal (ago–oct 2026: 571 mm frente a 36 mm de promedio, NASA POWER, ~50 km). Suelo saturado: revise drenajes, evite labranza con el suelo mojado y vigile hongos (lancha, pudriciones) antes de sembrar."
+  },
+  "suelo": {
+    "fuente": "EJEMPLO (dato provisional, falta dato real)",
+    "textura": "Franco",
+    "arcilla_pct": 22.0,
+    "arena_pct": 41.0,
+    "ph": 6.0,
+    "soc_pct": 3.0,
+    "n_gkg": 2.0,
+    "es_andisol": true,
+    "editado_por_usuario": false
+  },
+  "ndvi_mensual": [
+    {
+      "mes": "2023-11",
+      "ndvi": 0.34,
+      "ndti": 0.11,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2023-12",
+      "ndvi": 0.58,
+      "ndti": 0.08,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-01",
+      "ndvi": 0.72,
+      "ndti": 0.06,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-02",
+      "ndvi": 0.76,
+      "ndti": 0.05,
+      "n_obs": 1,
+      "interpolado": true
+    },
+    {
+      "mes": "2024-03",
+      "ndvi": 0.68,
+      "ndti": 0.07,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-04",
+      "ndvi": 0.45,
+      "ndti": 0.12,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-05",
+      "ndvi": 0.24,
+      "ndti": 0.16,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-06",
+      "ndvi": 0.21,
+      "ndti": 0.15,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-07",
+      "ndvi": 0.19,
+      "ndti": 0.11,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-08",
+      "ndvi": 0.18,
+      "ndti": 0.09,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-09",
+      "ndvi": 0.22,
+      "ndti": 0.08,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-10",
+      "ndvi": 0.31,
+      "ndti": 0.1,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-11",
+      "ndvi": 0.56,
+      "ndti": 0.07,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2024-12",
+      "ndvi": 0.69,
+      "ndti": 0.06,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-01",
+      "ndvi": 0.74,
+      "ndti": 0.05,
+      "n_obs": 1,
+      "interpolado": true
+    },
+    {
+      "mes": "2025-02",
+      "ndvi": 0.71,
+      "ndti": 0.06,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-03",
+      "ndvi": 0.59,
+      "ndti": 0.08,
+      "n_obs": 2,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-04",
+      "ndvi": 0.33,
+      "ndti": 0.14,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-05",
+      "ndvi": 0.22,
+      "ndti": 0.15,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-06",
+      "ndvi": 0.2,
+      "ndti": 0.12,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-07",
+      "ndvi": 0.19,
+      "ndti": 0.1,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-08",
+      "ndvi": 0.18,
+      "ndti": 0.08,
+      "n_obs": 4,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-09",
+      "ndvi": 0.21,
+      "ndti": 0.08,
+      "n_obs": 3,
+      "interpolado": false
+    },
+    {
+      "mes": "2025-10",
+      "ndvi": 0.27,
+      "ndti": 0.09,
+      "n_obs": 2,
+      "interpolado": false
+    }
+  ],
+  "historia_inferida": [
+    {
+      "anio": 2023,
+      "ciclos": 0,
+      "meses_cultivo": [
+        12
+      ],
+      "meses_desnudo": [],
+      "meses_residuo": []
+    },
+    {
+      "anio": 2024,
+      "ciclos": 2,
+      "meses_cultivo": [
+        1,
+        2,
+        3,
+        11,
+        12
+      ],
+      "meses_desnudo": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "meses_residuo": [
+        5,
+        6
+      ]
+    },
+    {
+      "anio": 2025,
+      "ciclos": 1,
+      "meses_cultivo": [
+        1,
+        2,
+        3
+      ],
+      "meses_desnudo": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "meses_residuo": [
+        5
+      ]
+    }
+  ],
+  "historia_declarada": [
+    "arroz",
+    "arroz"
+  ],
+  "nematodo_declarado": false,
+  "clima_metodo_et0": "Penman-Monteith FAO-56 (radiación, viento y humedad de NASA POWER)",
+  "estado_datos": {
+    "clima": "NASA POWER 2015–2026 (diario, AG); T corregida +3.5 °C por altitud (celda a 559.61 m)",
+    "anomalia": "NASA POWER PRECTOTCORR, ago–oct 2026 vs 2001–2025",
+    "suelo": "EJEMPLO (dato provisional, falta dato real)",
+    "ndvi": "EJEMPLO (dato provisional, falta dato real)",
+    "smap": "sin dato",
+    "terreno": "EJEMPLO (verificar con NASADEM 30 m)"
+  }
+}

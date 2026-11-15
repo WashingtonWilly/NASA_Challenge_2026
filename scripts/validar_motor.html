@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>RotaSat — Suite de Validación del Motor</title>
+</head>
+<body>
+  <pre id="resultado-validacion">Ejecutando...</pre>
+  <script src="../js/datos_embebidos.js"></script>
+  <script src="../js/filtros.js"></script>
+  <script src="../js/balance.js"></script>
+  <script src="../js/irr.js"></script>
+  <script src="../js/motor.js"></script>
+  <script>
+    (function () {
+      try {
+      const resultados = [];
+      function assert(nombre, cond, detalle) {
+        resultados.push({ nombre, ok: Boolean(cond), detalle: detalle || '' });
+      }
+
+      const cat = window.CATALOGO_CULTIVOS;
+      const parcelas = window.PARCELAS_DEMO || {};
+      const sliders = { agua: 3, suelo: 3, ganar: 3 };
+
+      // 1. Escenarios por parcela (Licto, Guano, El Oro)
+      ['parcela_licto', 'parcela_guano', 'parcela_el_oro'].forEach(pid => {
+        const p = parcelas[pid];
+        assert(`Parcela ${pid} cargada`, Boolean(p), pid);
+        if (!p) return;
+        const res = window.AgronomiaMotor.recomendar(p, cat, sliders, { escenarioLluviaPct: 0, escenarioTempC: 0 });
+        assert(`${pid}: 3 recomendaciones`, res.recomendadas && res.recomendadas.length === 3, `len=${res.recomendadas?.length}`);
+        assert(`${pid}: actual viola reglas fitosanitarias`, res.actual && res.actual.violaReglasFitosanitarias === true, res.actual?.motivoRiesgoFitosanitario || 'ok');
+        const inc = res.recomendadas[0]?.incertidumbre;
+        assert(`${pid}: incertidumbre z=1.65 válida`, inc && inc.z === 1.65 && inc.sigmaW > 0 && inc.ic90Min <= res.recomendadas[0].irr && res.recomendadas[0].irr <= inc.ic90Max, JSON.stringify(inc));
+      });
+
+      // 2. Monotonía hídrica (lluvia -25 % vs 0 %, +2.5 °C vs 0 °C, pendiente 24 % vs 5 %)
+      const pLicto = parcelas.parcela_licto;
+      if (pLicto) {
+        const seq = [cat.cultivos[0], cat.cultivos[1], cat.cultivos[5]]; // papa, maiz_suave, chocho
+        const bNormal = window.BalanceMotor.balanceHidrico(seq, pLicto, 0, true, 0);
+        const bSeco = window.BalanceMotor.balanceHidrico(seq, pLicto, -25, true, 0);
+        const bCalor = window.BalanceMotor.balanceHidrico(seq, pLicto, 0, true, 2.5);
+
+        const iH2ONormal = window.AgronomiaIRR.indiceAgua(bNormal);
+        const iH2OSeco = window.AgronomiaIRR.indiceAgua(bSeco);
+        const iH2OCalor = window.AgronomiaIRR.indiceAgua(bCalor);
+        assert('Monotonía lluvia: -25% lluvia -> menor/igual I_H2O', iH2OSeco <= iH2ONormal, `${iH2OSeco} <= ${iH2ONormal}`);
+        assert('Monotonía térmica: +2.5°C -> mayor ETc', bCalor.totalETc_mm > bNormal.totalETc_mm, `${bCalor.totalETc_mm.toFixed(1)} > ${bNormal.totalETc_mm.toFixed(1)}`);
+        assert('Monotonía térmica: +2.5°C -> menor/igual I_H2O', iH2OCalor <= iH2ONormal, `${iH2OCalor} <= ${iH2ONormal}`);
+
+        const pPlana = JSON.parse(JSON.stringify(pLicto));
+        pPlana.terreno.pendiente_pct = 5;
+        const pLadera = JSON.parse(JSON.stringify(pLicto));
+        pLadera.terreno.pendiente_pct = 24;
+        const bPlana = window.BalanceMotor.balanceHidrico(seq, pPlana, 0, true, 0);
+        const bLadera = window.BalanceMotor.balanceHidrico(seq, pLadera, 0, true, 0);
+        assert('Monotonía pendiente: 24% -> menor/igual I_H2O que 5%', window.AgronomiaIRR.indiceAgua(bLadera) <= window.AgronomiaIRR.indiceAgua(bPlana), `${window.AgronomiaIRR.indiceAgua(bLadera)} <= ${window.AgronomiaIRR.indiceAgua(bPlana)}`);
+
+        // 3. Crédito de nitrógeno del último cultivo (0.5 vs 1.0)
+        const nHalf = window.AgronomiaIRR.indiceNitrogeno(seq, [], { creditoUltimoCultivo: 0.5 });
+        const nFull = window.AgronomiaIRR.indiceNitrogeno(seq, [], { creditoUltimoCultivo: 1.0 });
+        assert('Crédito N Año 3 ponderado (0.5 < 1.0)', nHalf.creditosKgHa < nFull.creditosKgHa, `${nHalf.creditosKgHa} < ${nFull.creditosKgHa}`);
+      }
+
+      // 4. Helada severa para tolerancia Moderada (< -2 °C)
+      if (pLicto) {
+        const cultMod = Object.assign({}, cat.cultivos[0], { id: 'test_mod', nombre: 'Prueba Mod', tolera_helada: 'Moderada' });
+        const pHelada = JSON.parse(JSON.stringify(pLicto));
+        pHelada.clima_mensual = pHelada.clima_mensual.map(m => Object.assign({}, m, { Tmin_abs: -2.5 }));
+        const fMod = window.FiltrosMotor.evaluarFiltroIndividual(cultMod, pHelada, [], {}, {}, false);
+        assert('Filtro helada severa (< -2°C) veta tolera_helada=Moderada', fMod.apto === false, fMod.razones.join(' | '));
+      }
+
+      // 5. Monte Carlo rápido (N=100) sobre pesos IRR
+      if (pLicto) {
+        const resBase = window.AgronomiaMotor.recomendar(pLicto, cat, sliders, {});
+        const top = resBase.recomendadas[0];
+        let dentroIC90 = 0;
+        const N = 100;
+        for (let i = 0; i < N; i++) {
+          const jitter = () => (Math.sin(i * 12.9898 + 1) * 0.04);
+          const s = top.subindices;
+          const p = top.pesos;
+          const irrSim = p.w_h2o * (s.agua + jitter()) + p.w_n * (s.nitrogeno - jitter()) + p.w_mos * (s.materiaOrganica + jitter() * 0.5) + p.w_rent * (s.rentabilidad - jitter() * 0.5);
+          if (irrSim >= top.incertidumbre.ic90Min && irrSim <= top.incertidumbre.ic90Max) dentroIC90++;
+        }
+        assert('Monte Carlo N=100 dentro de IC 90%', dentroIC90 >= 85, `${dentroIC90}/${N} dentro de [${top.incertidumbre.ic90Min}, ${top.incertidumbre.ic90Max}]`);
+      }
+
+      const pasaron = resultados.filter(r => r.ok).length;
+      const salida = { total: resultados.length, pasaron, fallaron: resultados.length - pasaron, resultados };
+      document.getElementById('resultado-validacion').textContent = JSON.stringify(salida, null, 2);
+      } catch (err) {
+        document.getElementById('resultado-validacion').textContent = JSON.stringify({ total: 1, pasaron: 0, fallaron: 1, resultados: [{ nombre: 'RuntimeError', ok: false, detalle: String(err && err.stack || err) }] });
+      }
+    })();
+  </script>
+</body>
+</html>

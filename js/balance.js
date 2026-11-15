@@ -77,7 +77,7 @@
    * Calcula el balance hídrico mes a mes durante los 36 meses de la rotación [a, b, c].
    * Optimizado para ejecutarse miles de veces en < 50 ms.
    */
-  function balanceHidrico(seq, parcela, escenarioLluviaPct = 0, ligero = false) {
+  function balanceHidrico(seq, parcela, escenarioLluviaPct = 0, ligero = false, escenarioTempC = 0) {
     const pendiente = parcela.terreno?.pendiente_pct ?? 10;
     const suelo = parcela.suelo || {};
     const climaArr = parcela.clima_mensual || [];
@@ -87,6 +87,7 @@
     }
 
     const factorEscenario = Math.max(0.2, 1 + (escenarioLluviaPct || 0) / 100);
+    const deltaT = Number(escenarioTempC) || 0;
     const meses36 = ligero ? null : [];
     let totalETc = 0;
     let totalDeficit = 0;
@@ -115,6 +116,9 @@
         const datoClima = climaMap[m] || { P_mm: 40, ET0_mm: 90, Tmin_abs: 5, Tmed: 14 };
         const P_ajustada = datoClima.P_mm * factorEscenario;
         const Pef = precipitacionEfectivaFAO(P_ajustada, pendiente, suelo);
+        const tmedBase = Number.isFinite(datoClima.Tmed) ? datoClima.Tmed : 14;
+        const factorTempET0 = deltaT !== 0 ? Math.max(0.8, (tmedBase + deltaT + 17.8) / Math.max(5, tmedBase + 17.8)) : 1;
+        const ET0_ajustada = datoClima.ET0_mm * factorTempET0;
         const infoCiclo = mapaEtapaMes[m];
 
         let ETc = 0;
@@ -127,7 +131,7 @@
           sueloDesnudo = false;
           kcUsado = infoCiclo.kc;
           etapa = infoCiclo.etapaNombre;
-          ETc = kcUsado * datoClima.ET0_mm;
+          ETc = kcUsado * ET0_ajustada;
           deficit = Math.max(0, ETc - Pef);
           totalETc += ETc;
           totalDeficit += deficit;
