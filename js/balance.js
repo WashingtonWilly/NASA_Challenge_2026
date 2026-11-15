@@ -165,7 +165,7 @@
             ET0_mm: Number(datoClima.ET0_mm.toFixed(1)),
             ETc_mm: Number(ETc.toFixed(1)),
             deficit_mm: Number(deficit.toFixed(1)),
-            riesgoHelada: datoClima.Tmin_abs < 0
+            riesgoHelada: (datoClima.Tmin_abs + deltaT) < 0
           });
         }
       }

@@ -3285,22 +3285,24 @@
       const i18nMap = {
         es: {
           nav: {
-            'tab-lote': '1. Mi lote',
+            'tab-simulador': 'Inicio',
+            'tab-terreno': '1. Mi lote',
             'tab-riesgos': '2. Riesgos y qué hacer',
-            'tab-plan': '3. Mi plan de 3 años',
-            'tab-calendario': '4. Cuándo sembrar',
-            'tab-metodologia': '5. Metodología NASA'
+            'tab-rotaciones': '3. Plan de 3 años',
+            'tab-informe': '4. Calendario y PDF',
+            'tab-satelites': '5. Metodología NASA'
           },
           banner: 'Proyecto para NASA International Space Apps Challenge 2026 · Riobamba',
           btnModo: 'Vista: Agricultor · Modo técnico'
         },
         en: {
           nav: {
-            'tab-lote': '1. My Plot',
+            'tab-simulador': 'Home',
+            'tab-terreno': '1. My Plot',
             'tab-riesgos': '2. Risks & Actions',
-            'tab-plan': '3. 3-Year Plan',
-            'tab-calendario': '4. Planting Calendar',
-            'tab-metodologia': '5. NASA Methodology'
+            'tab-rotaciones': '3. 3-Year Plan',
+            'tab-informe': '4. Calendar & PDF',
+            'tab-satelites': '5. NASA Methodology'
           },
           banner: 'NASA International Space Apps Challenge 2026 Project · Riobamba',
           btnModo: 'View: Farmer · Technical Mode'
