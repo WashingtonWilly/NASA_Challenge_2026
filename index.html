@@ -120,7 +120,40 @@
       <div class="banda-top">
         <div class="banda-top-inner">
           <span>Proyecto para NASA International Space Apps Challenge 2026 · Riobamba</span>
-          <span class="lang-switch"><strong>ES</strong> / EN</span>
+          <div class="banda-top-actions">
+            <button type="button" id="btn-modo-usuario" class="mode-pill-btn" aria-pressed="false">
+              <i data-lucide="user-check" class="icono"></i>
+              <span id="btn-modo-usuario-texto">Vista: Agricultor · Modo técnico</span>
+            </button>
+            <span class="lang-switch"><strong>ES</strong> / EN</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmación anti-clic accidental para entrar a Modo Técnico -->
+      <div id="confirm-modo-tecnico" class="mode-confirm-bar" role="region" aria-label="Confirmar cambio a modo técnico" hidden>
+        <div class="contenedor mode-confirm-inner">
+          <div class="mode-confirm-text">
+            <i data-lucide="shield-alert" class="icono"></i>
+            <span>
+              <strong>¿Activar Modo Técnico?</strong> Esta vista muestra datos de laboratorio, sensores satelitales NASA y ajustes matemáticos. Sus respuestas como agricultor no se perderán.
+            </span>
+          </div>
+          <div class="mode-confirm-actions">
+            <button type="button" id="btn-cancelar-tecnico" class="btn-sec">Seguir en Vista Agricultor</button>
+            <button type="button" id="btn-confirmar-tecnico" class="btn">Entrar a Modo Técnico</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Franja persistente mientras el Modo Técnico está activo -->
+      <div id="banner-modo-tecnico" class="mode-active-banner" role="status" hidden>
+        <div class="contenedor mode-confirm-inner">
+          <div class="mode-confirm-text">
+            <i data-lucide="flask-conical" class="icono"></i>
+            <span><strong>Modo Técnico activo</strong> — Editando datos de laboratorio y calibración. La base declarada por el agricultor permanece protegida.</span>
+          </div>
+          <button type="button" id="btn-salir-tecnico" class="btn-sec">Volver a Vista Agricultor</button>
         </div>
       </div>
 
@@ -152,7 +185,7 @@
               <p id="anomaly-message" style="font-size:0.85rem; color:var(--texto-2); margin:0 0 10px;">
                 Cargando anomalía trimestral de precipitaciones y humedad superficial del suelo...
               </p>
-              <div class="fila">
+              <div class="fila solo-tecnico">
                 <span>Sensores hidrológicos</span>
                 <span id="anomaly-sensor-pill">GPM IMERG + SMAP L4 (10 km)</span>
               </div>
@@ -279,8 +312,8 @@
             <div class="terreno-telemetry">
               <div class="card-datos">
                 <h3>
-                  <span><i data-lucide="satellite" class="icono"></i> Ficha biofísica del lote</span>
-                  <span id="tag-elev" class="mono">NASADEM 30 m</span>
+                  <span><i data-lucide="satellite" class="icono"></i> Ficha del lote</span>
+                  <span id="tag-elev" class="mono solo-tecnico">NASADEM 30 m</span>
                 </h3>
                 <div class="fila">
                   <span>Superficie del lote</span>
@@ -296,18 +329,18 @@
                   <span id="kpi-elev-sub">Región Sierra · SE</span>
                 </div>
                 <div class="fila">
-                  <span>Pendiente media (<span id="tag-pend" class="mono">SRTM 30 m</span>)</span>
+                  <span>Pendiente media <span id="tag-pend" class="mono solo-tecnico">(SRTM 30 m)</span></span>
                   <span id="kpi-pend-val" class="tabular-nums">14 %</span>
                 </div>
-                <div class="fila">
+                <div class="fila solo-tecnico">
                   <span>Escorrentía y pendiente máxima</span>
                   <span id="kpi-pend-sub" class="tabular-nums">Máx. 22 %</span>
                 </div>
                 <div class="fila">
-                  <span>Precipitación anual (<span id="tag-clima" class="mono">NASA POWER</span>)</span>
+                  <span>Lluvia al año <span id="tag-clima" class="mono solo-tecnico">(NASA POWER)</span></span>
                   <span id="kpi-clima-val" class="tabular-nums">686 mm/año</span>
                 </div>
-                <div class="fila">
+                <div class="fila solo-tecnico">
                   <span>Demanda evaporativa anual (ET₀)</span>
                   <span id="kpi-clima-sub" class="tabular-nums">1 105 mm/año</span>
                 </div>
@@ -341,90 +374,176 @@
         <section id="tab-suelo" class="step-section tab-panel" data-tab-panel="tab-suelo" role="tabpanel" hidden>
           <div class="step-header">
             <div class="mono"><i data-lucide="sprout" class="icono"></i> Paso 2</div>
-            <h2>Mi suelo, historial de siembra y prioridades</h2>
-            <p>Ajuste los datos de su tierra si cuenta con análisis de laboratorio, indique qué sembró los últimos 2
-              años y pondere los objetivos de su finca.</p>
+            <h2>Mi tierra, lo que sembré antes y mis prioridades</h2>
+            <p class="solo-agricultor">Cuéntenos con sus propias palabras cómo es su tierra y qué busca lograr en estos 3 años.</p>
+            <p class="solo-tecnico">Ajuste los datos de laboratorio (SoilGrids / INIAP), verifique pendiente de campo y calibre los pesos IRR sin sobrescribir la base del agricultor.</p>
           </div>
 
           <div class="paso2-grid">
-            <!-- Columna Izquierda: Suelo Editable + Historial de 2 años -->
+            <!-- Columna Izquierda: Base del Agricultor + Panel Técnico de Laboratorio -->
             <div class="panel-card">
               <div class="panel-card-header">
-                <h3><i data-lucide="flask-conical" class="icono"></i> Propiedades del suelo (0–30 cm)</h3>
-                <span id="soil-origin-badge" class="mono">ISRIC SoilGrids 250 m</span>
-              </div>
-              <p style="margin: -6px 0 0; font-size: 0.85rem; color: var(--texto-2);">
-                Prellenado por satélite a 250 <span class="unidad">m</span> de resolución. Si conoce la textura de su
-                lote o cuenta con análisis del INIAP, edítelo aquí:
-              </p>
-
-              <div class="form-grid-3">
-                <div class="field-group">
-                  <label for="input-suelo-textura">Textura del suelo</label>
-                  <select id="input-suelo-textura" class="field-select">
-                    <option value="Franco">Franco (equilibrado)</option>
-                    <option value="Franco arenoso">Franco arenoso (suelto)</option>
-                    <option value="Franco arcilloso">Franco arcilloso (pesado)</option>
-                    <option value="Franco limoso">Franco limoso</option>
-                    <option value="Arcilloso">Arcilloso</option>
-                    <option value="Arenoso">Arenoso</option>
-                  </select>
-                </div>
-
-                <div class="field-group">
-                  <label for="input-suelo-soc">Carbono orgánico (%)</label>
-                  <input type="number" id="input-suelo-soc" class="field-input tabular-nums" step="0.1" min="0.2"
-                    max="15" value="3.4" />
-                </div>
-
-                <div class="field-group">
-                  <label for="input-suelo-ph">Acidez del suelo (pH)</label>
-                  <input type="number" id="input-suelo-ph" class="field-input tabular-nums" step="0.1" min="4.0"
-                    max="8.5" value="5.9" />
-                </div>
+                <h3><i data-lucide="sprout" class="icono"></i> ¿Cómo es la tierra de su lote?</h3>
+                <span id="soil-origin-badge" class="mono solo-tecnico">ISRIC SoilGrids 250 m</span>
               </div>
 
-              <div class="panel-card-header" style="margin-top: 8px;">
-                <h3><i data-lucide="wheat" class="icono"></i> Historial del lote en los últimos 2 años</h3>
-                <span id="tag-historia" class="mono">HLS NDVI + dato local</span>
+              <!-- MODO SIMPLE: 3 tarjetas visuales para tipo de tierra -->
+              <div class="soil-simple-cards" role="radiogroup" aria-label="Tipo de tierra según el agricultor">
+                <button type="button" class="soil-simple-btn" data-soil-simple="arenosa" aria-pressed="false">
+                  <strong>Arenosa</strong>
+                  <span>Suelta, el agua se filtra rápido</span>
+                </button>
+                <button type="button" class="soil-simple-btn activo" data-soil-simple="negra_franca" aria-pressed="true">
+                  <strong>Negra / Franca</strong>
+                  <span>Suave, oscura y guarda humedad</span>
+                </button>
+                <button type="button" class="soil-simple-btn" data-soil-simple="arcillosa" aria-pressed="false">
+                  <strong>Arcillosa</strong>
+                  <span>Pesada, se encharca con lluvia</span>
+                </button>
               </div>
-              <p style="margin: -6px 0 0; font-size: 0.85rem; color: var(--texto-2);">
-                El motor aplica pausas fitosanitarias por familia botánica (3 a 4 años sin repetir Solanáceas tras papa
-                para cortar ciclos de nematodos y lancha).
+
+              <div class="panel-card-header" style="margin-top: 12px;">
+                <h3><i data-lucide="wheat" class="icono"></i> ¿Qué sembró los últimos 2 años?</h3>
+                <span id="tag-historia" class="mono solo-tecnico">HLS NDVI + dato local</span>
+              </div>
+              <p class="solo-agricultor" style="margin: -6px 0 0; font-size: 0.85rem; color: var(--texto-2);">
+                Así evitamos repetir cultivos de la misma familia seguidos para que no vuelvan las plagas del suelo.
               </p>
 
               <div class="form-grid-2">
                 <div class="field-group">
-                  <label for="select-historia-1">Cultivo sembrado hace 2 años (2024)</label>
+                  <label for="select-historia-1">Hace 2 años (2024)</label>
                   <select id="select-historia-1" class="field-select"></select>
                 </div>
                 <div class="field-group">
-                  <label for="select-historia-2">Último cultivo cosechado (2025)</label>
+                  <label for="select-historia-2">El año pasado (2025)</label>
                   <select id="select-historia-2" class="field-select"></select>
                 </div>
               </div>
 
               <label class="checkbox-row" for="check-nematodo">
                 <input type="checkbox" id="check-nematodo" />
-                <span>Presencia observada de nematodo del quiste, hernia de la col o lancha severa en este lote (amplía
-                  la pausa sanitaria a 4 años).</span>
+                <span>¿Vio "bolitas" en las raíces (nematodos), palomilla o lancha fuerte en este lote?</span>
               </label>
 
               <label class="checkbox-row" for="check-retira-forraje">
                 <input type="checkbox" id="check-retira-forraje" />
-                <span>Corte y retiro del rastrojo para alimentación animal (descuenta 70 % del aporte de biomasa al
-                  suelo y prioriza especies forrajeras).</span>
+                <span>¿Saca la caña o paja después de cosechar para dar al ganado?</span>
               </label>
+
+              <!-- MODO AVANZADO (TÉCNICO): Datos de laboratorio y campo -->
+              <div class="tech-drawer solo-tecnico">
+                <div class="panel-card-header">
+                  <h4><i data-lucide="flask-conical" class="icono"></i> Ajuste técnico de laboratorio / campo (0–30 cm)</h4>
+                  <button type="button" id="btn-limpiar-tecnico" class="btn-link-sm">Restaurar a base agricultor + NASA</button>
+                </div>
+                <div id="tech-farmer-summary" class="tech-farmer-lock">
+                  Base declarada por el agricultor (protegida): Tierra Negra / Franca.
+                </div>
+
+                <div class="form-grid-3">
+                  <div class="field-group">
+                    <label for="input-suelo-textura">Textura (lab)</label>
+                    <select id="input-suelo-textura" class="field-select">
+                      <option value="Franco">Franco (equilibrado)</option>
+                      <option value="Franco arenoso">Franco arenoso (suelto)</option>
+                      <option value="Franco arcilloso">Franco arcilloso (pesado)</option>
+                      <option value="Franco limoso">Franco limoso</option>
+                      <option value="Arcilloso">Arcilloso</option>
+                      <option value="Arenoso">Arenoso</option>
+                    </select>
+                  </div>
+
+                  <div class="field-group">
+                    <label for="input-suelo-soc">Carbono orgánico (%)</label>
+                    <input type="number" id="input-suelo-soc" class="field-input tabular-nums" step="0.1" min="0.2"
+                      max="15" value="3.4" />
+                  </div>
+
+                  <div class="field-group">
+                    <label for="input-suelo-ph">Acidez exacta (pH)</label>
+                    <input type="number" id="input-suelo-ph" class="field-input tabular-nums" step="0.1" min="4.0"
+                      max="8.5" value="5.9" />
+                  </div>
+                </div>
+
+                <div class="form-grid-2" style="margin-top: 8px;">
+                  <div class="field-group">
+                    <label for="input-tecnico-pendiente">Pendiente verificada con clinómetro (%)</label>
+                    <input type="number" id="input-tecnico-pendiente" class="field-input tabular-nums" step="0.5" min="0" max="60" placeholder="Usa SRTM si vacío" />
+                  </div>
+                  <div class="field-group">
+                    <label for="input-tecnico-notas">Notas técnicas de campo</label>
+                    <input type="text" id="input-tecnico-notas" class="field-input" placeholder="Ej. Muestra INIAP #42, drenaje..." />
+                  </div>
+                </div>
+
+                <div style="margin-top: 10px;">
+                  <button type="button" id="btn-exportar-parcela" class="btn-sec">
+                    <i data-lucide="download" class="icono"></i> Exportar JSON combinado (Agricultor + NASA + Técnico)
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <!-- Columna Derecha: Prioridades del Agricultor y Simulador Climático -->
+            <!-- Columna Derecha: Prioridades Simples (Agricultor) + Calibración Matemática (Técnico) -->
             <div class="panel-card">
               <div class="panel-card-header">
-                <h3><i data-lucide="sprout" class="icono"></i> Prioridades de manejo para los próximos 3 años</h3>
-                <span class="mono">Ponderación IRR</span>
+                <h3><i data-lucide="sliders-horizontal" class="icono"></i> ¿Qué es lo más importante para usted?</h3>
+                <span class="mono solo-tecnico">Ponderación IRR</span>
               </div>
 
-              <div class="sliders-list">
+              <!-- MODO SIMPLE: Selectores visuales Poco / Normal / Mucho -->
+              <div class="priority-simple-list solo-agricultor">
+                <div class="priority-simple-item">
+                  <div class="priority-simple-label">
+                    <i data-lucide="droplet" class="icono"></i>
+                    <div>
+                      <strong>Ahorrar agua</strong>
+                      <span>Resistir veranos secos</span>
+                    </div>
+                  </div>
+                  <div class="priority-btn-group" data-simple-slider="agua" role="group" aria-label="Prioridad ahorrar agua">
+                    <button type="button" class="prio-btn" data-val="1">Poco</button>
+                    <button type="button" class="prio-btn activo" data-val="3">Normal</button>
+                    <button type="button" class="prio-btn" data-val="5">Mucho</button>
+                  </div>
+                </div>
+
+                <div class="priority-simple-item">
+                  <div class="priority-simple-label">
+                    <i data-lucide="sprout" class="icono"></i>
+                    <div>
+                      <strong>Cuidar la tierra</strong>
+                      <span>Devolver abono y fuerza al suelo</span>
+                    </div>
+                  </div>
+                  <div class="priority-btn-group" data-simple-slider="suelo" role="group" aria-label="Prioridad cuidar la tierra">
+                    <button type="button" class="prio-btn" data-val="1">Poco</button>
+                    <button type="button" class="prio-btn activo" data-val="3">Normal</button>
+                    <button type="button" class="prio-btn" data-val="5">Mucho</button>
+                  </div>
+                </div>
+
+                <div class="priority-simple-item">
+                  <div class="priority-simple-label">
+                    <i data-lucide="coins" class="icono"></i>
+                    <div>
+                      <strong>Ganar más</strong>
+                      <span>Mejor venta en feria o mercado</span>
+                    </div>
+                  </div>
+                  <div class="priority-btn-group" data-simple-slider="ganar" role="group" aria-label="Prioridad ganar más">
+                    <button type="button" class="prio-btn" data-val="1">Poco</button>
+                    <button type="button" class="prio-btn activo" data-val="3">Normal</button>
+                    <button type="button" class="prio-btn" data-val="5">Mucho</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MODO AVANZADO (TÉCNICO): Sliders numéricos + pesos IRR + sensibilidad lluvia -->
+              <div class="sliders-list solo-tecnico">
                 <div class="slider-item">
                   <div class="slider-top">
                     <label class="slider-label" for="slider-agua"><i data-lucide="droplet" class="icono"></i> Ahorrar
@@ -502,8 +621,8 @@
               datos satelitales NASA, beneficios cuantificados, lagunas de información y riesgos locales.</p>
           </div>
 
-          <!-- Barra de metadatos del motor -->
-          <div id="engine-meta-bar" class="engine-meta-bar">
+          <!-- Barra de metadatos del motor (solo técnico) -->
+          <div id="engine-meta-bar" class="engine-meta-bar solo-tecnico">
             Calculando evaluación multicriterio IRR...
           </div>
 
@@ -512,8 +631,8 @@
             <!-- Generado dinámicamente por app.js -->
           </div>
 
-          <!-- Gráficos Interactivos: Balance Hídrico 36m + Historial HLS NDVI/NDTI -->
-          <div class="charts-grid">
+          <!-- Gráficos Interactivos: Balance Hídrico 36m + Historial HLS NDVI/NDTI (ocultos en Vista Simple) -->
+          <div id="charts-grid-rotaciones" class="charts-grid" hidden>
             <div class="chart-card">
               <h3><i data-lucide="droplet" class="icono"></i> Balance hídrico mensual simulado a 36 meses (NASA POWER +
                 SRTM + FAO-56) <span id="tag-chart-balance" class="tag-ejemplo" hidden>Ejemplo</span></h3>

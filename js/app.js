@@ -25,6 +25,7 @@
     },
     ultimoResultado: null,
     rotacionSeleccionadaGraficoId: 'recomendada_1',
+    tarjetasTecnicas: {},
     map: null,
     drawnItems: null,
     activePolygonLayer: null,
@@ -629,28 +630,164 @@
     }
   }
 
+  const MAPA_TIERRA_SIMPLE = {
+    arenosa: { etiqueta: 'Arenosa', textura: 'Arenoso', soc_pct: 1.4 },
+    negra_franca: { etiqueta: 'Negra / Franca', textura: 'Franco', soc_pct: 3.2 },
+    arcillosa: { etiqueta: 'Arcillosa', textura: 'Arcilloso', soc_pct: 2.2 }
+  };
+
+  function inferirTipoTierraSimple(textura) {
+    const t = String(textura || '').toLowerCase();
+    if (t.includes('arenos')) return 'arenosa';
+    if (t.includes('arcillos')) return 'arcillosa';
+    return 'negra_franca';
+  }
+
   /**
-   * Pobla los selectores e inputs del Paso 2 (suelo editable + historial de cultivos)
+   * Garantiza el modelo dual unificado (agricultor + satelite_nasa + tecnico) sin alterar datos previos
+   */
+  function asegurarEsquemaDual(parcela) {
+    if (!parcela) return parcela;
+    if (!parcela.satelite_nasa) {
+      parcela.satelite_nasa = {
+        suelo_soilgrids: clonar(parcela.suelo || {}),
+        terreno_srtm: clonar(parcela.terreno || {})
+      };
+    }
+    if (!parcela.agricultor) {
+      parcela.agricultor = {
+        tipo_tierra: inferirTipoTierraSimple(parcela.suelo && parcela.suelo.textura),
+        historia_cultivos: clonar(parcela.historia_declarada || ['papa', 'papa']),
+        vio_nematodos: Boolean(parcela.nematodo_declarado),
+        manejo_rastrojo: state.opciones.retiraForraje ? 'retirar_ganado' : 'dejar_en_suelo',
+        prioridades: clonar(state.sliders)
+      };
+    }
+    if (!parcela.tecnico) {
+      parcela.tecnico = {
+        suelo_laboratorio: { textura: null, soc_pct: null, ph: null },
+        terreno_verificado: { pendiente_pct: null },
+        notas_campo: ''
+      };
+    }
+    return parcela;
+  }
+
+  /**
+   * Resuelve valores efectivos para el motor: Técnico > Base Agricultor / Satélite NASA
+   */
+  function aplicarDatosEfectivos(parcela) {
+    asegurarEsquemaDual(parcela);
+    const baseSuelo = parcela.satelite_nasa.suelo_soilgrids || {};
+    const baseTerreno = parcela.satelite_nasa.terreno_srtm || {};
+    const mapAg = MAPA_TIERRA_SIMPLE[parcela.agricultor.tipo_tierra] || MAPA_TIERRA_SIMPLE.negra_franca;
+    const lab = parcela.tecnico.suelo_laboratorio || {};
+    const campo = parcela.tecnico.terreno_verificado || {};
+
+    parcela.suelo.textura = lab.textura || (parcela.agricultor.editado_tierra ? mapAg.textura : (baseSuelo.textura || mapAg.textura));
+    parcela.suelo.soc_pct = lab.soc_pct !== null && lab.soc_pct !== undefined
+      ? lab.soc_pct
+      : (parcela.agricultor.editado_tierra ? mapAg.soc_pct : (baseSuelo.soc_pct ?? mapAg.soc_pct));
+    parcela.suelo.ph = lab.ph !== null && lab.ph !== undefined ? lab.ph : (baseSuelo.ph ?? 6.0);
+    parcela.suelo.editado_por_usuario = Boolean(lab.textura || lab.soc_pct !== null || lab.ph !== null || parcela.agricultor.editado_tierra);
+
+    parcela.terreno.pendiente_pct = campo.pendiente_pct !== null && campo.pendiente_pct !== undefined
+      ? campo.pendiente_pct
+      : (baseTerreno.pendiente_pct ?? parcela.terreno.pendiente_pct);
+
+    parcela.historia_declarada = clonar(parcela.agricultor.historia_cultivos);
+    parcela.nematodo_declarado = Boolean(parcela.agricultor.vio_nematodos);
+  }
+
+  function construirJsonCombinado(parcela) {
+    asegurarEsquemaDual(parcela);
+    return {
+      id: parcela.id,
+      nombre: parcela.nombre,
+      ubicacion: {
+        texto: parcela.ubicacion_texto,
+        centroide: parcela.centroide,
+        area_ha: parcela.area_ha
+      },
+      agricultor: parcela.agricultor,
+      satelite_nasa: parcela.satelite_nasa,
+      tecnico: parcela.tecnico,
+      estado_efectivo_motor: {
+        suelo: parcela.suelo,
+        terreno: parcela.terreno,
+        historia_declarada: parcela.historia_declarada,
+        nematodo_declarado: parcela.nematodo_declarado,
+        sliders: state.sliders,
+        opciones: state.opciones
+      }
+    };
+  }
+
+  function sincronizarBotonesPrioridadSimple() {
+    document.querySelectorAll('.priority-btn-group[data-simple-slider]').forEach(group => {
+      const key = group.getAttribute('data-simple-slider');
+      const val = Number(state.sliders[key] || 3);
+      const targetVal = val <= 2 ? 1 : (val >= 4 ? 5 : 3);
+      group.querySelectorAll('.prio-btn').forEach(btn => {
+        const bVal = Number(btn.getAttribute('data-val'));
+        btn.classList.toggle('activo', bVal === targetVal);
+      });
+    });
+  }
+
+  /**
+   * Pobla los selectores e inputs del Paso 2 (Vista Agricultor + Vista Técnico)
    */
   function sincronizarControlesPaso2ConParcela() {
     const parcela = obtenerParcelaActual();
+    aplicarDatosEfectivos(parcela);
+
+    // Sincronizar tarjetas simples de tipo de tierra (Agricultor)
+    const tipoSimple = parcela.agricultor.tipo_tierra || 'negra_franca';
+    document.querySelectorAll('.soil-simple-btn[data-soil-simple]').forEach(btn => {
+      const activo = btn.getAttribute('data-soil-simple') === tipoSimple;
+      btn.classList.toggle('activo', activo);
+      btn.setAttribute('aria-pressed', activo ? 'true' : 'false');
+    });
+
+    // Sincronizar resumen protegido para el Técnico
+    const summaryEl = document.getElementById('tech-farmer-summary');
+    if (summaryEl) {
+      const etiquetaTierra = (MAPA_TIERRA_SIMPLE[tipoSimple] || MAPA_TIERRA_SIMPLE.negra_franca).etiqueta;
+      const nemTxt = parcela.agricultor.vio_nematodos ? 'Sí reportó plagas/nematodos' : 'Sin plagas reportadas';
+      const rastTxt = parcela.agricultor.manejo_rastrojo === 'retirar_ganado' ? 'Retira rastrojo' : 'Deja rastrojo en suelo';
+      summaryEl.textContent = `Base declarada por el agricultor (protegida): Tierra ${etiquetaTierra} · ${nemTxt} · ${rastTxt}.`;
+    }
 
     const selTextura = document.getElementById('input-suelo-textura');
     const inpSoc = document.getElementById('input-suelo-soc');
     const inpPh = document.getElementById('input-suelo-ph');
+    const inpPend = document.getElementById('input-tecnico-pendiente');
+    const inpNotas = document.getElementById('input-tecnico-notas');
     const badgeOrigen = document.getElementById('soil-origin-badge');
 
     if (selTextura) selTextura.value = parcela.suelo.textura || 'Franco';
     if (inpSoc) inpSoc.value = parcela.suelo.soc_pct ?? 2.5;
     if (inpPh) inpPh.value = parcela.suelo.ph ?? 6.0;
+    if (inpPend) {
+      const pendTec = parcela.tecnico && parcela.tecnico.terreno_verificado && parcela.tecnico.terreno_verificado.pendiente_pct;
+      inpPend.value = pendTec !== null && pendTec !== undefined ? pendTec : '';
+    }
+    if (inpNotas) {
+      inpNotas.value = (parcela.tecnico && parcela.tecnico.notas_campo) || '';
+    }
 
     if (badgeOrigen) {
-      if (parcela.suelo.editado_por_usuario) {
-        badgeOrigen.textContent = 'Editado con dato local del agricultor';
-        badgeOrigen.className = 'estado alerta';
+      const lab = (parcela.tecnico && parcela.tecnico.suelo_laboratorio) || {};
+      if (lab.textura || lab.soc_pct !== null || lab.ph !== null) {
+        badgeOrigen.textContent = 'Calibrado con laboratorio (Técnico)';
+        badgeOrigen.className = 'estado alerta solo-tecnico';
+      } else if (parcela.agricultor.editado_tierra) {
+        badgeOrigen.textContent = 'Estimado desde selección del agricultor';
+        badgeOrigen.className = 'estado ok solo-tecnico';
       } else {
         badgeOrigen.textContent = parcela.suelo.fuente || 'ISRIC SoilGrids 250 m';
-        badgeOrigen.className = 'mono';
+        badgeOrigen.className = 'mono solo-tecnico';
       }
     }
 
@@ -673,6 +810,14 @@
     if (chkNem) {
       chkNem.checked = Boolean(parcela.nematodo_declarado);
     }
+
+    const sliderAgua = document.getElementById('slider-agua');
+    const sliderSuelo = document.getElementById('slider-suelo');
+    const sliderGanar = document.getElementById('slider-ganar');
+    if (sliderAgua) sliderAgua.value = String(state.sliders.agua);
+    if (sliderSuelo) sliderSuelo.value = String(state.sliders.suelo);
+    if (sliderGanar) sliderGanar.value = String(state.sliders.ganar);
+    sincronizarBotonesPrioridadSimple();
   }
 
   /**
@@ -702,48 +847,172 @@
 
     const todasLasTarjetas = [...resultado.recomendadas, resultado.actual];
     const areaHa = parcela.area_ha || 1.0;
+    const modoGlobalTec = document.body.classList.contains('modo-tecnico');
+    const hayAlgunaTecnica = modoGlobalTec || todasLasTarjetas.some(r => Boolean(state.tarjetasTecnicas[r.id]));
 
-    grid.innerHTML = todasLasTarjetas.map((rot, idx) => {
+    const chartsGrid = document.getElementById('charts-grid-rotaciones');
+    if (chartsGrid) {
+      chartsGrid.hidden = !hayAlgunaTecnica;
+      if (hayAlgunaTecnica) {
+        setTimeout(() => {
+          if (state.chartBalance) state.chartBalance.resize();
+          if (state.chartHLS) state.chartHLS.resize();
+        }, 40);
+      }
+    }
+
+    grid.innerHTML = todasLasTarjetas.map((rot) => {
+      const isTechnicalMode = modoGlobalTec || Boolean(state.tarjetasTecnicas[rot.id]);
       const esSeleccionadaGrafico = rot.id === state.rotacionSeleccionadaGraficoId;
       const clasesCard = [
         'rotation-card',
         rot.rango === 1 ? 'rank-1' : '',
         rot.esActual ? 'actual-card' : '',
-        esSeleccionadaGrafico ? 'selected-for-chart' : ''
+        isTechnicalMode && esSeleccionadaGrafico ? 'selected-for-chart' : ''
       ].filter(Boolean).join(' ');
 
+      const tituloAmigable = rot.esActual
+        ? 'Su práctica actual (sin rotación)'
+        : rot.titulo.replace(/^Estrategia\s+(\d+)/i, 'Opción $1');
+
+      const anosCortos = ['Año 1', 'Año 2', 'Año 3'];
       const anosEtiquetas = ['Año 1 (2026–2027)', 'Año 2 (2027–2028)', 'Año 3 (2028–2029)'];
-      const timelineHtml = rot.cultivos.map((c, i) => {
-        const signoN = c.credito_n_kg > 0
-          ? `<span style="color:var(--ok); font-weight:600;">+${c.credito_n_kg} <span class="unidad">kg N/ha</span></span>`
-          : `<span style="color:var(--alerta);">-${c.extraccion_n_kg} <span class="unidad">kg N/ha</span></span>`;
-        return `
-          <div class="year-node">
-            <span class="year-label">${anosEtiquetas[i]}</span>
-            <div class="crop-name-row">
-              <span>${c.nombre}</span>
-            </div>
-            <span class="crop-family-tag">${c.familia}</span>
-            <div class="crop-meta-mini">
-              Raíz: ${c.raiz_tipo}<br/>
-              Balance N: ${signoN}<br/>
-              Margen: <b>$${fmtMiles(c.margen_usd_ha || 0)}</b> <span class="unidad">/ha</span>${c.estado_economico === 'oficial' ? '' : ' <span class="tag-ejemplo" title="' + (c.fuente || '') + '">estimado</span>'}
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      const wAguaPct = Math.round(rot.subindices.agua * 100);
-      const wNitPct = Math.round(rot.subindices.nitrogeno * 100);
-      const wMosPct = Math.round(rot.subindices.materiaOrganica * 100);
-      const wRentPct = Math.round(rot.subindices.rentabilidad * 100);
-
       const ingresoTotalLoteAnual = Math.round(rot.detalles.rentabilidad.margenAnualPromedioUsdHa * areaHa);
+
+      // Vista Simple: Receta (solo años y cultivo)
+      const recetaSimpleHtml = rot.cultivos.map((c, i) => `
+        <div class="rot-simple-step">
+          <span class="year-label">${anosCortos[i]}</span>
+          <strong>${c.nombre}</strong>
+        </div>
+      `).join('');
+
+      // Vista Simple: Beneficios resumidos en lenguaje cotidiano
+      const cobAgua = rot.balanceHidrico.coberturaAguaPct;
+      const textoAguaSimple = cobAgua >= 85
+        ? 'Cubierto casi en su totalidad por lluvia'
+        : (cobAgua >= 60 ? 'Buena parte cubierta por lluvia; poco riego de apoyo' : 'Necesita riego de apoyo en meses secos');
+      const tieneLeguminosa = rot.cultivos.some(c => c.familia === 'Fabáceas');
+      const textoSueloSimple = tieneLeguminosa
+        ? 'Abono natural por leguminosas'
+        : 'Sin aporte de abono natural (desgasta el suelo)';
+
+      // Vista Simple: Solo advertencias prácticas de campo (sin menciones a SoilGrids/250 m/satélites)
+      const riesgosPracticos = (rot.explicacion.riesgosLocales || [])
+        .filter(r => !/SoilGrids|250\s*m|NASA|satelital/i.test(r))
+        .slice(0, 2);
+
       const alertaFitoHtml = rot.violaReglasFitosanitarias
         ? `<div class="estado riesgo" style="padding:6px 10px;">
              Alto · ${rot.motivoRiesgoFitosanitario}
            </div>`
         : '';
+
+      // Vista Técnica: Secuencia completa, IRR, barras de subíndices, 5 puntos NASA
+      let panelTecnicoHtml = '';
+      if (isTechnicalMode) {
+        const timelineTecnicoHtml = rot.cultivos.map((c, i) => {
+          const signoN = c.credito_n_kg > 0
+            ? `<span style="color:var(--ok); font-weight:600;">+${c.credito_n_kg} <span class="unidad">kg N/ha</span></span>`
+            : `<span style="color:var(--alerta);">-${c.extraccion_n_kg} <span class="unidad">kg N/ha</span></span>`;
+          return `
+            <div class="year-node">
+              <span class="year-label">${anosEtiquetas[i]}</span>
+              <div class="crop-name-row"><span>${c.nombre}</span></div>
+              <span class="crop-family-tag">${c.familia}</span>
+              <div class="crop-meta-mini">
+                Raíz: ${c.raiz_tipo}<br/>
+                Balance N: ${signoN}<br/>
+                Margen: <b>$${fmtMiles(c.margen_usd_ha || 0)}</b> <span class="unidad">/ha</span>${c.estado_economico === 'oficial' ? '' : ' <span class="tag-ejemplo" title="' + (c.fuente || '') + '">estimado</span>'}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        const wAguaPct = Math.round(rot.subindices.agua * 100);
+        const wNitPct = Math.round(rot.subindices.nitrogeno * 100);
+        const wMosPct = Math.round(rot.subindices.materiaOrganica * 100);
+        const wRentPct = Math.round(rot.subindices.rentabilidad * 100);
+        const p = rot.pesos || resultado.pesosAplicados;
+
+        panelTecnicoHtml = `
+          <div class="rot-tech-panel">
+            <div class="rot-tech-weights tabular-nums mono">
+              <strong>Puntaje IRR: ${rot.irr.toFixed(2)}</strong> (${rot.irrPct}/100) ·
+              Pesos: Agua ${Math.round(p.w_h2o * 100)}% · Nitrógeno ${Math.round(p.w_n * 100)}% · MOS ${Math.round(p.w_mos * 100)}% · Rentabilidad ${Math.round(p.w_rent * 100)}%
+            </div>
+
+            <div class="timeline-3y">${timelineTecnicoHtml}</div>
+
+            <div class="subindices-bars">
+              <div class="subbar-item">
+                <div class="subbar-head">
+                  <span><i data-lucide="droplet" class="icono"></i> Agua cubierta por lluvia</span>
+                  <span class="tabular-nums">${rot.balanceHidrico.coberturaAguaPct} <span class="unidad">%</span> (I_H2O ${rot.subindices.agua.toFixed(2)})</span>
+                </div>
+                <div class="subbar-track"><div class="subbar-fill agua" style="width:${wAguaPct}%"></div></div>
+                <div class="subbar-translation">Déficit 3 años: <b>${fmtMiles(rot.balanceHidrico.deficitTotal)}</b> <span class="unidad">mm</span> (${rot.balanceHidrico.mesesConDeficit} meses secos)</div>
+              </div>
+
+              <div class="subbar-item">
+                <div class="subbar-head">
+                  <span><i data-lucide="sprout" class="icono"></i> Balance de nitrógeno</span>
+                  <span class="tabular-nums">${rot.detalles.nitrogeno.balanceNetoKgHa >= 0 ? '+' : ''}${rot.detalles.nitrogeno.balanceNetoKgHa} <span class="unidad">kg N/ha</span> (I_N ${rot.subindices.nitrogeno.toFixed(2)})</span>
+                </div>
+                <div class="subbar-track"><div class="subbar-fill nitrogeno" style="width:${wNitPct}%"></div></div>
+                <div class="subbar-translation">Fijación por leguminosas: <b>+${rot.detalles.nitrogeno.creditosKgHa}</b> <span class="unidad">kg N/ha</span></div>
+              </div>
+
+              <div class="subbar-item">
+                <div class="subbar-head">
+                  <span><i data-lucide="flask-conical" class="icono"></i> Materia orgánica y suelo</span>
+                  <span class="tabular-nums">${rot.detalles.materiaOrganica.humusEstableTHa} <span class="unidad">t/ha humus</span> (I_MOS ${rot.subindices.materiaOrganica.toFixed(2)})</span>
+                </div>
+                <div class="subbar-track"><div class="subbar-fill mos" style="width:${wMosPct}%"></div></div>
+                <div class="subbar-translation">Biomasa de rastrojo: <b>${rot.detalles.materiaOrganica.biomasaResiduoTHa}</b> <span class="unidad">t MS/ha en 3 años</span></div>
+              </div>
+
+              <div class="subbar-item">
+                <div class="subbar-head">
+                  <span><i data-lucide="coins" class="icono"></i> Margen bruto estimado</span>
+                  <span class="tabular-nums">$${fmtMiles(rot.detalles.rentabilidad.margenAnualPromedioUsdHa)} <span class="unidad">/ha/año</span> (I_rent ${rot.subindices.rentabilidad.toFixed(2)})</span>
+                </div>
+                <div class="subbar-track"><div class="subbar-fill rent" style="width:${wRentPct}%"></div></div>
+                <div class="subbar-translation">En el lote (${areaHa} <span class="unidad">ha</span>): <b>~$${fmtMiles(ingresoTotalLoteAnual)}</b> <span class="unidad">USD/año</span></div>
+              </div>
+            </div>
+
+            <div class="explain-5-box">
+              <p class="explain-summary-text">
+                <strong>1. Por qué se sugiere:</strong> ${rot.explicacion.porQue}
+              </p>
+              <div class="explain-details-body">
+                <div class="explain-block">
+                  <h4><i data-lucide="satellite" class="icono"></i> 2. Evidencia satelital NASA y de suelo</h4>
+                  <ul>${rot.explicacion.evidenciaNasa.map(x => `<li>${x}</li>`).join('')}</ul>
+                </div>
+                <div class="explain-block">
+                  <h4><i data-lucide="wheat" class="icono"></i> 3. Beneficios cuantificados</h4>
+                  <ul>${rot.explicacion.beneficios.map(x => `<li>${x}</li>`).join('')}</ul>
+                </div>
+                <div class="explain-block">
+                  <h4><i data-lucide="flask-conical" class="icono"></i> 4. Lagunas de información</h4>
+                  <ul>${rot.explicacion.lagunasInfo.map(x => `<li>${x}</li>`).join('')}</ul>
+                </div>
+                <div class="explain-block">
+                  <h4><i data-lucide="shield-check" class="icono"></i> 5. Riesgos que requieren validación local</h4>
+                  <ul>${rot.explicacion.riesgosLocales.map(x => `<li>${x}</li>`).join('')}</ul>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="btn-sec btn-ver-grafico" data-select-rot="${rot.id}">
+              <i data-lucide="droplet" class="icono"></i>
+              <span>${esSeleccionadaGrafico ? 'Mostrando en el gráfico hídrico de 36 meses' : 'Ver balance hídrico de 36 meses'}</span>
+            </button>
+          </div>
+        `;
+      }
 
       return `
         <article class="${clasesCard}" data-rot-id="${rot.id}">
@@ -752,97 +1021,64 @@
               <span class="estado ${rot.semaforo.color}">
                 ${rot.semaforo.etiqueta}
               </span>
-              <h3 class="rot-card-title">${rot.titulo}</h3>
+              <h3 class="rot-card-title">${isTechnicalMode ? rot.titulo : tituloAmigable}</h3>
             </div>
-            <div class="irr-score-badge">
-              <div class="irr-score-num">${rot.irr.toFixed(2)}</div>
-              <div class="irr-score-label">IRR (${rot.irrPct} <span class="unidad">/ 100</span>)</div>
-            </div>
+            ${isTechnicalMode ? `
+              <div class="irr-score-badge">
+                <div class="irr-score-num">${rot.irr.toFixed(2)}</div>
+                <div class="irr-score-label">IRR (${rot.irrPct} <span class="unidad">/ 100</span>)</div>
+              </div>
+            ` : ''}
           </div>
 
           ${alertaFitoHtml}
 
-          <div class="timeline-3y">
-            ${timelineHtml}
-          </div>
+          ${!isTechnicalMode ? `
+            <div class="rot-simple-recipe">${recetaSimpleHtml}</div>
 
-          <div class="subindices-bars">
-            <div class="subbar-item">
-              <div class="subbar-head">
-                <span><i data-lucide="droplet" class="icono"></i> Agua cubierta por lluvia</span>
-                <span class="tabular-nums">${rot.balanceHidrico.coberturaAguaPct} <span class="unidad">%</span> (I_H2O ${rot.subindices.agua.toFixed(2)})</span>
-              </div>
-              <div class="subbar-track"><div class="subbar-fill agua" style="width:${wAguaPct}%"></div></div>
-              <div class="subbar-translation">Déficit 3 años: <b>${fmtMiles(rot.balanceHidrico.deficitTotal)}</b> <span class="unidad">mm</span> (${rot.balanceHidrico.mesesConDeficit} meses secos)</div>
+            <div class="rot-simple-profit">
+              <span class="rot-simple-profit-label">
+                <i data-lucide="coins" class="icono"></i>
+                <span>Ganancia estimada en ${areaHa} ha</span>
+              </span>
+              <span class="rot-simple-profit-val tabular-nums">~$${fmtMiles(ingresoTotalLoteAnual)} USD/año</span>
             </div>
 
-            <div class="subbar-item">
-              <div class="subbar-head">
-                <span><i data-lucide="sprout" class="icono"></i> Balance de nitrógeno</span>
-                <span class="tabular-nums">${rot.detalles.nitrogeno.balanceNetoKgHa >= 0 ? '+' : ''}${rot.detalles.nitrogeno.balanceNetoKgHa} <span class="unidad">kg N/ha</span> (I_N ${rot.subindices.nitrogeno.toFixed(2)})</span>
-              </div>
-              <div class="subbar-track"><div class="subbar-fill nitrogeno" style="width:${wNitPct}%"></div></div>
-              <div class="subbar-translation">Fijación por leguminosas: <b>+${rot.detalles.nitrogeno.creditosKgHa}</b> <span class="unidad">kg N/ha</span></div>
-            </div>
+            <ul class="rot-simple-bullets">
+              <li><i data-lucide="droplet" class="icono"></i><span><strong>Agua:</strong> ${textoAguaSimple}</span></li>
+              <li><i data-lucide="sprout" class="icono"></i><span><strong>Suelo:</strong> ${textoSueloSimple}</span></li>
+            </ul>
 
-            <div class="subbar-item">
-              <div class="subbar-head">
-                <span><i data-lucide="flask-conical" class="icono"></i> Materia orgánica y suelo</span>
-                <span class="tabular-nums">${rot.detalles.materiaOrganica.humusEstableTHa} <span class="unidad">t/ha humus</span> (I_MOS ${rot.subindices.materiaOrganica.toFixed(2)})</span>
+            ${riesgosPracticos.length ? `
+              <div class="rot-simple-risks">
+                <strong>Recomendaciones prácticas en campo:</strong>
+                <ul>${riesgosPracticos.map(r => `<li>${r}</li>`).join('')}</ul>
               </div>
-              <div class="subbar-track"><div class="subbar-fill mos" style="width:${wMosPct}%"></div></div>
-              <div class="subbar-translation">Biomasa de rastrojo: <b>${rot.detalles.materiaOrganica.biomasaResiduoTHa}</b> <span class="unidad">t MS/ha en 3 años</span></div>
-            </div>
+            ` : ''}
+          ` : ''}
 
-            <div class="subbar-item">
-              <div class="subbar-head">
-                <span><i data-lucide="coins" class="icono"></i> Margen bruto estimado</span>
-                <span class="tabular-nums">$${fmtMiles(rot.detalles.rentabilidad.margenAnualPromedioUsdHa)} <span class="unidad">/ha/año</span> (I_rent ${rot.subindices.rentabilidad.toFixed(2)})</span>
-              </div>
-              <div class="subbar-track"><div class="subbar-fill rent" style="width:${wRentPct}%"></div></div>
-              <div class="subbar-translation">En el lote (${areaHa} <span class="unidad">ha</span>): <b>~$${fmtMiles(ingresoTotalLoteAnual)}</b> <span class="unidad">USD/año</span></div>
-            </div>
-          </div>
-
-          <div class="explain-5-box">
-            <p class="explain-summary-text">
-              <strong>1. Por qué se sugiere:</strong> ${rot.explicacion.porQue}
-            </p>
-            <details ${idx === 0 ? 'open' : ''}>
-              <summary>
-                <span>Ver evidencia satelital NASA, beneficios, lagunas y riesgos (5 puntos)</span>
-                <i data-lucide="chevron-down" class="icono"></i>
-              </summary>
-              <div class="explain-details-body">
-                <div class="explain-block">
-                  <h4><i data-lucide="satellite" class="icono"></i> 2. Evidencia satelital NASA y de suelo que la respalda</h4>
-                  <ul>${rot.explicacion.evidenciaNasa.map(x => `<li>${x}</li>`).join('')}</ul>
-                </div>
-                <div class="explain-block">
-                  <h4><i data-lucide="wheat" class="icono"></i> 3. Beneficios cuantificados para la parcela</h4>
-                  <ul>${rot.explicacion.beneficios.map(x => `<li>${x}</li>`).join('')}</ul>
-                </div>
-                <div class="explain-block">
-                  <h4><i data-lucide="flask-conical" class="icono"></i> 4. Lagunas de información (satélite vs. medición en campo)</h4>
-                  <ul>${rot.explicacion.lagunasInfo.map(x => `<li>${x}</li>`).join('')}</ul>
-                </div>
-                <div class="explain-block">
-                  <h4><i data-lucide="shield-check" class="icono"></i> 5. Riesgos que requieren validación local</h4>
-                  <ul>${rot.explicacion.riesgosLocales.map(x => `<li>${x}</li>`).join('')}</ul>
-                </div>
-              </div>
-            </details>
-          </div>
+          ${panelTecnicoHtml}
 
           <div class="card-footer-actions">
-            <button type="button" class="btn-sec btn-ver-grafico" data-select-rot="${rot.id}">
-              <i data-lucide="droplet" class="icono"></i>
-              <span>${esSeleccionadaGrafico ? 'Mostrando en el gráfico hídrico de 36 meses' : 'Ver balance hídrico de 36 meses'}</span>
-            </button>
+            ${!modoGlobalTec ? `
+              <button type="button" class="btn-sec btn-toggle-tecnico" data-toggle-tech="${rot.id}" aria-expanded="${isTechnicalMode ? 'true' : 'false'}">
+                <i data-lucide="satellite" class="icono"></i>
+                <span>${isTechnicalMode ? 'Ocultar reporte técnico' : 'Ver reporte técnico (NASA)'}</span>
+              </button>
+            ` : ''}
           </div>
         </article>
       `;
     }).join('');
+
+    grid.querySelectorAll('[data-toggle-tech]').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const rotId = this.getAttribute('data-toggle-tech');
+        state.tarjetasTecnicas[rotId] = !state.tarjetasTecnicas[rotId];
+        renderizarTarjetasRotacion(state.ultimoResultado, obtenerParcelaActual());
+        actualizarGraficoBalance36m();
+      });
+    });
 
     grid.querySelectorAll('[data-select-rot]').forEach(btn => {
       btn.addEventListener('click', function () {
@@ -1434,11 +1670,12 @@
     if (btnExportar) {
       btnExportar.addEventListener('click', () => {
         const parcela = obtenerParcelaActual();
-        const blob = new Blob([JSON.stringify(parcela, null, 2)], { type: 'application/json' });
+        const combinado = construirJsonCombinado(parcela);
+        const blob = new Blob([JSON.stringify(combinado, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${parcela.id || 'parcela'}.json`;
+        a.download = `${parcela.id || 'parcela'}_combinado.json`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -1479,18 +1716,121 @@
   }
 
   /**
+   * Configura la transición segura entre Modo Simple (Agricultor) y Modo Avanzado (Técnico)
+   */
+  function configurarModoDual() {
+    const btnModo = document.getElementById('btn-modo-usuario');
+    const txtModo = document.getElementById('btn-modo-usuario-texto');
+    const confirmBar = document.getElementById('confirm-modo-tecnico');
+    const bannerActivo = document.getElementById('banner-modo-tecnico');
+    const btnConfirmar = document.getElementById('btn-confirmar-tecnico');
+    const btnCancelar = document.getElementById('btn-cancelar-tecnico');
+    const btnSalir = document.getElementById('btn-salir-tecnico');
+
+    function setModoTecnico(activo) {
+      document.body.classList.toggle('modo-tecnico', activo);
+      if (btnModo) btnModo.setAttribute('aria-pressed', activo ? 'true' : 'false');
+      if (txtModo) txtModo.textContent = activo ? 'Modo Técnico activo' : 'Vista: Agricultor · Modo técnico';
+      if (confirmBar) confirmBar.hidden = true;
+      if (bannerActivo) bannerActivo.hidden = !activo;
+      sincronizarControlesPaso2ConParcela();
+      if (state.ultimoResultado) {
+        renderizarTarjetasRotacion(state.ultimoResultado, obtenerParcelaActual());
+      }
+    }
+
+    if (btnModo) {
+      btnModo.addEventListener('click', () => {
+        if (document.body.classList.contains('modo-tecnico')) {
+          setModoTecnico(false);
+        } else if (confirmBar) {
+          confirmBar.hidden = !confirmBar.hidden;
+        }
+      });
+    }
+    if (btnConfirmar) btnConfirmar.addEventListener('click', () => setModoTecnico(true));
+    if (btnCancelar && confirmBar) btnCancelar.addEventListener('click', () => { confirmBar.hidden = true; });
+    if (btnSalir) btnSalir.addEventListener('click', () => setModoTecnico(false));
+
+    // Modo Simple: tarjetas de tipo de tierra del agricultor
+    document.querySelectorAll('.soil-simple-btn[data-soil-simple]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = obtenerParcelaActual();
+        asegurarEsquemaDual(p);
+        p.agricultor.tipo_tierra = btn.getAttribute('data-soil-simple');
+        p.agricultor.editado_tierra = true;
+        sincronizarControlesPaso2ConParcela();
+        actualizarTodo();
+      });
+    });
+
+    // Modo Simple: botones Poco / Normal / Mucho sincronizados con sliders IRR
+    document.querySelectorAll('.priority-btn-group[data-simple-slider]').forEach(group => {
+      const key = group.getAttribute('data-simple-slider');
+      group.querySelectorAll('.prio-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = Number(btn.getAttribute('data-val')) || 3;
+          state.sliders[key] = val;
+          const p = obtenerParcelaActual();
+          asegurarEsquemaDual(p);
+          p.agricultor.prioridades[key] = val;
+          sincronizarControlesPaso2ConParcela();
+          actualizarTodo();
+        });
+      });
+    });
+
+    // Modo Técnico: pendiente verificada en campo y notas técnicas
+    const inpPend = document.getElementById('input-tecnico-pendiente');
+    if (inpPend) {
+      inpPend.addEventListener('change', () => {
+        const p = obtenerParcelaActual();
+        asegurarEsquemaDual(p);
+        p.tecnico.terreno_verificado.pendiente_pct = inpPend.value === '' ? null : Number(inpPend.value);
+        sincronizarControlesPaso2ConParcela();
+        dibujarPoligonoParcelaActual(false);
+        actualizarTodo();
+      });
+    }
+
+    const inpNotas = document.getElementById('input-tecnico-notas');
+    if (inpNotas) {
+      inpNotas.addEventListener('input', () => {
+        const p = obtenerParcelaActual();
+        asegurarEsquemaDual(p);
+        p.tecnico.notas_campo = inpNotas.value;
+      });
+    }
+
+    const btnLimpiarTec = document.getElementById('btn-limpiar-tecnico');
+    if (btnLimpiarTec) {
+      btnLimpiarTec.addEventListener('click', () => {
+        const p = obtenerParcelaActual();
+        asegurarEsquemaDual(p);
+        p.tecnico.suelo_laboratorio = { textura: null, soc_pct: null, ph: null };
+        p.tecnico.terreno_verificado = { pendiente_pct: null };
+        p.tecnico.notas_campo = '';
+        sincronizarControlesPaso2ConParcela();
+        dibujarPoligonoParcelaActual(false);
+        actualizarTodo();
+      });
+    }
+  }
+
+  /**
    * Configura todos los eventos de botones, sliders e inputs
    */
   function configurarEventos() {
     configurarSidebarTabs();
+    configurarModoDual();
     configurarPanelUbicacion();
 
     const onSoilChange = () => {
       const p = obtenerParcelaActual();
-      p.suelo.textura = document.getElementById('input-suelo-textura').value;
-      p.suelo.soc_pct = Number(document.getElementById('input-suelo-soc').value) || 1.5;
-      p.suelo.ph = Number(document.getElementById('input-suelo-ph').value) || 6.0;
-      p.suelo.editado_por_usuario = true;
+      asegurarEsquemaDual(p);
+      p.tecnico.suelo_laboratorio.textura = document.getElementById('input-suelo-textura').value;
+      p.tecnico.suelo_laboratorio.soc_pct = Number(document.getElementById('input-suelo-soc').value) || 1.5;
+      p.tecnico.suelo_laboratorio.ph = Number(document.getElementById('input-suelo-ph').value) || 6.0;
       sincronizarControlesPaso2ConParcela();
       actualizarTodo();
     };
@@ -1513,10 +1853,12 @@
 
     const onHistoriaChange = () => {
       const p = obtenerParcelaActual();
+      asegurarEsquemaDual(p);
       const h1 = document.getElementById('select-historia-1').value;
       const h2 = document.getElementById('select-historia-2').value;
-      p.historia_declarada = [h1, h2];
-      p.nematodo_declarado = document.getElementById('check-nematodo').checked;
+      p.agricultor.historia_cultivos = [h1, h2];
+      p.agricultor.vio_nematodos = document.getElementById('check-nematodo').checked;
+      sincronizarControlesPaso2ConParcela();
       actualizarTodo();
     };
 
@@ -1530,6 +1872,7 @@
       if (!el) return;
       el.addEventListener('input', function () {
         state.sliders[key] = Number(this.value);
+        sincronizarBotonesPrioridadSimple();
         actualizarTodo();
       });
     };
@@ -1555,8 +1898,12 @@
     const chkForraje = document.getElementById('check-retira-forraje');
     if (chkForraje) {
       chkForraje.addEventListener('change', function () {
+        const p = obtenerParcelaActual();
+        asegurarEsquemaDual(p);
+        p.agricultor.manejo_rastrojo = this.checked ? 'retirar_ganado' : 'dejar_en_suelo';
         state.opciones.retiraForraje = this.checked;
         state.opciones.priorizarForraje = this.checked;
+        sincronizarControlesPaso2ConParcela();
         actualizarTodo();
       });
     }
