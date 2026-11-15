@@ -698,6 +698,16 @@
             <!-- Generado dinámicamente por app.js -->
           </div>
 
+          <!-- Disclaimer de Responsabilidad (Foco centrado en el usuario) -->
+          <aside class="rotasat-disclaimer-banner" role="note" aria-label="Nota importante de responsabilidad">
+            <div class="disclaimer-icon-wrap" aria-hidden="true">
+              <i data-lucide="triangle-alert" class="icono"></i>
+            </div>
+            <p class="disclaimer-text">
+              <strong>Nota importante:</strong> RotaSat es una herramienta de apoyo a la toma de decisiones basada en datos satelitales. Las proyecciones climáticas y sugerencias de cultivos deben ser validadas siempre con la experiencia del agricultor y el criterio de técnicos agrícolas locales. No reemplaza el juicio humano en campo.
+            </p>
+          </aside>
+
           <!-- Gráficos Interactivos: Balance Hídrico 36m + Historial HLS NDVI/NDTI (ocultos en Vista Simple) -->
           <div id="charts-grid-rotaciones" class="charts-grid" hidden>
             <div class="chart-card">
@@ -817,6 +827,21 @@
                   RotaSat armoniza 6 fuentes de observación de la Tierra de la NASA e ISRIC con distintas resoluciones
                   espaciales y temporales hacia la escala de parcela y paso mensual durante 36 meses.
                 </p>
+
+                <!-- Bloque de Armonización de Resoluciones Espaciales (Enfoque Jurado Space Apps) -->
+                <div class="harmonization-box">
+                  <h3><i data-lucide="layers" class="icono"></i> Armonización de Resoluciones Espaciales</h3>
+                  <p>
+                    Para traducir observaciones orbitales heterogéneas a decisiones agronómicas dentro de los linderos exactos de un polígono parcelario local (por ejemplo, un lote andino de <strong>20 000 m²</strong>), <strong>RotaSat</strong> implementa un flujo de reducción de escala física (<em>topographic &amp; edaphic downscaling</em>) e interpolación zonal en dos etapas. Las variables hidrometeorológicas de resolución gruesa —como la humedad en la zona radicular de <strong>SMAP L4 (9 km)</strong>, la precipitación satelital de <strong>GPM IMERG (10 km)</strong> y las series radiativas y térmicas de <strong>NASA POWER / MERRA-2 (~50 km)</strong>— actúan como forzantes atmosféricos de mesoescala y se proyectan sobre la malla fina de <strong>30 m</strong> provista por el modelo digital de elevación <strong>NASADEM / SRTM (30 m)</strong> y la constelación armonizada <strong>HLS Landsat 8/9 + Sentinel-2 (30 m)</strong>. Mediante corrección altitudinal por gradiente térmico adiabático (<code>&Gamma; = &minus;6.5 °C/km</code>), partición de escorrentía superficial modulada por la pendiente local SRTM e integración con la capacidad de retención hídrica de <strong>ISRIC SoilGrids (250 m)</strong>, el motor recorta y pondera cada píxel dentro del polígono de <strong>20 000 m²</strong>, garantizando que el balance hídrico FAO-56 y el índice <strong>IRR</strong> reflejen las microcondiciones reales de la finca y no un promedio regional sin ajustar.
+                  </p>
+                  <div class="harmonization-scale-pills">
+                    <span class="scale-pill coarse">Macroescala: NASA POWER (~50 km) · GPM (10 km) · SMAP (9 km)</span>
+                    <span class="scale-arrow" aria-hidden="true">→</span>
+                    <span class="scale-pill mid">Mesoescala: ISRIC SoilGrids (250 m)</span>
+                    <span class="scale-arrow" aria-hidden="true">→</span>
+                    <span class="scale-pill fine">Escala Finca (20 000 m²): SRTM (30 m) · HLS Landsat/Sentinel (30 m)</span>
+                  </div>
+                </div>
 
                 <h3 style="margin:8px 0 4px; color:var(--oliva);">1. Armonización multirresolución de sensores NASA y
                   suelo</h3>

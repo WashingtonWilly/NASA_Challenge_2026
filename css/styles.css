@@ -2143,6 +2143,40 @@ body.modo-tecnico .solo-agricultor {
   flex-shrink: 0;
 }
 
+.rot-simple-why {
+  padding: 10px 12px;
+  border-left: 3px solid var(--oliva);
+  border-radius: 0 4px 4px 0;
+  background-color: #EEF2E6;
+  font-size: 13px;
+  color: var(--tinta);
+}
+
+.rot-simple-why strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  color: var(--oliva);
+  font-size: 13.5px;
+}
+
+.rot-simple-why strong .icono {
+  width: 15px;
+  height: 15px;
+  color: var(--oliva);
+  flex-shrink: 0;
+}
+
+.rot-simple-why ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.45;
+}
+
 .rot-simple-risks {
   padding: 10px 12px;
   border-left: 3px solid var(--tierra);
@@ -2202,6 +2236,12 @@ body.modo-tecnico .solo-agricultor {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.btn-sm[hidden],
+.btn[hidden],
+.btn-sec[hidden] {
+  display: none !important;
 }
 
 .btn-sm .icono {
@@ -2316,6 +2356,115 @@ body.guided-drawing-active .map-wrapper {
   z-index: 950;
   outline: 3px solid var(--oliva);
   border-radius: 4px;
+}
+
+/* =========================================================
+   Disclaimer de Responsabilidad (Paso 3) y
+   Armonización de Resoluciones Espaciales (Metodología NASA)
+========================================================= */
+.rotasat-disclaimer-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 12px 16px;
+  background-color: #FAF3E3;
+  border: 1px solid #DFC282;
+  border-left: 4px solid var(--alerta);
+  border-radius: 4px;
+  color: var(--tinta);
+}
+
+.disclaimer-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--alerta-bg);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.disclaimer-icon-wrap .icono {
+  width: 16px;
+  height: 16px;
+  color: var(--alerta);
+}
+
+.disclaimer-text {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--tinta);
+}
+
+.disclaimer-text strong {
+  color: #7A4B0E;
+}
+
+.harmonization-box {
+  margin: 12px 0 14px;
+  padding: 14px 16px;
+  background-color: var(--papel-claro);
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--oliva);
+  border-radius: 4px;
+}
+
+.harmonization-box h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: var(--oliva);
+}
+
+.harmonization-box p {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--tinta);
+}
+
+.harmonization-scale-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.scale-pill {
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--borde);
+  font-weight: 600;
+}
+
+.scale-pill.coarse {
+  background-color: #F4ECE1;
+  color: var(--tierra);
+  border-color: #D8BFA8;
+}
+
+.scale-pill.mid {
+  background-color: #F3EFE3;
+  color: var(--tinta);
+}
+
+.scale-pill.fine {
+  background-color: #E6EEDB;
+  color: var(--oliva);
+  border-color: #B4C897;
+}
+
+.scale-arrow {
+  color: var(--gris);
+  font-weight: 700;
 }
 
 .sensor-pin {

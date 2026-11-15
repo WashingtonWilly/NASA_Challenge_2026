@@ -1039,6 +1039,79 @@
   }
 
   /**
+   * Construye dinámicamente las viñetas de "¿Por qué sugerimos esta rotación?"
+   * en función de las especies reales de la secuencia (leguminosas, familias botánicas,
+   * arquitectura radicular y demanda hídrica) y del cultivo previo de la parcela.
+   */
+  function construirRazonesPorQueSugerimos(rot, parcela) {
+    const cultivos = rot.cultivos || [];
+    if (!cultivos.length) return [];
+
+    const catalogoLista = (state.catalogo && state.catalogo.cultivos) || [];
+    const histIds = (parcela && parcela.historia_declarada) || ['papa'];
+    const cultivoPrevio = catalogoLista.find(c => c.id === histIds[0]) || { nombre: 'Papa', familia: 'Solanáceas' };
+
+    const razones = [];
+
+    // 1. Ruptura del ciclo de plagas según familia previa y familias reales de la rotación
+    const familiasRot = [...new Set(cultivos.map(c => c.familia))];
+    const nombresRot = cultivos.map(c => c.nombre.toLowerCase()).join(', ');
+    const repiteFamPreviaAnio1 = cultivos[0] && cultivos[0].familia === cultivoPrevio.familia;
+
+    if (!repiteFamPreviaAnio1) {
+      razones.push(
+        `Rompe el ciclo de plagas y enfermedades de las ${cultivoPrevio.familia.toLowerCase()} (${cultivoPrevio.nombre.toLowerCase()}) al alternar ${familiasRot.length} familias distintas (${nombresRot}).`
+      );
+    } else {
+      razones.push(
+        `Diversifica la parcela alternando ${nombresRot} para reducir la presión de plagas específicas del suelo.`
+      );
+    }
+
+    // 2. Fijación biológica de nitrógeno y materia orgánica (solo habla de nitrógeno si hay leguminosas reales)
+    const leguminosas = cultivos.filter(c => c.familia === 'Fabáceas' || (c.credito_n_kg && c.credito_n_kg > 0));
+    if (leguminosas.length > 0) {
+      const nombresLeg = [...new Set(leguminosas.map(c => c.nombre.toLowerCase()))].join(' y ');
+      const siguienteCultivo = (() => {
+        const idxLeg = cultivos.findIndex(c => c.familia === 'Fabáceas' || (c.credito_n_kg && c.credito_n_kg > 0));
+        return idxLeg >= 0 && cultivos[idxLeg + 1] ? cultivos[idxLeg + 1].nombre.toLowerCase() : null;
+      })();
+      razones.push(
+        siguienteCultivo
+          ? `Fija nitrógeno atmosférico con ${nombresLeg}, mejorando la materia orgánica y dejando nutrientes listos para la siembra de ${siguienteCultivo}.`
+          : `Fija nitrógeno atmosférico mediante ${nombresLeg}, mejorando la materia orgánica y recuperando la fertilidad natural de la tierra.`
+      );
+    } else {
+      const rastrojoT = (rot.detalles && rot.detalles.materiaOrganica && rot.detalles.materiaOrganica.biomasaResiduoTHa) || 0;
+      razones.push(
+        rastrojoT > 3
+          ? `Incorpora abundante rastrojo vegetal de ${nombresRot} que protege la estructura y esponjosidad del suelo.`
+          : `Alterna coberturas de ${nombresRot} para mantener el suelo protegido frente a la erosión.`
+      );
+    }
+
+    // 3. Optimización hídrica y exploración radicular según las raíces y demanda reales de la secuencia
+    const raicesUnicas = [...new Set(cultivos.map(c => c.raiz_tipo).filter(Boolean))];
+    const cobAgua = (rot.balanceHidrico && rot.balanceHidrico.coberturaAguaPct) || 0;
+    const cultivoMenorAgua = cultivos.slice().sort((a, b) => (a.kc_medio || 0.8) - (b.kc_medio || 0.8))[0];
+
+    if (cobAgua >= 75) {
+      razones.push(
+        `Optimiza el uso hídrico en la temporada seca con especies rústicas como ${cultivoMenorAgua.nombre.toLowerCase()}` +
+        (raicesUnicas.length > 1 ? ` y combina raíces (${raicesUnicas.join(' y ')}) que aprovechan la humedad a distintas profundidades.` : '.')
+      );
+    } else {
+      razones.push(
+        raicesUnicas.length > 1
+          ? `Combina distintas profundidades de raíz (${raicesUnicas.join(' y ')}) entre ${nombresRot} para aprovechar mejor la humedad y no compactar la tierra.`
+          : `Ajusta los ciclos de ${nombresRot} a los meses de mayor lluvia de la zona para reducir la necesidad de riego.`
+      );
+    }
+
+    return razones;
+  }
+
+  /**
    * Renderiza las tarjetas comparativas del Paso 3 (Top 3 recomendadas + práctica actual)
    */
   function renderizarTarjetasRotacion(resultado, parcela) {
@@ -1119,6 +1192,11 @@
       const riesgosPracticos = (rot.explicacion.riesgosLocales || [])
         .filter(r => !/SoilGrids|250\s*m|NASA|satelital/i.test(r))
         .slice(0, 2);
+
+      // Explicabilidad dinámica para Opción 1, Opción 2 y Opción 3
+      const razonesSugerencia = !rot.esActual
+        ? construirRazonesPorQueSugerimos(rot, parcela)
+        : [];
 
       const alertaFitoHtml = rot.violaReglasFitosanitarias
         ? `<div class="estado riesgo" style="padding:6px 10px;">
@@ -1266,6 +1344,15 @@
               <li><i data-lucide="droplet" class="icono"></i><span><strong>Agua:</strong> ${textoAguaSimple}</span></li>
               <li><i data-lucide="sprout" class="icono"></i><span><strong>Suelo:</strong> ${textoSueloSimple}</span></li>
             </ul>
+
+            ${!rot.esActual && razonesSugerencia.length ? `
+              <div class="rot-simple-why">
+                <strong><i data-lucide="check-circle-2" class="icono"></i> ¿Por qué sugerimos esta rotación?</strong>
+                <ul>
+                  ${razonesSugerencia.map(razon => `<li>${razon}</li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
 
             ${riesgosPracticos.length ? `
               <div class="rot-simple-risks">
