@@ -69,7 +69,7 @@ def et0_penman_monteith_diario(lat_deg: float, doy: int, tmed: float, tmax: floa
     return max(0.0, num / den)
 
 
-def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101", fin: str = "20241231",
+def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101", fin: str = None,
                                  elev_parcela_m: float = None, cache: str = None, online: bool = True):
     """
     Consulta la API oficial de NASA POWER y devuelve la climatología mensual.
@@ -77,6 +77,8 @@ def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101"
     elevación de la celda POWER (~50 km) y la de la parcela: clave en los Andes.
     Devuelve None si no hay conexión (el llamador decide qué hacer; nunca inventa datos).
     """
+    if not fin:
+        fin = datetime.utcnow().strftime("%Y%m%d")
     params = urllib.parse.urlencode({
         "parameters": "T2M_MAX,T2M_MIN,T2M,PRECTOTCORR,ALLSKY_SFC_SW_DWN,WS2M,RH2M",
         "community": "AG",
@@ -140,14 +142,16 @@ def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101"
             acum[m]["Tmed"].append(tmed)
 
         nombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+        dias_mes = [31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
         salida = []
         for m in range(1, 13):
-            n_anios = max(1, len(anios_por_mes[m]))
+            n_validos = max(1, len(acum[m]["P"]))
+            dm = dias_mes[m - 1]
             salida.append({
                 "mes": m,
                 "nombre_mes": nombres[m - 1],
-                "P_mm": round(sum(acum[m]["P"]) / n_anios, 1),
-                "ET0_mm": round(sum(acum[m]["ET0"]) / n_anios, 1),
+                "P_mm": round((sum(acum[m]["P"]) / n_validos) * dm, 1),
+                "ET0_mm": round((sum(acum[m]["ET0"]) / n_validos) * dm, 1),
                 "Tmin_abs": round(min(acum[m]["Tmin"]), 1),
                 "Tmed": round(sum(acum[m]["Tmed"]) / max(1, len(acum[m]["Tmed"])), 1)
             })
