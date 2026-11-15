@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Apartado 3D · RotaSat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{--papel:#EFEADC;--claro:#F7F3E8;--campo:#FBF8F0;--banda:#E4DDCB;--tinta:#2B2A22;--texto:#5A5440;--gris:#6B6450;--oliva:#3E4A1E;--tierra:#A6512B;--borde:#D6CDB4;--curva:#C9BFA2;--blanco:#FBF6EA}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:'Public Sans',sans-serif;color:var(--tinta);background:transparent}
+body{padding:4px;font-size:14px}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--tierra);outline-offset:2px}
+button[disabled]{opacity:.5;cursor:not-allowed}
+.viewer{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,.92fr);gap:12px;align-items:stretch}
+.scene-card{position:relative;min-height:640px;border:1px solid var(--borde);border-radius:10px;background:var(--papel);overflow:hidden;isolation:isolate;transition:background-color .25s ease}
+.scene-card.sim-sequia{background:#EFE5D0}
+.scene-card.sim-lluvia{background:#E5ECEB}
+.scene-card canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.scene-card canvas:active{cursor:grabbing}
+.scene-top{position:absolute;z-index:4;inset:12px 12px auto;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;pointer-events:none}
+.scene-top .mini-kicker{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--gris);background:rgba(247,243,232,.95);padding:7px 9px;border:1px solid var(--borde);border-radius:6px;max-width:340px}
+.scene-top button{pointer-events:auto;background:var(--claro);border:1px solid var(--borde);color:var(--oliva);padding:8px 10px;border-radius:6px;font-size:12px;font-weight:600}
+.scene-top button:hover{border-color:var(--oliva)}
+.scene-bottom{position:absolute;z-index:4;left:12px;right:12px;bottom:12px;display:flex;gap:8px;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.scene-bottom .hint{max-width:350px;background:rgba(247,243,232,.95);border:1px solid var(--borde);border-radius:6px;padding:8px 10px;font-size:11px;line-height:1.5;color:var(--gris)}
+.scene-bottom .counter{background:var(--oliva);color:var(--blanco);padding:8px 10px;border-radius:6px;font:500 11px 'IBM Plex Mono',monospace;white-space:nowrap}
+.poster{position:absolute;inset:0;z-index:6;background:var(--papel);display:flex;justify-content:center;align-items:center;flex-direction:column;gap:8px;padding:25px}
+.poster img{max-width:92%;max-height:80%;object-fit:contain;border-radius:6px}
+.poster span{font-size:12px;text-align:center;line-height:1.5;color:var(--gris);background:var(--claro);padding:7px 11px;border:1px solid var(--borde);border-radius:6px}
+.poster[hidden]{display:none}
+.hover-tip{position:absolute;z-index:5;pointer-events:none;padding:7px 10px;background:var(--oliva);color:var(--blanco);font-size:12px;white-space:nowrap;max-width:220px;transform:translate(12px,-14px);border-radius:4px}
+.hover-tip[hidden]{display:none}
+.marker{position:absolute;z-index:3;pointer-events:auto;transform:translate(-50%,-50%);border:1px solid var(--borde);border-radius:4px;padding:5px 8px;background:rgba(247,243,232,.94);color:var(--oliva);font:500 10px 'IBM Plex Mono',monospace;white-space:nowrap;transition:border-color .15s,background .15s}
+.marker:hover,.marker[aria-pressed=true]{background:#F1E0CF;border-color:var(--tierra);color:var(--tierra)}
+.marker[hidden]{display:none}
+.panel{background:var(--claro);border:1px solid var(--borde);border-radius:10px;padding:18px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.kicker{font:400 11px 'IBM Plex Mono',monospace;letter-spacing:.035em;color:var(--gris);margin:0}
+h1{font-size:20px;line-height:1.2;color:var(--oliva);margin:6px 0 6px;font-weight:700;letter-spacing:-.015em}
+.lead{font-size:12.5px;color:var(--texto);line-height:1.55;margin:0}
+.headline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+h2{font-size:13px;font-weight:700;color:var(--oliva);margin:0}
+.note{font:400 10px 'IBM Plex Mono',monospace;color:var(--gris)}
+.layer-list{display:flex;flex-direction:column;gap:6px}
+.layer-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}
+.layer-select{display:flex;gap:10px;align-items:center;min-width:0;text-align:left;background:var(--campo);border:1px solid var(--borde);border-left:3px solid transparent;padding:9px 10px;color:var(--tinta);border-radius:4px;transition:background .15s,border-color .15s}
+.layer-select:hover{background:var(--banda)}
+.layer-select[aria-pressed=true]{background:#F4E6D7;border-color:var(--tierra);border-left-color:var(--tierra)}
+.layer-select .num{font:500 11px 'IBM Plex Mono',monospace;color:var(--gris)}
+.layer-select .title{display:block;font-weight:600;font-size:12.5px}
+.layer-select .sub{display:block;font-size:10.5px;color:var(--gris);margin-top:2px;font-weight:400}
+.layer-toggle{width:70px;border:1px solid var(--borde);background:var(--campo);color:var(--oliva);font-weight:600;font-size:11px;border-radius:4px;padding:7px 4px}
+.layer-toggle:hover{background:var(--banda)}
+.layer-toggle[aria-pressed=false]{color:var(--gris);background:var(--papel)}
+button.simple{border:1px solid var(--borde);color:var(--oliva);background:var(--campo);padding:8px 10px;border-radius:5px;font-weight:600;font-size:11.5px;text-align:center}
+button.simple:hover{background:var(--banda);border-color:var(--oliva)}
+button.simple[aria-pressed=true]{background:#E6EAD3;border-color:var(--oliva)}
+button.primary{background:var(--tierra);color:var(--blanco);border:1px solid var(--tierra);font-size:12px;font-weight:600;padding:10px 12px;border-radius:5px}
+button.primary:hover{background:#8C4322}
+.detail{border-top:3px solid var(--oliva);border-radius:6px;padding:11px 12px;background:var(--papel)}
+.detail .tag{color:var(--gris);font:400 10px 'IBM Plex Mono',monospace}
+.detail strong{color:var(--oliva);font-size:14px;display:block;margin:5px 0}
+.detail p{font-size:12px;color:var(--texto);line-height:1.5;margin:0}
+.detail-live{margin-top:8px;padding:8px 10px;background:var(--campo);border:1px solid var(--borde);border-radius:5px;font-size:11.5px;color:var(--tinta);line-height:1.45}
+.detail-live strong{display:inline;font-size:11.5px;color:var(--tierra);margin:0}
+.detail .mini-actions{display:flex;gap:7px;margin-top:10px}
+.detail .mini-actions button{flex:1}
+.btn-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.btn-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.field label{font-weight:600;font-size:12px;color:var(--oliva)}
+.field .range-line{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px}
+.field output{font:500 11px 'IBM Plex Mono',monospace;color:var(--gris)}
+input[type=range]{width:100%;accent-color:var(--tierra);cursor:pointer}
+.panel-foot{display:flex;justify-content:space-between;gap:8px;align-items:center;border-top:1px solid var(--borde);padding-top:10px;margin-top:auto}
+.state{margin:0;font-size:11px;line-height:1.45;color:var(--gris)}
+.power{font:500 10px 'IBM Plex Mono',monospace;color:var(--oliva);white-space:nowrap}
+.help{font-size:10.5px;line-height:1.45;color:var(--gris);margin:0}
+.scene-card:fullscreen{width:100%;height:100%;min-height:100vh}
+@media(max-width:920px){.viewer{grid-template-columns:1fr}.scene-card{height:54vh;min-height:400px;max-height:560px}.panel{gap:12px}.layer-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}}
+@media(max-width:520px){body{padding:2px}.scene-card{min-height:310px;height:44vh;max-height:420px}.panel{padding:12px}.layer-list{grid-template-columns:1fr}.scene-top{inset:8px 8px auto}.scene-bottom{left:8px;right:8px;bottom:8px}.scene-bottom .hint{max-width:190px;font-size:10px}.marker{padding:3px 5px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "./three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+</script>
+</head>
+<body>
+<main class="viewer" aria-label="Explorador tridimensional de RotaSat">
+  <section class="scene-card" id="sceneCard" aria-label="Modelo 3D de cuatro capas geoespaciales">
+    <div class="poster" id="poster" role="status"><img src="./vista_previa.webp" alt="Cuatro capas geoespaciales: paisaje agrícola, curvas de nivel, relieve y mapa base"/><span id="posterMessage">Cargando las cuatro capas 3D…</span></div>
+    <div class="scene-top"><div class="mini-kicker" id="kickerParcela">ROTASAT / GEOVISUALIZACIÓN 3D</div><button id="fullscreen" title="Pantalla completa" type="button" aria-label="Alternar pantalla completa">Pantalla completa</button></div>
+    <div id="hoverTip" class="hover-tip" hidden></div>
+    <button class="marker" data-marker="agricultura" type="button" aria-pressed="true" hidden>04 · Agrícola</button>
+    <button class="marker" data-marker="curvas" type="button" aria-pressed="false" hidden>03 · Curvas</button>
+    <button class="marker" data-marker="relieve" type="button" aria-pressed="false" hidden>02 · Relieve</button>
+    <button class="marker" data-marker="mapa" type="button" aria-pressed="false" hidden>01 · Mapa</button>
+    <div class="scene-bottom"><div class="hint" id="hintText">Arrastra para girar · Zoom con rueda o dos dedos · Haz clic en una capa</div><span class="counter" id="visibleCount">4 / 4 CAPAS</span></div>
+  </section>
+  <aside class="panel" aria-label="Herramientas para explorar el territorio">
+    <header><p class="kicker" id="panelKicker">INTERACCIÓN TERRENO ↔ DATOS · 04 CAPAS</p><h1 id="panelTitle">Explora el territorio</h1><p class="lead" id="panelLead">Haz clic en cualquier estrato 3D para vincularlo con los datos reales de tu parcela activa.</p></header>
+    <section aria-label="Capas"><div class="headline"><h2 id="layersHead">Capas disponibles</h2><span class="note" id="layersNote">SELECCIONAR / VISIBILIDAD</span></div>
+      <div class="layer-list">
+        <div class="layer-row"><button class="layer-select" data-layer="agricultura" aria-pressed="true" type="button"><span class="num">04</span><span><span class="title" data-i18n-layer="agricultura-t">Paisaje agrícola</span><span class="sub" data-i18n-layer="agricultura-s">Cobertura HLS y rotación</span></span></button><button class="layer-toggle" data-toggle="agricultura" aria-pressed="true" type="button">Visible</button></div>
+        <div class="layer-row"><button class="layer-select" data-layer="curvas" aria-pressed="false" type="button"><span class="num">03</span><span><span class="title" data-i18n-layer="curvas-t">Curvas de nivel</span><span class="sub" data-i18n-layer="curvas-s">Piso térmico NASADEM 30 m</span></span></button><button class="layer-toggle" data-toggle="curvas" aria-pressed="true" type="button">Visible</button></div>
+        <div class="layer-row"><button class="layer-select" data-layer="relieve" aria-pressed="false" type="button"><span class="num">02</span><span><span class="title" data-i18n-layer="relieve-t">Relieve montañoso</span><span class="sub" data-i18n-layer="relieve-s">Pendiente SRTM y suelo</span></span></button><button class="layer-toggle" data-toggle="relieve" aria-pressed="true" type="button">Visible</button></div>
+        <div class="layer-row"><button class="layer-select" data-layer="mapa" aria-pressed="false" type="button"><span class="num">01</span><span><span class="title" data-i18n-layer="mapa-t">Mapa base y clima</span><span class="sub" data-i18n-layer="mapa-s">NASA POWER + SMAP L4</span></span></button><button class="layer-toggle" data-toggle="mapa" aria-pressed="true" type="button">Visible</button></div>
+      </div>
+    </section>
+    <section class="detail" aria-live="polite">
+      <span class="tag" id="detailLabel">CAPA 04 / 04</span>
+      <strong id="detailTitle">Paisaje agrícola</strong>
+      <p id="detailText">Mosaico agrícola para observar la cobertura vegetal y las parcelas.</p>
+      <div class="detail-live" id="detailLive">Esperando sincronización con la parcela activa…</div>
+      <div class="mini-actions"><button type="button" id="focus" class="simple">Acercar a capa</button><button type="button" id="isolate" class="simple" aria-pressed="false">Aislar capa</button></div>
+    </section>
+    <section aria-label="Separación de capas"><div class="headline"><h2 id="spacingHead">Explosión de capas</h2><span class="note" id="spacingLabel">NORMAL</span></div><div class="btn-grid"><button class="simple spacing-choice" type="button" data-spacing="1.15" aria-pressed="false">Compactas</button><button class="simple spacing-choice" type="button" data-spacing="1.6" aria-pressed="true">Normal</button><button class="simple spacing-choice" type="button" data-spacing="2.7" aria-pressed="false">Separadas</button></div><div class="field" style="margin-top:8px"><div class="range-line"><label for="spacing" id="spacingFieldLabel">Distancia vertical</label><output id="spacingValue">1,6</output></div><input id="spacing" type="range" min="1.0" max="2.9" step="0.1" value="1.6" /></div></section>
+    <section aria-label="Perspectiva"><div class="headline"><h2 id="viewHead">Perspectiva</h2><span class="note" id="viewNote">CÁMARA</span></div><div class="btn-grid"><button class="simple view-btn" type="button" data-view="iso" aria-pressed="true">Isométrica</button><button class="simple view-btn" type="button" data-view="top" aria-pressed="false">Superior</button><button class="simple view-btn" type="button" data-view="side" aria-pressed="false">Lateral</button></div></section>
+    <section aria-label="Acciones"><div class="headline"><h2 id="actionsHead">Exploración</h2></div><div class="btn-two"><button id="tour" class="primary" type="button">Iniciar recorrido</button><button id="compare" class="simple" type="button" aria-pressed="false">Relieve + curvas</button><button id="showAll" class="simple" type="button">Mostrar todas</button><button id="rotate" class="simple" type="button" aria-pressed="true">Pausar rotación</button><button id="reset" class="simple" type="button" style="grid-column:1 / -1">Restablecer vista completa</button></div></section>
+    <div class="panel-foot"><p id="status" class="state" role="status" aria-live="polite">Preparando visor 3D…</p><span class="power" id="simModeBadge">ESCENARIO: NORMAL</span></div>
+    <p class="help" id="helpFoot">Maqueta conceptual sincronizada en tiempo real con los parámetros NASA, SoilGrids y FAO-56 de tu parcela.</p>
+  </aside>
+</main>
+<script type="module">
+const el=id=>document.getElementById(id);
+const stage=el('sceneCard'),poster=el('poster'),posterMessage=el('posterMessage'),status=el('status'),hoverTip=el('hoverTip');
+const META_ES={
+ agricultura:{number:'04',title:'Paisaje agrícola',text:'Mosaico agrícola de referencia. Vincula la cobertura vegetal HLS (30 m) con la rotación y el cultivo sugerido.',anchor:4.95},
+ curvas:{number:'03',title:'Curvas de nivel',text:'Líneas altimétricas que ilustran el piso térmico NASADEM (30 m) y determinan cultivos aptos y riesgo de heladas.',anchor:3.30},
+ relieve:{number:'02',title:'Relieve montañoso',text:'Pendiente del terreno SRTM/NASADEM combinada con retención hídrica del suelo ISRIC SoilGrids (0–30 cm).',anchor:1.98},
+ mapa:{number:'01',title:'Mapa base y clima',text:'Referencia territorial acoplada a forzantes atmosféricos NASA POWER (~50 km) y humedad radicular SMAP L4 (9 km).',anchor:.22}
+};
+const META_EN={
+ agricultura:{number:'04',title:'Agricultural Landscape',text:'Agricultural mosaic linking HLS (30 m) vegetation cover with your simulated crop rotation.',anchor:4.95},
+ curvas:{number:'03',title:'Contour Lines',text:'Altimetric contours illustrating the NASADEM (30 m) thermal belt, suitable crops, and frost thresholds.',anchor:3.30},
+ relieve:{number:'02',title:'Mountain Relief',text:'SRTM/NASADEM terrain slope combined with ISRIC SoilGrids (0–30 cm) soil water retention and runoff.',anchor:1.98},
+ mapa:{number:'01',title:'Basemap & Climate',text:'Spatial context coupled with NASA POWER (~50 km) climate forcings and SMAP L4 (9 km) root-zone moisture.',anchor:.22}
+};
+let lang='es';
+let META=META_ES;
+let datosParcela=null;
+let sunLight=null, ambientLight=null;
+const bottomUp=['mapa','relieve','curvas','agricultura'];
+const topDown=[...bottomUp].reverse();
+const objects={mapa:[],relieve:[],curvas:[],agricultura:[]};
+const shown={mapa:true,relieve:true,curvas:true,agricultura:true};
+let selected='agricultura',isolated=false,compare=false,spacing=1.6,autoRotate=true,loaded=false,tourStep=-1,hovered=null;
+let THREE,scene,renderer,camera,controls,raf,resizeObserver,raycaster,pointer,transition=null;
+const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const getKey=(n)=>{
+ if(n==='base_de_mapa'||n.startsWith('Capa_01_'))return 'mapa';
+ if(n==='base_relieve'||n.startsWith('Capa_02_'))return 'relieve';
+ if(n==='base_curvas_nivel'||n.startsWith('Capa_03_'))return 'curvas';
+ if(n==='base_paisaje'||n.startsWith('Capa_04_'))return 'agricultura';
+ return null;
+};
+const setStatus=t=>{status.textContent=t};
+function effectiveVisible(k){return shown[k] && (!isolated||k===selected)}
+function setRotate(value){
+ autoRotate=!!value;
+ el('rotate').textContent=autoRotate?(lang==='en'?'Pause spin':'Pausar rotación'):(lang==='en'?'Resume spin':'Reanudar rotación');
+ el('rotate').setAttribute('aria-pressed',String(autoRotate));
+ if(controls)controls.autoRotate=autoRotate;
+}
+function setSpacing(value){
+ spacing=Number(value);el('spacing').value=spacing;el('spacingValue').textContent=spacing.toFixed(1).replace('.',',');
+ el('spacingLabel').textContent=spacing<1.4?(lang==='en'?'COMPACT':'COMPACTAS'):spacing>2.25?(lang==='en'?'EXPLODED':'SEPARADAS'):'NORMAL';
+ document.querySelectorAll('.spacing-choice').forEach(btn=>btn.setAttribute('aria-pressed',String(Math.abs(Number(btn.dataset.spacing)-spacing)<.06)));
+}
+function renderLiveDetail(){
+ const box=el('detailLive');
+ if(!box)return;
+ if(!datosParcela){
+  box.textContent=lang==='en'?'Waiting for active plot synchronization…':'Esperando sincronización con la parcela activa…';
+  return;
+ }
+ const d=datosParcela;
+ const en=lang==='en';
+ if(selected==='agricultura'){
+  box.innerHTML=en
+   ? `<strong>Live link (${d.parcelaNombre}):</strong> Plan: <em>${d.planLabel}</em> · IRR <strong>${d.irrPct}/100</strong> · Rainfall coverage <strong>${d.coberturaAguaPct}%</strong> · Deficit <strong>${d.deficitMm} mm</strong> · Est. net margin <strong>$${d.margenAnualUsd}/yr</strong>`
+   : `<strong>Vínculo en vivo (${d.parcelaNombre}):</strong> Plan: <em>${d.planLabel}</em> · IRR <strong>${d.irrPct}/100</strong> · Lluvia cubre <strong>${d.coberturaAguaPct}%</strong> · Déficit <strong>${d.deficitMm} mm</strong> · Margen est. <strong>$${d.margenAnualUsd}/año</strong>`;
+ }else if(selected==='curvas'){
+  box.innerHTML=en
+   ? `<strong>Thermal belt (NASADEM 30 m):</strong> Elevation <strong>${d.elevM} m a.s.l.</strong> · Min temp <strong>${d.tminAbs}°C</strong> · Frost nights risk: <strong>${d.riesgoHelada}</strong> · Suitable crops: <strong>${d.cultivosAptosCount}</strong>`
+   : `<strong>Piso térmico (NASADEM 30 m):</strong> Altitud <strong>${d.elevM} m s.n.m.</strong> · Tmin <strong>${d.tminAbs} °C</strong> · Heladas: <strong>${d.riesgoHelada}</strong> · Cultivos aptos: <strong>${d.cultivosAptosCount}</strong>`;
+ }else if(selected==='relieve'){
+  box.innerHTML=en
+   ? `<strong>Slope &amp; Soil (SRTM + SoilGrids):</strong> Mean slope <strong>${d.pendPct}%</strong> · Runoff factor <strong>f_pend = ${d.fPend}</strong> · Texture <strong>${d.textura}</strong> · SOC <strong>${d.socPct}%</strong> · pH <strong>${d.ph}</strong>`
+   : `<strong>Pendiente y Suelo (SRTM + SoilGrids):</strong> Pendiente media <strong>${d.pendPct} %</strong> · Factor escorrentía <strong>f_pend = ${d.fPend}</strong> · Textura <strong>${d.textura}</strong> · SOC <strong>${d.socPct} %</strong> · pH <strong>${d.ph}</strong>`;
+ }else{
+  box.innerHTML=en
+   ? `<strong>Climate &amp; Moisture (POWER + SMAP L4):</strong> Sim rainfall <strong>${d.lluviaSimMm} mm/yr</strong> · ET₀ <strong>${d.et0SimMm} mm/yr</strong> · Effective rain <strong>${d.pefAnualMm} mm/yr</strong> · SMAP root moisture <strong>${d.smapText}</strong>`
+   : `<strong>Clima y Humedad (POWER + SMAP L4):</strong> Lluvia sim. <strong>${d.lluviaSimMm} mm/año</strong> · ET₀ <strong>${d.et0SimMm} mm/año</strong> · Lluvia efectiva <strong>${d.pefAnualMm} mm/año</strong> · Humedad SMAP <strong>${d.smapText}</strong>`;
+ }
+}
+function aplicarAmbienteSimulacion(){
+ if(!datosParcela)return;
+ const esc=datosParcela.escenario||'normal';
+ stage.classList.remove('sim-sequia','sim-lluvia');
+ if(esc==='sequia')stage.classList.add('sim-sequia');
+ else if(esc==='lluvia')stage.classList.add('sim-lluvia');
+ const badge=el('simModeBadge');
+ if(badge){
+  const labels={
+   es:{normal:'ESCENARIO: NORMAL',sequia:'SIMULACIÓN: SEQUÍA (+ΔT)',lluvia:'SIMULACIÓN: LLUVIA (+ESCORRENTÍA)'},
+   en:{normal:'SCENARIO: BASELINE',sequia:'SIM: DROUGHT (+ΔT)',lluvia:'SIM: HEAVY RAIN (RUNOFF)'}
+  };
+  badge.textContent=labels[lang][esc]||labels[lang].normal;
+ }
+ if(sunLight && ambientLight && THREE){
+  if(esc==='sequia'){sunLight.color.set('#FFE3B3');sunLight.intensity=2.3;ambientLight.intensity=1.35;}
+  else if(esc==='lluvia'){sunLight.color.set('#CFE7FF');sunLight.intensity=1.75;ambientLight.intensity=1.55;}
+  else{sunLight.color.set('#FFFFFF');sunLight.intensity=2.0;ambientLight.intensity=1.45;}
+ }
+}
+function aplicarIdioma(nuevoLang){
+ lang=nuevoLang==='en'?'en':'es';
+ META=lang==='en'?META_EN:META_ES;
+ document.documentElement.lang=lang;
+ el('panelKicker').textContent=lang==='en'?'TERRAIN ↔ DATA INTERACTION · 04 LAYERS':'INTERACCIÓN TERRENO ↔ DATOS · 04 CAPAS';
+ el('panelTitle').textContent=lang==='en'?'Explore the terrain':'Explora el territorio';
+ el('panelLead').textContent=lang==='en'?'Click any 3D stratum to inspect live NASA & agronomic metrics from your active plot.':'Haz clic en cualquier estrato 3D para vincularlo con los datos reales de tu parcela activa.';
+ el('layersHead').textContent=lang==='en'?'Available layers':'Capas disponibles';
+ el('layersNote').textContent=lang==='en'?'SELECT / VISIBILITY':'SELECCIONAR / VISIBILIDAD';
+ el('focus').textContent=lang==='en'?'Zoom to layer':'Acercar a capa';
+ el('spacingHead').textContent=lang==='en'?'Layer explosion':'Explosión de capas';
+ el('spacingFieldLabel').textContent=lang==='en'?'Vertical spacing':'Distancia vertical';
+ el('viewHead').textContent=lang==='en'?'Perspective':'Perspectiva';
+ el('viewNote').textContent=lang==='en'?'CAMERA':'CÁMARA';
+ el('actionsHead').textContent=lang==='en'?'Exploration':'Exploración';
+ el('compare').textContent=lang==='en'?'Relief + contours':'Relieve + curvas';
+ el('showAll').textContent=lang==='en'?'Show all':'Mostrar todas';
+ el('reset').textContent=lang==='en'?'Reset full view':'Restablecer vista completa';
+ el('hintText').textContent=lang==='en'?'Drag to orbit · Scroll/pinch to zoom · Click a layer':'Arrastra para girar · Zoom con rueda o dos dedos · Haz clic en una capa';
+ el('helpFoot').textContent=lang==='en'?'Conceptual 3D terrain synced live with your plot’s NASA, SoilGrids & FAO-56 metrics.':'Maqueta conceptual sincronizada en tiempo real con los parámetros NASA, SoilGrids y FAO-56 de tu parcela.';
+ const layerCopy=lang==='en'?{
+  'agricultura-t':'Agricultural landscape','agricultura-s':'HLS cover & rotation',
+  'curvas-t':'Contour lines','curvas-s':'NASADEM 30 m thermal belt',
+  'relieve-t':'Mountain relief','relieve-s':'SRTM slope & soil',
+  'mapa-t':'Basemap & climate','mapa-s':'NASA POWER + SMAP L4'
+ }:{
+  'agricultura-t':'Paisaje agrícola','agricultura-s':'Cobertura HLS y rotación',
+  'curvas-t':'Curvas de nivel','curvas-s':'Piso térmico NASADEM 30 m',
+  'relieve-t':'Relieve montañoso','relieve-s':'Pendiente SRTM y suelo',
+  'mapa-t':'Mapa base y clima','mapa-s':'NASA POWER + SMAP L4'
+ };
+ Object.entries(layerCopy).forEach(([k,v])=>{const node=document.querySelector(`[data-i18n-layer="${k}"]`);if(node)node.textContent=v;});
+ setRotate(autoRotate);
+ setSpacing(spacing);
+ updateUI();
+ renderLiveDetail();
+ aplicarAmbienteSimulacion();
+}
+function updateUI(){
+ for(const b of document.querySelectorAll('[data-layer]'))b.setAttribute('aria-pressed',String(b.dataset.layer===selected));
+ for(const b of document.querySelectorAll('[data-toggle]')){const k=b.dataset.toggle;b.textContent=effectiveVisible(k)?'Visible':(lang==='en'?'Hidden':'Oculta');b.setAttribute('aria-pressed',String(effectiveVisible(k)));}
+ for(const b of document.querySelectorAll('[data-marker]'))b.setAttribute('aria-pressed',String(b.dataset.marker===selected));
+ el('detailLabel').textContent=(lang==='en'?'LAYER ':'CAPA ')+META[selected].number+' / 04';
+ el('detailTitle').textContent=META[selected].title;
+ el('detailText').textContent=META[selected].text;
+ el('isolate').textContent=isolated?(lang==='en'?'Exit isolation':'Salir de aislamiento'):(lang==='en'?'Isolate layer':'Aislar capa');
+ el('isolate').setAttribute('aria-pressed',String(isolated));
+ el('compare').setAttribute('aria-pressed',String(compare));
+ const n=bottomUp.filter(effectiveVisible).length;
+ el('visibleCount').textContent=`${n} / 4 `+(lang==='en'?'LAYERS':'CAPAS');
+ renderLiveDetail();
+}
+function syncMeshes(){
+ for(let i=0;i<bottomUp.length;i++){
+  const k=bottomUp[i],dy=(spacing-1.6)*i;
+  for(const mesh of objects[k]){mesh.visible=effectiveVisible(k);mesh.userData.targetOffset=dy;}
+ }
+ updateUI();
+}
+function select(k){
+ selected=k;if(!shown[k])shown[k]=true;if(compare){compare=false;bottomUp.forEach(z=>shown[z]=true)}
+ syncMeshes();
+ setStatus((lang==='en'?'Selected: ':'Seleccionada: ')+META[k].title);
+ try{if(window.parent!==window)window.parent.postMessage({type:'visor3d:capaSeleccionada',layer:k},'*');}catch(e){}
+}
+function toggle(k){if(isolated)isolated=false;if(compare)compare=false;shown[k]=!shown[k];syncMeshes();setStatus(META[k].title+': '+(shown[k]?(lang==='en'?'visible.':'visible.'):(lang==='en'?'hidden.':'oculta.')));}
+function animateCamera(position,target){if(!camera||!controls)return;setRotate(false);transition={startP:camera.position.clone(),startT:controls.target.clone(),endP:new THREE.Vector3(...position),endT:new THREE.Vector3(...target),progress:0};}
+function view(which){
+ if(!camera)return;
+ const centers={iso:[[11.4,9.6,11.4],[0,2.45,0]],top:[[.15,18.5,.25],[0,2.45,0]],side:[[17.5,5.4,.12],[0,2.45,0]]};
+ animateCamera(...centers[which]);
+ document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===which)));
+ setStatus((lang==='en'?'View: ':'Vista ')+which+'.');
+}
+function focusSelected(){if(!camera)return;const height=META[selected].anchor+(spacing-1.6)*bottomUp.indexOf(selected),target=[0,height,0];animateCamera([8.8,height+5.6,8.8],target);setStatus((lang==='en'?'Focus: ':'Enfoque: ')+META[selected].title+'.');}
+function reset(){selected='agricultura';isolated=false;compare=false;tourStep=-1;bottomUp.forEach(k=>shown[k]=true);setSpacing(1.6);setRotate(!prefersReduced);el('tour').textContent=lang==='en'?'Start tour':'Iniciar recorrido';document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view==='iso')));syncMeshes();if(loaded){animateCamera([11.4,9.6,11.4],[0,2.45,0]);setRotate(!prefersReduced)}setStatus(lang==='en'?'View reset.':'Vista restablecida.');}
+function compareRelief(){compare=!compare;isolated=false;if(compare){shown.mapa=false;shown.agricultura=false;shown.curvas=true;shown.relieve=true;selected='curvas';setStatus(lang==='en'?'Comparing relief & contours.':'Comparación: relieve y curvas de nivel.');}else{bottomUp.forEach(k=>shown[k]=true);setStatus(lang==='en'?'Showing all 4 layers.':'Mostrando de nuevo las cuatro capas.');}syncMeshes();}
+function tour(){tourStep=(tourStep+1)%topDown.length;const k=topDown[tourStep];isolated=false;compare=false;shown[k]=true;select(k);focusSelected();el('tour').textContent=tourStep===3?(lang==='en'?'Restart tour':'Reiniciar recorrido'):(lang==='en'?`Next (${tourStep+2}/4)`:`Siguiente (${tourStep+2}/4)`);setStatus(`${tourStep+1}/4: ${META[k].title}.`);}
+function setFullscreen(){if(document.fullscreenElement)document.exitFullscreen();else stage.requestFullscreen?.();}
+function pointerHit(e){if(!loaded)return null;const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);const list=bottomUp.flatMap(k=>objects[k]).filter(o=>o.visible);const hit=raycaster.intersectObjects(list,false)[0];return hit?.object?.userData?.layer||null}
+function updateHover(e){if(!loaded)return;const key=pointerHit(e);if(hovered!==key){hovered=key;renderer.domElement.style.cursor=key?'pointer':'grab'}if(!key){hoverTip.hidden=true;return;}const rect=stage.getBoundingClientRect();hoverTip.textContent=META[key].title;hoverTip.style.left=Math.min(e.clientX-rect.left,rect.width-150)+'px';hoverTip.style.top=Math.max(e.clientY-rect.top,20)+'px';hoverTip.hidden=false;}
+function positionMarkers(){if(!loaded)return;for(const k of bottomUp){const m=document.querySelector(`[data-marker="${k}"]`);if(!effectiveVisible(k)){m.hidden=true;continue;}const p=new THREE.Vector3(4.05,META[k].anchor+(spacing-1.6)*bottomUp.indexOf(k),3.5).project(camera);if(p.z>1||p.z< -1){m.hidden=true;continue;}m.hidden=false;m.style.left=((p.x+1)/2*stage.clientWidth)+'px';m.style.top=((1-p.y)/2*stage.clientHeight)+'px';}}
+function listen(){
+ document.querySelectorAll('[data-layer]').forEach(b=>b.addEventListener('click',()=>select(b.dataset.layer)));
+ document.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',()=>toggle(b.dataset.toggle)));
+ document.querySelectorAll('[data-marker]').forEach(b=>b.addEventListener('click',()=>select(b.dataset.marker)));
+ document.querySelectorAll('.spacing-choice').forEach(b=>b.addEventListener('click',()=>{setSpacing(b.dataset.spacing);syncMeshes();}));
+ el('spacing').addEventListener('input',e=>{setSpacing(e.target.value);syncMeshes()});
+ document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>view(b.dataset.view)));
+ el('focus').addEventListener('click',focusSelected);el('isolate').addEventListener('click',()=>{isolated=!isolated;shown[selected]=true;compare=false;syncMeshes();});
+ el('compare').addEventListener('click',compareRelief);
+ el('showAll').addEventListener('click',()=>{isolated=false;compare=false;bottomUp.forEach(k=>shown[k]=true);syncMeshes();});
+ el('rotate').addEventListener('click',()=>{setRotate(!autoRotate);});
+ el('reset').addEventListener('click',reset);el('tour').addEventListener('click',tour);el('fullscreen').addEventListener('click',setFullscreen);
+ document.addEventListener('fullscreenchange',()=>{el('fullscreen').textContent=document.fullscreenElement?(lang==='en'?'Exit fullscreen':'Salir de pantalla completa'):(lang==='en'?'Fullscreen':'Pantalla completa');});
+ window.addEventListener('message',ev=>{
+  const msg=ev.data;
+  if(!msg||typeof msg!=='object')return;
+  if(msg.type==='rotasat:datosParcela' && msg.payload){
+   datosParcela=msg.payload;
+   const kc=el('kickerParcela');
+   if(kc)kc.textContent=`ROTASAT 3D · ${(datosParcela.parcelaNombre||'Lote').toUpperCase()} (${datosParcela.elevM} m)`;
+   if(datosParcela.lang && datosParcela.lang!==lang)aplicarIdioma(datosParcela.lang);
+   else{renderLiveDetail();aplicarAmbienteSimulacion();}
+  }else if(msg.type==='rotasat:seleccionarCapa' && META[msg.layer]){
+   select(msg.layer);
+   if(msg.focus)focusSelected();
+  }else if(msg.type==='rotasat:lang' && msg.lang){
+   aplicarIdioma(msg.lang);
+  }
+ });
+}
+async function load3D(){
+ try{
+  THREE=await import('three');
+  const [{OrbitControls},{GLTFLoader}]=await Promise.all([import('three/addons/controls/OrbitControls.js'),import('three/addons/loaders/GLTFLoader.js')]);
+  scene=new THREE.Scene();scene.background=null;
+  camera=new THREE.PerspectiveCamera(40,1,.1,120);camera.position.set(11.4,9.6,11.4);
+  renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'high-performance'});
+  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));
+  stage.appendChild(renderer.domElement);
+  controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.065;controls.enablePan=false;controls.minDistance=5.4;controls.maxDistance=32;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI*.505;controls.target.set(0,2.45,0);controls.autoRotate=false;controls.autoRotateSpeed=.55;controls.update();
+  controls.addEventListener('start',()=>{transition=null;setRotate(false);});
+  ambientLight=new THREE.AmbientLight(0xffffff,1.45);scene.add(ambientLight);
+  sunLight=new THREE.DirectionalLight(0xffffff,2.0);sunLight.position.set(8,14,7);scene.add(sunLight);
+  const fill=new THREE.DirectionalLight(0xffffff,.55);fill.position.set(-6,5,-8);scene.add(fill);
+  setStatus('Cargando geometría y texturas del terreno…');
+  const model=await new GLTFLoader().loadAsync('./capas_geoespaciales_allpawinay.glb');
+  model.scene.traverse(o=>{if(!o.isMesh)return;const k=getKey(o.name);if(!k)return;o.userData.layer=k;o.userData.targetOffset=0;objects[k].push(o);const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach((m,i)=>{if(!m)return;const copy=m.clone();copy.side=THREE.DoubleSide;if(Array.isArray(o.material))o.material[i]=copy;else o.material=copy;});});
+  if(bottomUp.some(k=>objects[k].length===0))throw new Error('No se reconocen las cuatro capas del archivo GLB.');
+  scene.add(model.scene);raycaster=new THREE.Raycaster();pointer=new THREE.Vector2();
+  let down=null;
+  renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY}});
+  renderer.domElement.addEventListener('pointerup',e=>{if(!down)return;const move=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;if(move<7){const hit=pointerHit(e);if(hit)select(hit);}});
+  renderer.domElement.addEventListener('pointermove',updateHover);
+  renderer.domElement.addEventListener('pointerleave',()=>{hovered=null;hoverTip.hidden=true;renderer.domElement.style.cursor='grab';});
+  const resize=()=>{const w=stage.clientWidth,h=stage.clientHeight;if(!w||h<10)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);};
+  resizeObserver=new ResizeObserver(resize);resizeObserver.observe(stage);resize();loaded=true;poster.hidden=true;
+  const render=()=>{
+   raf=requestAnimationFrame(render);
+   const easing=prefersReduced?1:.18;
+   bottomUp.forEach(k=>objects[k].forEach(o=>{const d=o.userData.targetOffset||0;o.position.y+=(d-o.position.y)*easing;}));
+   if(transition){transition.progress=Math.min(1,transition.progress+(prefersReduced?1:.038));const t=transition.progress*transition.progress*(3-2*transition.progress);camera.position.lerpVectors(transition.startP,transition.endP,t);controls.target.lerpVectors(transition.startT,transition.endT,t);if(transition.progress>=1)transition=null;}
+   controls.autoRotate=autoRotate;controls.update();positionMarkers();
+   const simColor=(datosParcela&&datosParcela.simMode==='actual')?'#A6512B':(datosParcela&&datosParcela.escenario==='sequia'?'#C27A22':'#3E4A1E');
+   for(const k of bottomUp){const baseTint=(k==='agricultura'&&datosParcela)?0.03:0;const intensity=baseTint+(k===selected?.08:0)+(k===hovered?.075:0);for(const o of objects[k]){const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>{if(m?.emissive){m.emissive.set(k===selected?'#A6512B':simColor);m.emissiveIntensity=intensity;}})}}
+   renderer.render(scene,camera);
+  };
+  syncMeshes();document.querySelectorAll('.panel button,.scene-top button,.marker').forEach(b=>b.disabled=false);setRotate(!prefersReduced);setStatus('Modelo 3D listo. Interactúa con las capas o simula un escenario.');
+  aplicarAmbienteSimulacion();
+  try{if(window.parent!==window)window.parent.postMessage({type:'visor3d:listo'},'*');}catch(e){}
+  render();
+ }catch(err){console.error('Error del visor 3D:',err);poster.hidden=false;posterMessage.textContent='Vista de respaldo activa. Abre el proyecto desde un servidor local (Live Server o python -m http.server) con acceso a Internet para renderizar el GLB interactivo.';setStatus('Modo respaldo 2D (requiere servidor HTTP local para ES Modules).');}
+}
+listen();updateUI();document.querySelectorAll('.panel button,.scene-top button,.marker').forEach(b=>b.disabled=true);load3D();
+</script>
+</body>
+</html>

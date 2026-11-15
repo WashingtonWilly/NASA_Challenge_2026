@@ -3371,3 +3371,199 @@ body:not(.modo-tecnico) .plan-prioridades .sliders-list { display: none !importa
 .capas-nasa[hidden] { display: none; }
 .capas-nasa .capas-leyenda { display: grid; }
 .capas-leyenda-ctrl .capas-fecha { justify-content: space-between; }
+
+/* ==========================================================================
+   Módulo 6: Apartado 3D — Simulador interactivo terreno ↔ datos NASA
+   ========================================================================== */
+.visor3d-sim-bar {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  background: var(--campo);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+
+.visor3d-sim-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.visor3d-sim-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--oliva);
+}
+
+.visor3d-parcela-badge {
+  margin-top: 4px;
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.visor3d-layer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.visor3d-chip,
+.visor3d-sim-btn {
+  appearance: none;
+  border: 1px solid var(--borde);
+  background: var(--papel-claro);
+  color: var(--tinta);
+  font-family: var(--fuente);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.visor3d-chip:hover,
+.visor3d-sim-btn:hover {
+  border-color: var(--oliva);
+  background: var(--banda);
+}
+
+.visor3d-chip.activo {
+  background: var(--tierra);
+  border-color: var(--tierra);
+  color: #fff;
+}
+
+.visor3d-sim-btn.activo {
+  background: var(--oliva);
+  border-color: var(--oliva);
+  color: #fff;
+}
+
+.visor3d-sim-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 12px;
+}
+
+.visor3d-ctrl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.visor3d-ctrl-label {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--texto-2);
+}
+
+.visor3d-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.visor3d-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.visor3d-kpi {
+  appearance: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--campo);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  cursor: pointer;
+  transition: border-color 0.16s ease, background-color 0.16s ease, transform 0.14s ease;
+}
+
+.visor3d-kpi:hover {
+  border-color: var(--oliva);
+  background: var(--papel-claro);
+}
+
+.visor3d-kpi.activo {
+  border-color: var(--tierra);
+  background: #FFF9F2;
+  box-shadow: inset 3px 0 0 var(--tierra);
+}
+
+.visor3d-kpi-tag {
+  font-family: var(--mono);
+  font-size: 0.71rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--texto-2);
+}
+
+.visor3d-kpi.activo .visor3d-kpi-tag {
+  color: var(--tierra);
+}
+
+.visor3d-kpi-val {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--tinta);
+  line-height: 1.3;
+}
+
+.visor3d-kpi-sub {
+  font-size: 0.8rem;
+  color: var(--texto-2);
+  line-height: 1.35;
+}
+
+.visor3d-frame-wrap {
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #E9E2CE;
+  box-shadow: 0 12px 28px rgba(43, 42, 34, 0.08);
+}
+
+.visor3d-iframe {
+  display: block;
+  width: 100%;
+  height: 860px;
+  border: 0;
+}
+
+@media (max-width: 1080px) {
+  .visor3d-kpis-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .visor3d-kpis-grid {
+    grid-template-columns: 1fr;
+  }
+  .visor3d-iframe {
+    height: 1120px;
+  }
+}

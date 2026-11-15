@@ -91,6 +91,13 @@
             </span>
             <span class="sidebar-badge-num">9</span>
           </button>
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-3d">
+            <span class="sidebar-item-left">
+              <i data-lucide="box" class="icono"></i>
+              <span>Apartado 3D</span>
+            </span>
+            <span class="sidebar-badge-num">3D</span>
+          </button>
         </nav>
 
         <!-- Tarjeta inferior: Parcela en memoria -->
@@ -1196,6 +1203,77 @@
 
           </div>
 
+        </section>
+
+        <!-- MÓDULO 6: APARTADO 3D INTERACTIVO (TERRENO ↔ DATOS) -->
+        <section id="tab-3d" class="step-section tab-panel" data-tab-panel="tab-3d" role="tabpanel" hidden>
+          <div class="step-header">
+            <div class="mono"><i data-lucide="box" class="icono"></i> Simulación espacial 3D</div>
+            <h2>Apartado 3D — Terreno y datos en tiempo real</h2>
+            <p>Interactúa con los cuatro estratos geoespaciales del lote y simula cómo el clima, la pendiente SRTM y la rotación de cultivos transforman el balance hídrico y productivo.</p>
+          </div>
+
+          <div id="visor3d-sim-bar" class="panel-card visor3d-sim-bar">
+            <div class="visor3d-sim-top">
+              <div>
+                <div class="visor3d-sim-eyebrow"><i data-lucide="sliders-horizontal" class="icono"></i> Simulador interactivo terreno ↔ datos NASA</div>
+                <div id="visor3d-parcela-badge" class="visor3d-parcela-badge">Cargando parcela activa…</div>
+              </div>
+              <div class="visor3d-layer-chips" role="group" aria-label="Sincronizar capa 3D">
+                <button type="button" class="visor3d-chip activo" data-sim3d-layer="agricultura" aria-pressed="true">04 Paisaje agrícola</button>
+                <button type="button" class="visor3d-chip" data-sim3d-layer="curvas" aria-pressed="false">03 Curvas de nivel</button>
+                <button type="button" class="visor3d-chip" data-sim3d-layer="relieve" aria-pressed="false">02 Relieve montañoso</button>
+                <button type="button" class="visor3d-chip" data-sim3d-layer="mapa" aria-pressed="false">01 Mapa base</button>
+              </div>
+            </div>
+
+            <div class="visor3d-sim-controls">
+              <div class="visor3d-ctrl-group">
+                <span class="visor3d-ctrl-label">Escenario climático simulado</span>
+                <div class="visor3d-btn-row" role="group" aria-label="Escenario climático 3D">
+                  <button type="button" class="visor3d-sim-btn activo" data-sim3d-esc="normal" aria-pressed="true">Normal (POWER)</button>
+                  <button type="button" class="visor3d-sim-btn" data-sim3d-esc="sequia" aria-pressed="false">Sequía (−25 % lluvia, +2 °C)</button>
+                  <button type="button" class="visor3d-sim-btn" data-sim3d-esc="lluvia" aria-pressed="false">Lluvia intensa (+20 % lluvia)</button>
+                </div>
+              </div>
+
+              <div class="visor3d-ctrl-group">
+                <span class="visor3d-ctrl-label">Manejo de cultivos comparado</span>
+                <div class="visor3d-btn-row" role="group" aria-label="Modo de rotación 3D">
+                  <button type="button" class="visor3d-sim-btn activo" data-sim3d-modo="recomendada" aria-pressed="true">Opción 1 recomendada (rotación)</button>
+                  <button type="button" class="visor3d-sim-btn" data-sim3d-modo="actual" aria-pressed="false">Práctica actual (monocultivo)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="visor3d-kpis" class="visor3d-kpis-grid">
+            <button type="button" class="visor3d-kpi activo" data-kpi-layer="agricultura">
+              <span class="visor3d-kpi-tag">04 · Paisaje agrícola (HLS + IRR)</span>
+              <strong id="sim3d-val-agri" class="visor3d-kpi-val">—</strong>
+              <span id="sim3d-sub-agri" class="visor3d-kpi-sub">Cargando estrategia…</span>
+            </button>
+            <button type="button" class="visor3d-kpi" data-kpi-layer="curvas">
+              <span class="visor3d-kpi-tag">03 · Curvas de nivel (NASADEM 30 m)</span>
+              <strong id="sim3d-val-curvas" class="visor3d-kpi-val">—</strong>
+              <span id="sim3d-sub-curvas" class="visor3d-kpi-sub">Cargando piso térmico…</span>
+            </button>
+            <button type="button" class="visor3d-kpi" data-kpi-layer="relieve">
+              <span class="visor3d-kpi-tag">02 · Relieve y suelo (SRTM + SoilGrids)</span>
+              <strong id="sim3d-val-relieve" class="visor3d-kpi-val">—</strong>
+              <span id="sim3d-sub-relieve" class="visor3d-kpi-sub">Cargando pendiente…</span>
+            </button>
+            <button type="button" class="visor3d-kpi" data-kpi-layer="mapa">
+              <span class="visor3d-kpi-tag">01 · Mapa base y clima (POWER + SMAP)</span>
+              <strong id="sim3d-val-mapa" class="visor3d-kpi-val">—</strong>
+              <span id="sim3d-sub-mapa" class="visor3d-kpi-sub">Cargando balance hídrico…</span>
+            </button>
+          </div>
+
+          <div class="visor3d-frame-wrap">
+            <iframe id="iframe-visor-3d" data-src="visor3d/index.html"
+              title="Visor geoespacial 3D interactivo RotaSat" class="visor3d-iframe" loading="lazy"></iframe>
+          </div>
         </section>
 
         <!-- MÓDULO 7: ADMINISTRACIÓN -->

@@ -102,6 +102,7 @@
     setText('[data-tab-target="tab-rotaciones"] .sidebar-item-left span', 'My planting plan');
     setText('[data-tab-target="tab-informe"] .sidebar-item-left span', 'My PDF report');
     setText('[data-tab-target="tab-satelites"] .sidebar-item-left span', 'NASA data');
+    setText('[data-tab-target="tab-3d"] .sidebar-item-left span', '3D View');
     setText('.sidebar-memory-title span', 'Plot in memory');
 
     setText('.banda-top-inner > span', 'NASA International Space Apps Challenge 2026 Project · Riobamba');
@@ -436,6 +437,32 @@
     const thsEn = ['Source / Mission', 'Extracted Variables', 'Native Resolution', 'Plot-level Harmonization'];
     ths.forEach((th, i) => { if (thsEn[i]) setText(th, thsEn[i]); });
 
+    // Módulo 6: Apartado 3D interactivo
+    setTextPreservingIcons('#tab-3d .step-header .mono', '3D spatial simulation');
+    setText('#tab-3d .step-header h2', '3D View — Live terrain & data');
+    setText('#tab-3d .step-header p',
+      'Interact with the plot’s four geospatial strata and simulate how climate, SRTM slope, and crop rotation transform water balance and profit.');
+    setTextPreservingIcons('#visor3d-sim-bar .visor3d-sim-eyebrow', 'Interactive NASA terrain ↔ data simulator');
+    setText('[data-sim3d-layer="agricultura"]', '04 Agricultural landscape');
+    setText('[data-sim3d-layer="curvas"]', '03 Contour lines');
+    setText('[data-sim3d-layer="relieve"]', '02 Mountain relief');
+    setText('[data-sim3d-layer="mapa"]', '01 Basemap');
+
+    const ctrlLabels = document.querySelectorAll('#visor3d-sim-bar .visor3d-ctrl-label');
+    if (ctrlLabels[0]) setText(ctrlLabels[0], 'Simulated climate scenario');
+    if (ctrlLabels[1]) setText(ctrlLabels[1], 'Compared crop management');
+
+    setText('[data-sim3d-esc="normal"]', 'Baseline (POWER)');
+    setText('[data-sim3d-esc="sequia"]', 'Drought (−25% rain, +2 °C)');
+    setText('[data-sim3d-esc="lluvia"]', 'Heavy rain (+20% rain)');
+    setText('[data-sim3d-modo="recomendada"]', 'Option 1 recommended (rotation)');
+    setText('[data-sim3d-modo="actual"]', 'Current practice (monoculture)');
+
+    setText('[data-kpi-layer="agricultura"] .visor3d-kpi-tag', '04 · Agricultural landscape (HLS + IRR)');
+    setText('[data-kpi-layer="curvas"] .visor3d-kpi-tag', '03 · Contour lines (NASADEM 30 m)');
+    setText('[data-kpi-layer="relieve"] .visor3d-kpi-tag', '02 · Relief & soil (SRTM + SoilGrids)');
+    setText('[data-kpi-layer="mapa"] .visor3d-kpi-tag', '01 · Basemap & climate (POWER + SMAP)');
+
     // Footer
     const footerP = document.querySelectorAll('footer .contenedor div:first-child p');
     if (footerP[0]) setHtml(footerP[0], '<strong>Team RotaSat</strong> · NASA International Space Apps Challenge 2026 · Riobamba, Ecuador');
@@ -539,7 +566,14 @@
     ['Pesos IRR:', 'IRR Weights:'],
     ['Nitrógeno ', 'Nitrogen '],
     ['Materia orgánica ', 'Organic matter '],
-    ['Rentabilidad ', 'Profitability ']
+    ['Rentabilidad ', 'Profitability '],
+    ['Lluvia cubre ', 'Rain covers '],
+    ['Déficit ', 'Deficit '],
+    [' m s.n.m. · ', ' m a.s.l. · '],
+    [' aptos', ' suitable'],
+    ['% pend. · f_pend = ', '% slope · f_pend = '],
+    ['mm/año', 'mm/yr'],
+    ['/año', '/yr']
   ];
 
   function traducirTexto(txt) {
@@ -589,7 +623,9 @@
     '#badge-escenario-lluvia',
     '#badge-escenario-temp',
     '#parcela-activa',
-    '#tech-farmer-summary'
+    '#tech-farmer-summary',
+    '#visor3d-parcela-badge',
+    '#visor3d-kpis'
   ];
 
   function aplicarDinamico() {

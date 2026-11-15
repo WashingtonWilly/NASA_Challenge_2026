@@ -25,6 +25,11 @@
       retiraForraje: false,
       priorizarForraje: false
     },
+    sim3d: {
+      escenario: 'normal',
+      modo: 'recomendada',
+      capa: 'agricultura'
+    },
     lang: 'es',
     ultimoResultado: null,
     rotacionSeleccionadaGraficoId: 'recomendada_1',
@@ -2125,6 +2130,221 @@
     refrescarIconosLucide();
   }
 
+  const SIM3D_ESCENARIOS = {
+    normal: { lluviaPct: 0, tempC: 0 },
+    sequia: { lluviaPct: -25, tempC: 2.0 },
+    lluvia: { lluviaPct: 20, tempC: 0 }
+  };
+
+  function enviarMensajeVisor3D(msg) {
+    const iframe = document.getElementById('iframe-visor-3d');
+    if (!iframe || !iframe.getAttribute('src') || !iframe.contentWindow) return;
+    try {
+      iframe.contentWindow.postMessage(msg, '*');
+    } catch (e) { /* iframe aún inicializando */ }
+  }
+
+  function sincronizarCapaActiva3D(layer) {
+    if (!layer) return;
+    state.sim3d.capa = layer;
+    document.querySelectorAll('[data-sim3d-layer]').forEach(btn => {
+      const on = btn.dataset.sim3dLayer === layer;
+      btn.classList.toggle('activo', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('[data-kpi-layer]').forEach(card => {
+      card.classList.toggle('activo', card.dataset.kpiLayer === layer);
+    });
+  }
+
+  function construirPayloadVisor3D() {
+    const parcela = obtenerParcelaActual();
+    if (!parcela || !state.catalogo) return null;
+
+    const escCfg = SIM3D_ESCENARIOS[state.sim3d.escenario] || SIM3D_ESCENARIOS.normal;
+    const mismoEscenarioPrincipal = state.ultimoResultado
+      && escCfg.lluviaPct === (state.opciones.escenarioLluviaPct || 0)
+      && escCfg.tempC === (state.opciones.escenarioTempC || 0);
+
+    const resSim = mismoEscenarioPrincipal
+      ? state.ultimoResultado
+      : window.AgronomiaMotor.recomendar(parcela, state.catalogo, state.sliders, {
+          ...state.opciones,
+          escenarioLluviaPct: escCfg.lluviaPct,
+          escenarioTempC: escCfg.tempC
+        });
+
+    const rot = state.sim3d.modo === 'actual'
+      ? resSim.actual
+      : ((resSim.recomendadas && resSim.recomendadas[0]) || resSim.actual);
+    const bal = (rot && rot.balanceHidrico) || {};
+
+    const clima = parcela.clima_mensual || [];
+    const lluviaBase = clima.reduce((a, m) => a + (m.P_mm || 0), 0);
+    const lluviaSimMm = Math.round(lluviaBase * (1 + escCfg.lluviaPct / 100));
+    const et0SimMm = Math.round(clima.reduce((a, m) => {
+      const tmed = Number.isFinite(m.Tmed) ? m.Tmed : 14;
+      const fT = escCfg.tempC !== 0 ? Math.max(0.8, (tmed + escCfg.tempC + 17.8) / Math.max(5, tmed + 17.8)) : 1;
+      return a + (m.ET0_mm || 0) * fT;
+    }, 0));
+
+    const minAbsBase = clima.length ? Math.min(...clima.map(m => m.Tmin_abs ?? 5)) : 4;
+    const tminAbs = Number((minAbsBase + escCfg.tempC).toFixed(1));
+    const esEn = state.lang === 'en';
+    const riesgoHelada = tminAbs < 0
+      ? (esEn ? 'Severe frost' : 'Helada severa')
+      : (tminAbs < 2 ? (esEn ? 'Moderate risk' : 'Riesgo moderado') : (esEn ? 'Low / none' : 'Bajo / sin helada'));
+
+    const smRaw = parcela.smap && Number(parcela.smap.sm_rootzone_m3m3);
+    const smAnom = parcela.smap && Number(parcela.smap.anomalia_pct);
+    const smapText = Number.isFinite(smRaw) && smRaw > 0
+      ? `${smRaw.toFixed(3)} m³/m³ (${(smAnom || 0) >= 0 ? '+' : ''}${Math.round(smAnom || 0)}%)`
+      : (parcela.anomalia
+          ? `${parcela.anomalia.pct > 0 ? '+' : ''}${parcela.anomalia.pct}% (${esEn ? 'anomaly' : 'anomalía'})`
+          : (esEn ? 'Pending' : 'Sin serie'));
+
+    const pendPct = parcela.terreno?.pendiente_pct ?? 12;
+    const fPend = window.BalanceMotor.factorPendiente(pendPct);
+    const areaHa = parcela.area_ha || 1;
+    const margenAnualUsd = Math.round((rot?.detalles?.rentabilidad?.margenAnualPromedioUsdHa || 0) * areaHa);
+
+    return {
+      lang: state.lang,
+      parcelaNombre: parcela.nombre || 'Parcela activa',
+      elevM: parcela.terreno?.elev_m ?? 2850,
+      pendPct,
+      fPend,
+      textura: parcela.suelo?.textura || 'Franco',
+      socPct: parcela.suelo?.soc_pct ?? 2.5,
+      ph: parcela.suelo?.ph ?? 6.0,
+      lluviaSimMm,
+      et0SimMm,
+      pefAnualMm: Math.round((bal.pefTotal || 0) / 3),
+      smapText,
+      tminAbs,
+      riesgoHelada,
+      cultivosAptosCount: resSim?.cultivosAptos?.length ?? 0,
+      planLabel: rot?.cultivos ? rot.cultivos.map(c => c.nombre).join(' → ') : '—',
+      irrPct: rot?.irrPct ?? 0,
+      coberturaAguaPct: bal.coberturaAguaPct ?? 0,
+      deficitMm: Math.round(bal.deficitTotal || 0),
+      margenAnualUsd,
+      escenario: state.sim3d.escenario,
+      simMode: state.sim3d.modo
+    };
+  }
+
+  function actualizarPanelSimulacion3D() {
+    const payload = construirPayloadVisor3D();
+    if (!payload) return;
+
+    const esEn = state.lang === 'en';
+    const escTxt = payload.escenario === 'sequia'
+      ? (esEn ? 'Drought (−25% rain, +2 °C)' : 'Sequía (−25 % lluvia, +2 °C)')
+      : (payload.escenario === 'lluvia'
+          ? (esEn ? 'Heavy rain (+20% rain)' : 'Lluvia intensa (+20 % lluvia)')
+          : (esEn ? 'Baseline (NASA POWER)' : 'Normal (NASA POWER)'));
+    const modoTxt = payload.simMode === 'actual'
+      ? (esEn ? 'Current practice' : 'Práctica actual')
+      : (esEn ? 'Option 1 recommended' : 'Opción 1 recomendada');
+
+    const badge = document.getElementById('visor3d-parcela-badge');
+    if (badge) {
+      badge.textContent = `${payload.parcelaNombre} · ${escTxt} · ${modoTxt}`;
+    }
+
+    const setEl = (id, txt) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = txt;
+    };
+
+    setEl('sim3d-val-agri', `IRR ${payload.irrPct}/100 · $${fmtMiles(payload.margenAnualUsd)}/año`);
+    setEl('sim3d-sub-agri', `${payload.planLabel} · Lluvia cubre ${payload.coberturaAguaPct}% · Déficit ${fmtMiles(payload.deficitMm)} mm`);
+
+    setEl('sim3d-val-curvas', `${fmtMiles(payload.elevM)} m s.n.m. · ${payload.cultivosAptosCount} aptos`);
+    setEl('sim3d-sub-curvas', `Tmin ${payload.tminAbs} °C · ${payload.riesgoHelada}`);
+
+    setEl('sim3d-val-relieve', `${payload.pendPct}% pend. · f_pend = ${payload.fPend}`);
+    setEl('sim3d-sub-relieve', `${payload.textura} · SOC ${payload.socPct}% · pH ${payload.ph}`);
+
+    setEl('sim3d-val-mapa', `${fmtMiles(payload.lluviaSimMm)} mm/año · Pef ${fmtMiles(payload.pefAnualMm)} mm`);
+    setEl('sim3d-sub-mapa', `ET₀ ${fmtMiles(payload.et0SimMm)} mm · SMAP: ${payload.smapText}`);
+
+    document.querySelectorAll('[data-sim3d-esc]').forEach(btn => {
+      const on = btn.dataset.sim3dEsc === state.sim3d.escenario;
+      btn.classList.toggle('activo', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('[data-sim3d-modo]').forEach(btn => {
+      const on = btn.dataset.sim3dModo === state.sim3d.modo;
+      btn.classList.toggle('activo', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+
+    sincronizarCapaActiva3D(state.sim3d.capa);
+    enviarMensajeVisor3D({ type: 'rotasat:datosParcela', payload });
+  }
+
+  function configurarApartado3D() {
+    document.querySelectorAll('[data-sim3d-esc]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.sim3d.escenario = btn.dataset.sim3dEsc || 'normal';
+        actualizarPanelSimulacion3D();
+        if (window.RotaSatI18n && window.RotaSatI18n.getLang() === 'en') {
+          window.RotaSatI18n.aplicarDinamico();
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-sim3d-modo]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.sim3d.modo = btn.dataset.sim3dModo || 'recomendada';
+        actualizarPanelSimulacion3D();
+        if (window.RotaSatI18n && window.RotaSatI18n.getLang() === 'en') {
+          window.RotaSatI18n.aplicarDinamico();
+        }
+      });
+    });
+
+    const seleccionarCapaDesdePanel = (layer) => {
+      if (!layer) return;
+      sincronizarCapaActiva3D(layer);
+      enviarMensajeVisor3D({ type: 'rotasat:seleccionarCapa', layer, focus: true });
+    };
+
+    document.querySelectorAll('[data-sim3d-layer]').forEach(btn => {
+      btn.addEventListener('click', () => seleccionarCapaDesdePanel(btn.dataset.sim3dLayer));
+    });
+    document.querySelectorAll('[data-kpi-layer]').forEach(card => {
+      card.addEventListener('click', () => seleccionarCapaDesdePanel(card.dataset.kpiLayer));
+    });
+
+    const iframe = document.getElementById('iframe-visor-3d');
+    if (iframe) {
+      iframe.addEventListener('load', () => {
+        const payload = construirPayloadVisor3D();
+        if (payload) enviarMensajeVisor3D({ type: 'rotasat:datosParcela', payload });
+        enviarMensajeVisor3D({ type: 'rotasat:lang', lang: state.lang });
+        enviarMensajeVisor3D({ type: 'rotasat:seleccionarCapa', layer: state.sim3d.capa, focus: false });
+      });
+    }
+
+    window.addEventListener('message', ev => {
+      const iframeEl = document.getElementById('iframe-visor-3d');
+      if (iframeEl && ev.source !== iframeEl.contentWindow) return;
+      const msg = ev.data;
+      if (!msg || typeof msg !== 'object') return;
+      if (msg.type === 'visor3d:listo') {
+        const payload = construirPayloadVisor3D();
+        if (payload) enviarMensajeVisor3D({ type: 'rotasat:datosParcela', payload });
+        enviarMensajeVisor3D({ type: 'rotasat:lang', lang: state.lang });
+        enviarMensajeVisor3D({ type: 'rotasat:seleccionarCapa', layer: state.sim3d.capa, focus: false });
+      } else if (msg.type === 'visor3d:capaSeleccionada' && msg.layer) {
+        sincronizarCapaActiva3D(msg.layer);
+      }
+    });
+  }
+
   /**
    * Ejecuta el motor agronómico completo y actualiza toda la interfaz
    */
@@ -2153,6 +2373,7 @@
     renderizarCultivosVetados(resultado);
     renderizarCalendarioSiembra(resultado, parcela);
     renderizarPanelInforme(resultado, parcela);
+    actualizarPanelSimulacion3D();
     refrescarIconosLucide();
     if (window.RotaSatI18n && window.RotaSatI18n.getLang() === 'en') {
       window.RotaSatI18n.aplicarEstatico();
@@ -2501,6 +2722,17 @@
           if (state.chartBalance) state.chartBalance.resize();
           if (state.chartHLS) state.chartHLS.resize();
         }, 60);
+      }
+
+      if (targetId === 'tab-3d') {
+        const iframe3d = document.getElementById('iframe-visor-3d');
+        if (iframe3d && !iframe3d.getAttribute('src') && iframe3d.dataset.src) {
+          iframe3d.setAttribute('src', iframe3d.dataset.src);
+        }
+        actualizarPanelSimulacion3D();
+        if (window.RotaSatI18n && window.RotaSatI18n.getLang() === 'en') {
+          window.RotaSatI18n.aplicarDinamico();
+        }
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3195,6 +3427,7 @@
     configurarModoDual();
     configurarPanelUbicacion();
     configurarHerramientasSIG();
+    configurarApartado3D();
 
     const onSoilChange = () => {
       const p = obtenerParcelaActual();
@@ -3298,11 +3531,13 @@
       const aplicarIdioma = (lang) => {
         state.lang = lang === 'en' ? 'en' : 'es';
         try { localStorage.setItem('rotasat_lang', state.lang); } catch (e) {}
+        actualizarPanelSimulacion3D();
         if (window.RotaSatI18n) {
           window.RotaSatI18n.setLang(state.lang, () => actualizarTodo());
         } else {
           document.documentElement.lang = state.lang;
         }
+        enviarMensajeVisor3D({ type: 'rotasat:lang', lang: state.lang });
       };
 
       btnLang.addEventListener('click', function () {
