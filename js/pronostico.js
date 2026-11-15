@@ -14,16 +14,16 @@
 
   // Códigos WMO de estado del tiempo → emoji y texto corto
   function cielo(code) {
-    if (code === 0) return ['☀️', 'Despejado'];
-    if (code <= 2) return ['🌤️', 'Poco nublado'];
-    if (code === 3) return ['☁️', 'Nublado'];
-    if (code === 45 || code === 48) return ['🌫️', 'Neblina'];
-    if (code >= 51 && code <= 57) return ['🌦️', 'Llovizna'];
-    if (code >= 61 && code <= 67) return ['🌧️', 'Lluvia'];
-    if (code >= 71 && code <= 77) return ['🌨️', 'Nieve o granizo'];
-    if (code >= 80 && code <= 82) return ['🌧️', 'Aguaceros'];
-    if (code >= 95) return ['⛈️', 'Tormenta'];
-    return ['🌥️', 'Variable'];
+    if (code === 0) return ['sun', 'Despejado'];
+    if (code <= 2) return ['cloud-sun', 'Poco nublado'];
+    if (code === 3) return ['cloud', 'Nublado'];
+    if (code === 45 || code === 48) return ['cloud-fog', 'Neblina'];
+    if (code >= 51 && code <= 57) return ['cloud-drizzle', 'Llovizna'];
+    if (code >= 61 && code <= 67) return ['cloud-rain', 'Lluvia'];
+    if (code >= 71 && code <= 77) return ['cloud-snow', 'Nieve o granizo'];
+    if (code >= 80 && code <= 82) return ['cloud-rain', 'Aguaceros'];
+    if (code >= 95) return ['cloud-lightning', 'Tormenta'];
+    return ['cloud-sun', 'Variable'];
   }
 
   async function cargar(lat, lon, elev) {
@@ -71,7 +71,7 @@
       const peor = helada.reduce((a, b) => (b.tmin < a.tmin ? b : a));
       const cuando = helada.map(d => nombreDia(d.fecha, d.i, true)).join(', ');
       out.push({
-        clase: peor.tmin <= 0 ? 'riesgo' : 'alerta', icono: '🥶',
+        clase: peor.tmin <= 0 ? 'riesgo' : 'alerta', icono: 'thermometer-snowflake',
         titulo: `Esta semana: ${peor.tmin <= 0 ? 'helada' : 'noche muy fría'} (${peor.tmin} °C)`,
         porque: `Se esperan noches muy frías el ${cuando}. Las plantas pequeñas y las flores pueden quemarse.`,
         acciones: [
@@ -86,7 +86,7 @@
     const total = pron.dias.reduce((s, d) => s + (d.lluvia || 0), 0);
     if (fuertes.length) {
       out.push({
-        clase: 'alerta', icono: '⛈️',
+        clase: 'alerta', icono: 'cloud-lightning',
         titulo: `Esta semana: lluvia fuerte (${Math.round(total)} mm en 7 días)`,
         porque: `Se espera mucha lluvia el ${fuertes.map(d => nombreDia(d.fecha, d.i, true)).join(', ')}.`,
         acciones: [
@@ -98,7 +98,7 @@
       });
     } else if (total < 2 && !helada.length) {
       out.push({
-        clase: 'info', icono: '☀️', titulo: 'Esta semana: casi sin lluvia',
+        clase: 'info', icono: 'sun', titulo: 'Esta semana: casi sin lluvia',
         porque: `Se esperan menos de 2 mm de lluvia en 7 días.`,
         acciones: ['Si va a sembrar, asegure el riego o espere a que vuelva la lluvia.', 'Cubra el suelo con rastrojo para guardar la humedad.'],
         tecnico: `Pronóstico Open-Meteo, acumulado 7 días ${total.toFixed(1)} mm.`
@@ -109,23 +109,23 @@
 
   function tarjeta(pron, error) {
     if (error) {
-      return `<div class="pron-cabeza"><strong>🌦️ Esta semana en su lote</strong></div>
+      return `<div class="pron-cabeza"><strong><i data-lucide="cloud-sun" class="icono" aria-hidden="true"></i> Esta semana en su lote</strong></div>
         <p class="pron-nota">No se pudo cargar el pronóstico (sin internet). El resto de la página funciona igual.</p>`;
     }
     if (!pron) {
-      return `<div class="pron-cabeza"><strong>🌦️ Esta semana en su lote</strong></div><p class="pron-nota">Cargando pronóstico…</p>`;
+      return `<div class="pron-cabeza"><strong><i data-lucide="cloud-sun" class="icono" aria-hidden="true"></i> Esta semana en su lote</strong></div><p class="pron-nota">Cargando pronóstico…</p>`;
     }
     const dias = pron.dias.map((d, i) => {
       const [em, txt] = cielo(d.code);
       const frio = d.tmin <= 0 ? 'riesgo' : (d.tmin <= 2 ? 'alerta' : '');
       return `<div class="pron-dia ${frio}" role="listitem" aria-label="${nombreDia(d.fecha, i, true)}: ${txt}, mínima ${d.tmin} grados, máxima ${d.tmax}, lluvia ${d.lluvia} milímetros">
         <span class="pron-nombre">${nombreDia(d.fecha, i)}</span>
-        <span class="pron-emoji" aria-hidden="true">${em}</span>
+        <i data-lucide="${em}" class="icono pron-ico" aria-hidden="true"></i>
         <span class="pron-temp"><b>${Math.round(d.tmax)}°</b> <span>${Math.round(d.tmin)}°</span></span>
-        <span class="pron-lluvia">${d.lluvia >= 0.1 ? `💧 ${d.lluvia.toFixed(d.lluvia < 10 ? 1 : 0)} mm` : '—'}</span>
+        <span class="pron-lluvia">${d.lluvia >= 0.1 ? `${d.lluvia.toFixed(d.lluvia < 10 ? 1 : 0)} mm` : '—'}</span>
       </div>`;
     }).join('');
-    return `<div class="pron-cabeza"><strong>🌦️ Esta semana en su lote</strong><span class="pron-fuente">Open-Meteo · ajustado a su altura</span></div>
+    return `<div class="pron-cabeza"><strong><i data-lucide="cloud-sun" class="icono" aria-hidden="true"></i> Esta semana en su lote</strong><span class="pron-fuente">Open-Meteo · ajustado a su altura</span></div>
       <div class="pron-dias" role="list">${dias}</div>`;
   }
 

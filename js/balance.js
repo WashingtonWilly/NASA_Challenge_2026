@@ -21,15 +21,35 @@
    * Precipitación efectiva mensual FAO ajustada por escorrentía en ladera (SRTM)
    * y capacidad de retención de humedad del suelo (Andisoles / materia orgánica SoilGrids).
    */
+  /**
+   * Agua disponible total por textura (θCC − θPMP, m³/m³), punto medio de FAO-56 Tabla 19.
+   * fInfil: fracción de la lluvia útil que queda en la zona de raíces (arena: percolación
+   * profunda; arcilla: infiltración lenta y escorrentía con lluvias fuertes).
+   */
+  const TEXTURA_FAO56 = {
+    'Arenoso': { taw: 0.08, fInfil: 0.85 },
+    'Franco arenoso': { taw: 0.13, fInfil: 0.93 },
+    'Franco': { taw: 0.155, fInfil: 1.0 },
+    'Franco limoso': { taw: 0.16, fInfil: 1.0 },
+    'Franco arcilloso': { taw: 0.155, fInfil: 0.97 },
+    'Arcilloso': { taw: 0.16, fInfil: 0.92 }
+  };
+  function propiedadesTextura(textura) {
+    return TEXTURA_FAO56[textura] || TEXTURA_FAO56['Franco'];
+  }
+
   function precipitacionEfectivaFAO(P_mm, pendientePct, suelo) {
     if (P_mm <= 0) return 0;
     const fPend = factorPendiente(pendientePct);
+    const tex = propiedadesTextura(suelo?.textura);
     const base = P_mm > 75 ? (0.82 * P_mm - 12) : Math.max(0.72 * P_mm, P_mm - 8);
     // Los suelos francos/andisoles con alta materia orgánica (> 2.5% SOC) retienen humedad
-    // de lluvias previas y neblina andina disponible para la raíz (~8-12 mm/mes en época húmeda)
+    // de lluvias previas y neblina andina disponible para la raíz (~8-12 mm/mes en época húmeda);
+    // la reserva se escala con el agua disponible de la textura (FAO-56 Tabla 19).
     const soc = suelo?.soc_pct ?? 1.5;
-    const reservaSuelo = (suelo?.es_andisol || soc >= 2.5) ? Math.min(12, P_mm * 0.18) : Math.min(5, P_mm * 0.08);
-    return Math.max(0, fPend * Math.max(0, base) + reservaSuelo);
+    const reservaBase = (suelo?.es_andisol || soc >= 2.5) ? Math.min(12, P_mm * 0.18) : Math.min(5, P_mm * 0.08);
+    const reservaSuelo = reservaBase * (tex.taw / 0.155);
+    return Math.max(0, fPend * tex.fInfil * Math.max(0, base) + reservaSuelo);
   }
 
   function kcPorEtapa(kcArray, indiceMesEnCiclo, totalMesesCiclo) {
@@ -183,6 +203,7 @@
   const API = {
     NOMBRES_MESES,
     factorPendiente,
+    propiedadesTextura,
     precipitacionEfectivaFAO,
     elegirVentanaCultivo,
     balanceHidrico

@@ -199,7 +199,7 @@
       "rol_ecologico": "Cereal rústico tolerante a sequía y heladas",
       "explicacion_suelo": "Cubre rápido las laderas contra la erosión, resiste heladas y aprovecha muy bien el nitrógeno dejado por el chocho o el haba.",
       "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "fuente": "Estimado por el equipo: el boletín oficial SIPA-MAG de precios al productor no publica este cultivo; validar con la asociación o feria local"
     },
     {
       "id": "trigo",
@@ -277,8 +277,9 @@
       "margen_usd_ha": 1420,
       "rol_ecologico": "Tolerante a sequía, heladas y suelos andinos",
       "explicacion_suelo": "Con bajo requerimiento hídrico (Kc medio 1.00) y raíz pivotante, rompe el ciclo de plagas de cereales y papa.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "estado_economico": "parcial",
+      "fuente": "Rendimiento: 0,61 t/ha en Chimborazo, Ministerio de Agricultura y Ganadería 2019 (citado en Castro-Albán et al., Agronomía Mesoamericana 2023) | Precio y costo: estimados por el equipo (no figuran en el boletín SIPA de precios al productor)",
+      "rendimiento_t_ha": 0.61
     },
     {
       "id": "chocho",
@@ -316,7 +317,7 @@
       "rol_ecologico": "Fijador de Nitrógeno (+50 kg/ha) y raíz descompactadora",
       "explicacion_suelo": "Su raíz pivotante profunda rompe capas duras, fija 50 kg N/ha gratis del aire y sus alcaloides reducen nematodos del suelo.",
       "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "fuente": "Estimado por el equipo: el boletín oficial SIPA-MAG de precios al productor no publica este cultivo; validar con la asociación o feria local"
     },
     {
       "id": "haba",
@@ -355,7 +356,7 @@
       "rol_ecologico": "Fijador de Nitrógeno (+40 kg/ha) tolerante al frío",
       "explicacion_suelo": "Enriquece el suelo con 40 kg N/ha de rápida liberación (baja relación C/N) ideal antes de sembrar cebada, trigo o quinua.",
       "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "fuente": "Estimado por el equipo: el boletín oficial SIPA-MAG de precios al productor no publica este cultivo; validar con la asociación o feria local"
     },
     {
       "id": "arveja",
@@ -474,8 +475,9 @@
       "margen_usd_ha": 1750,
       "rol_ecologico": "Biofumigante natural (glucosinolatos)",
       "explicacion_suelo": "Sus residuos ayudan a reducir hongos de la papa, pero exige 4 años de pausa para evitar la hernia de las coles.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "estado_economico": "parcial",
+      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (brócoli, 0,32 USD/kg; sipa.agricultura.gob.ec) | Rendimiento y costo: estimados por el equipo",
+      "precio_usd_t": 320
     },
     {
       "id": "zanahoria",
@@ -911,8 +913,9 @@
       "margen_usd_ha": 1950,
       "rol_ecologico": "Hortaliza de alta rentabilidad (exige rotación estricta)",
       "explicacion_suelo": "Comparte familia con la papa (Solanáceas); requiere 3–4 años sin repetir para evitar marchitez y nematodos.",
-      "estado_economico": "estimado",
-      "fuente": "Estimado por el equipo (precio, rendimiento y margen por verificar con MAG-SIPA)"
+      "estado_economico": "parcial",
+      "fuente": "Precio: Boletín de precios al productor SIPA-MAG, dic 2025 (tomate riñón de invernadero, 7,98 USD/caja de 35 lb = 503 USD/t; sipa.agricultura.gob.ec) | Rendimiento y costo: estimados por el equipo",
+      "precio_usd_t": 503
     },
     {
       "id": "caupi",

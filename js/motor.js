@@ -178,9 +178,11 @@
       `${ej('clima')}NASA POWER (climatología 10 años; ET₀ ${parcela.clima_metodo_et0 && /Penman/.test(parcela.clima_metodo_et0) ? 'Penman-Monteith con radiación, viento y humedad' : 'Hargreaves con temperatura'}): la lluvia efectiva cubre el ${bal.coberturaAguaPct}% de la demanda hídrica del plan (${bal.etcTotal} mm); considera la anomalía regional de ${anomaliaPct > 0 ? '+' : ''}${anomaliaPct}% en ${parcela.anomalia?.ventana || 'el último trimestre'}.`,
       (parcela.ndvi_mensual || []).length
         ? `${ej('ndvi')}HLS Landsat 8/9 + Sentinel-2 (30 m): detectó ${mesesDesnudoHist} de ${totalMesesHist} meses (${pctDesnudoHist}%) con suelo descubierto (NDVI < 0.25); esta rotación sincroniza la cobertura vegetal con los picos de lluvia.`
-        : `HLS Landsat 8/9 + Sentinel-2 (30 m): este lote todavía no tiene historial satelital (se pide a AppEEARS y tarda horas); la recomendación usa clima, suelo y altitud.`,
+        : (['parcela_licto', 'parcela_guano'].includes(parcela.id)
+          ? `HLS Landsat 8/9 + Sentinel-2 (30 m): historial satelital pedido a NASA AppEEARS; mientras llega, la recomendación usa clima, suelo y altitud.`
+          : null),
       `${ej('suelo') || ej('terreno')}NASADEM SRTM (30 m) + ISRIC SoilGrids (250 m): lote a ${altitud} m s.n.m. con pendiente media del ${pendiente}% y suelo ${parcela.suelo?.textura || 'Franco'} (${parcela.suelo?.soc_pct || 2.0}% carbono orgánico, pH ${parcela.suelo?.ph || 6.0}).`
-    ];
+    ].filter(Boolean);
 
     const ahorroUreaSacos = Math.max(0, Math.round((resIRR.detalles.nitrogeno.creditosKgHa / 23) * 10) / 10);
     const beneficios = [
