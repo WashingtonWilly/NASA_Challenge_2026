@@ -20,6 +20,7 @@
     },
     opciones: {
       escenarioLluviaPct: 0,
+      conRiego: false,
       retiraForraje: false,
       priorizarForraje: false
     },
@@ -604,7 +605,18 @@
     const badgesHtml = badges
       .map(b => `<span class="estado ${b.clase}">${b.texto}</span>`)
       .join('');
-    vulnContainer.innerHTML = badgesHtml;
+    const AY = window.AyudaAgricultor;
+    if (AY) {
+      const avisos = AY.advertenciasLote(parcela, state.opciones);
+      state.avisosLote = avisos;
+      vulnContainer.innerHTML = AY.tarjetasAdvertencias(avisos);
+      const medEl = document.getElementById('medidores-lote');
+      if (medEl) medEl.innerHTML = AY.medidoresLote(parcela, state.opciones);
+      const tabEl = document.getElementById('tabla-clima-tecnica');
+      if (tabEl) tabEl.innerHTML = AY.tablaClimaTecnica(parcela, state.opciones);
+    } else {
+      vulnContainer.innerHTML = badgesHtml;
+    }
 
     const vulnMirror = document.getElementById('vuln-badges-mirror');
     if (vulnMirror) vulnMirror.innerHTML = badgesHtml;
@@ -723,7 +735,28 @@
     };
   }
 
+  const TEXTO_PRIORIDAD = ['', 'Poco', 'Algo', 'Normal', 'Bastante', 'Mucho'];
+  const ICONO_PRIORIDAD = { agua: '💧', suelo: '🌱', ganar: '💰' };
+
+  function pintarPrioSlider(wrap, val) {
+    const key = wrap.getAttribute('data-simple-slider');
+    const inp = wrap.querySelector('.prio-slider');
+    if (!inp) return;
+    inp.value = String(val);
+    inp.style.setProperty('--lleno', `${((val - 1) / 4) * 100}%`);
+    inp.setAttribute('aria-valuetext', TEXTO_PRIORIDAD[val]);
+    const txt = wrap.querySelector('.prio-texto');
+    if (txt) txt.textContent = TEXTO_PRIORIDAD[val];
+    const ic = wrap.querySelector('.prio-iconos');
+    if (ic) ic.textContent = (ICONO_PRIORIDAD[key] || '●').repeat(val);
+    wrap.dataset.nivel = String(val);
+  }
+
   function sincronizarBotonesPrioridadSimple() {
+    document.querySelectorAll('.prio-slider-wrap[data-simple-slider]').forEach(wrap => {
+      const key = wrap.getAttribute('data-simple-slider');
+      pintarPrioSlider(wrap, Math.max(1, Math.min(5, Number(state.sliders[key] || 3))));
+    });
     document.querySelectorAll('.priority-btn-group[data-simple-slider]').forEach(group => {
       const key = group.getAttribute('data-simple-slider');
       const val = Number(state.sliders[key] || 3);
@@ -905,7 +938,15 @@
       const alertaFitoHtml = rot.violaReglasFitosanitarias
         ? `<div class="estado riesgo" style="padding:6px 10px;">
              Alto · ${rot.motivoRiesgoFitosanitario}
-           </div>`
+           </div>
+           <details class="aviso-acciones aviso-acciones-suelto" open>
+             <summary>✅ ¿Qué puede hacer?</summary>
+             <ul>
+               <li>Cambie a una de las opciones recomendadas: alternan familias y cortan el ciclo de plagas.</li>
+               <li>Si va a repetir, use semilla sana o certificada y arranque las plantas que rebrotan solas.</li>
+               <li>Revise las raíces al cosechar: si ve "bolitas" (nematodos), deje descansar el lote 3 o 4 años de esa familia.</li>
+             </ul>
+           </details>`
         : '';
 
       // Vista Técnica: Secuencia completa, IRR, barras de subíndices, 5 puntos NASA
@@ -1034,6 +1075,27 @@
           ${alertaFitoHtml}
 
           ${!isTechnicalMode ? `
+            <div class="rot-simple-medidores">
+              ${window.AyudaAgricultor ? window.AyudaAgricultor.circulo({
+                titulo: rot.esActual ? 'Su práctica actual' : 'Qué tan buena es para su lote',
+                pct: rot.irrPct,
+                color: rot.irrPct >= 70 ? 'ok' : (rot.irrPct >= 50 ? 'alerta' : 'riesgo'),
+                centro: `${rot.irrPct}`,
+                texto: rot.irrPct >= 70 ? 'Muy buena opción' : (rot.irrPct >= 50 ? 'Opción regular' : 'Opción débil')
+              }) : ''}
+              <div class="rot-mini-barras">
+                ${[['💧', 'Agua', rot.subindices.agua], ['🌱', 'Tierra', (rot.subindices.nitrogeno + rot.subindices.materiaOrganica) / 2], ['💰', 'Ganancia', rot.subindices.rentabilidad]]
+                  .map(([ic, et, v]) => {
+                    const pc = Math.round(Math.max(0, Math.min(1, v)) * 100);
+                    const cl = pc >= 70 ? 'ok' : (pc >= 45 ? 'alerta' : 'riesgo');
+                    return `<div class="rot-mini-barra" role="img" aria-label="${et}: ${pc} de 100">
+                      <span class="rot-mini-et"><span aria-hidden="true">${ic}</span> ${et}</span>
+                      <span class="rot-mini-pista"><span class="rot-mini-lleno ${cl}" style="width:${pc}%"></span></span>
+                    </div>`;
+                  }).join('')}
+              </div>
+            </div>
+
             <div class="rot-simple-recipe">${recetaSimpleHtml}</div>
 
             <div class="rot-simple-profit">
@@ -1060,6 +1122,16 @@
           ${panelTecnicoHtml}
 
           <div class="card-footer-actions">
+            ${window.AyudaAgricultor ? `
+              <a class="btn-whatsapp" target="_blank" rel="noopener"
+                 href="${window.AyudaAgricultor.enlaceWhatsApp(window.AyudaAgricultor.textoPlanWhatsApp({ parcela, rot, areaHa, opciones: state.opciones, avisos: state.avisosLote }))}"
+                 aria-label="Enviar este plan por WhatsApp">
+                <span aria-hidden="true">📲</span> Enviar por WhatsApp
+              </a>` : ''}
+            ${window.AyudaAgricultor && window.AyudaAgricultor.puedeHablar() ? `
+              <button type="button" class="btn-escuchar" data-escuchar-rot="${rot.id}" aria-label="Escuchar esta opción en voz alta">
+                <span aria-hidden="true">🔊</span> Escuchar
+              </button>` : ''}
             ${!modoGlobalTec ? `
               <button type="button" class="btn-sec btn-toggle-tecnico" data-toggle-tech="${rot.id}" aria-expanded="${isTechnicalMode ? 'true' : 'false'}">
                 <i data-lucide="satellite" class="icono"></i>
@@ -1077,6 +1149,21 @@
         state.tarjetasTecnicas[rotId] = !state.tarjetasTecnicas[rotId];
         renderizarTarjetasRotacion(state.ultimoResultado, obtenerParcelaActual());
         actualizarGraficoBalance36m();
+      });
+    });
+
+    grid.querySelectorAll('[data-escuchar-rot]').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const rot = todasLasTarjetas.find(r => r.id === this.getAttribute('data-escuchar-rot'));
+        if (!rot || !window.AyudaAgricultor) return;
+        const titulo = rot.esActual ? 'Su práctica actual' : rot.titulo.replace(/^Estrategia\s+(\d+)/i, 'Opción $1');
+        const pasos = rot.cultivos.map((c, i) => `año ${i + 1}, ${c.nombre}`).join('; ');
+        const ganancia = Math.round(rot.detalles.rentabilidad.margenAnualPromedioUsdHa * areaHa);
+        const riesgos = (rot.explicacion.riesgosLocales || []).filter(r => !/SoilGrids|250\s*m|NASA|satelital/i.test(r)).slice(0, 2).join(' ');
+        window.AyudaAgricultor.leer(
+          `${titulo}. Puntaje ${rot.irrPct} de 100. Siembre: ${pasos}. ` +
+          `Ganancia estimada: unos ${ganancia} dólares al año en su lote. ` +
+          `La lluvia cubre el ${rot.balanceHidrico.coberturaAguaPct} por ciento del agua que necesita. ${riesgos}`, this);
       });
     });
 
@@ -1341,13 +1428,22 @@
         ? '<span class="estado riesgo">Alto · Pausa fitosanitaria</span>'
         : '<span class="estado alerta">Medio · Límite biofísico</span>';
 
+      const rem = window.AyudaAgricultor
+        ? window.AyudaAgricultor.remediosVeto(item.razones, c, resultado.cultivosAptos)
+        : null;
       return `
         <div class="vetado-item">
           <div class="vetado-head">
             <span><i data-lucide="wheat" class="icono"></i> ${c.nombre} <small class="unidad">(${c.familia})</small></span>
             ${etiquetaTipo}
           </div>
+          ${rem ? `<p class="vetado-motivo">🚫 ${rem.motivo}</p>` : ''}
           <p class="vetado-reason">${item.razones.join(' ')}</p>
+          ${rem ? `
+            <details class="aviso-acciones">
+              <summary>✅ ¿Qué puede hacer?</summary>
+              <ul>${rem.acciones.map(a => `<li>${a}</li>`).join('')}</ul>
+            </details>` : ''}
         </div>
       `;
     }).join('');
@@ -1381,7 +1477,36 @@
     actualizarGraficoBalance36m();
     actualizarGraficoHLS(parcela);
     renderizarCultivosVetados(resultado);
+    renderizarCalendarioSiembra(resultado, parcela);
     refrescarIconosLucide();
+  }
+
+  /**
+   * ¿Cuándo sembrar? Calendario de 12 meses por cultivo de las opciones recomendadas,
+   * con la climatología NASA POWER del lote (lluvia, ET0 y heladas).
+   */
+  function renderizarCalendarioSiembra(resultado, parcela) {
+    const cont = document.getElementById('calendario-filas');
+    const AY = window.AyudaAgricultor;
+    if (!cont || !AY) return;
+    const vistos = new Set();
+    const cultivos = [];
+    (resultado.recomendadas || []).forEach(r => r.cultivos.forEach(c => {
+      if (!vistos.has(c.id)) { vistos.add(c.id); cultivos.push(c); }
+    }));
+    const filas = cultivos.slice(0, 8).map(c => {
+      const cal = AY.calendarioSiembra(c, parcela, state.opciones);
+      return cal ? AY.filaCalendario(c, cal) : '';
+    }).join('');
+    cont.innerHTML = filas || '<p class="cal-ayuda">Sin datos de clima para este lote todavía.</p>';
+    const det = document.getElementById('cal-detalle');
+    if (det) det.textContent = '';
+    cont.querySelectorAll('.cal-celda').forEach(cel => {
+      cel.setAttribute('tabindex', '0');
+      const mostrar = () => { if (det) det.textContent = cel.getAttribute('title'); };
+      cel.addEventListener('click', mostrar);
+      cel.addEventListener('focus', mostrar);
+    });
   }
 
   function seleccionarParcelaPorId(nuevoId) {
@@ -1764,6 +1889,23 @@
       });
     });
 
+    // Modo Simple: barritas deslizables (1–5) sincronizadas con los pesos IRR
+    document.querySelectorAll('.prio-slider-wrap[data-simple-slider]').forEach(wrap => {
+      const key = wrap.getAttribute('data-simple-slider');
+      const inp = wrap.querySelector('.prio-slider');
+      if (!inp) return;
+      inp.addEventListener('input', () => pintarPrioSlider(wrap, Number(inp.value) || 3));
+      inp.addEventListener('change', () => {
+        const val = Number(inp.value) || 3;
+        state.sliders[key] = val;
+        const p = obtenerParcelaActual();
+        asegurarEsquemaDual(p);
+        p.agricultor.prioridades[key] = val;
+        sincronizarControlesPaso2ConParcela();
+        actualizarTodo();
+      });
+    });
+
     // Modo Simple: botones Poco / Normal / Mucho sincronizados con sliders IRR
     document.querySelectorAll('.priority-btn-group[data-simple-slider]').forEach(group => {
       const key = group.getAttribute('data-simple-slider');
@@ -1820,7 +1962,50 @@
   /**
    * Configura todos los eventos de botones, sliders e inputs
    */
+  function configurarAyudasAccesibles() {
+    const btnLetra = document.getElementById('btn-letra-grande');
+    const aplicarLetra = on => {
+      document.documentElement.classList.toggle('letra-grande', on);
+      if (btnLetra) btnLetra.setAttribute('aria-pressed', on ? 'true' : 'false');
+      setTimeout(() => {
+        if (state.map) state.map.invalidateSize();
+        if (state.chartBalance) state.chartBalance.resize();
+        if (state.chartHLS) state.chartHLS.resize();
+      }, 60);
+    };
+    let guardada = false;
+    try { guardada = localStorage.getItem('rotasat_letra_grande') === '1'; } catch (e) { guardada = false; }
+    aplicarLetra(guardada);
+    if (btnLetra) {
+      btnLetra.addEventListener('click', () => {
+        const on = !document.documentElement.classList.contains('letra-grande');
+        aplicarLetra(on);
+        try { localStorage.setItem('rotasat_letra_grande', on ? '1' : '0'); } catch (e) { /* sin almacenamiento */ }
+      });
+    }
+
+    const btnAvisos = document.getElementById('btn-escuchar-avisos');
+    if (btnAvisos) {
+      if (!window.AyudaAgricultor || !window.AyudaAgricultor.puedeHablar()) {
+        btnAvisos.hidden = true;
+      } else {
+        btnAvisos.addEventListener('click', function () {
+          window.AyudaAgricultor.leer(window.AyudaAgricultor.textoAdvertencias(state.avisosLote || []), this);
+        });
+      }
+    }
+  }
+
   function configurarEventos() {
+    configurarAyudasAccesibles();
+    const chkRiego = document.getElementById('check-tiene-riego');
+    if (chkRiego) {
+      chkRiego.checked = Boolean(state.opciones.conRiego);
+      chkRiego.addEventListener('change', () => {
+        state.opciones.conRiego = chkRiego.checked;
+        actualizarTodo();
+      });
+    }
     configurarSidebarTabs();
     configurarModoDual();
     configurarPanelUbicacion();
