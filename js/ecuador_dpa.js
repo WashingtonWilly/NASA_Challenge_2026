@@ -307,7 +307,8 @@
   // Vínculos directos a las parcelas demostrativas precalculadas
   const PARCELA_POR_UBICACION = {
     'CHIMBORAZO|Riobamba|Licto': 'parcela_licto',
-    'CHIMBORAZO|Guano|San Andrés': 'parcela_guano'
+    'CHIMBORAZO|Guano|San Andrés': 'parcela_guano',
+    'EL ORO|Santa Rosa|Santa Rosa': 'parcela_el_oro'
   };
 
   root.ECUADOR_DPA = ECUADOR_DPA;

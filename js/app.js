@@ -242,6 +242,11 @@
     const lat = parcela.centroide?.lat ?? -1.7848;
     const lon = parcela.centroide?.lon ?? -78.6125;
 
+    const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Imágenes Esri, Maxar | Datos NASA POWER, SRTM, HLS, GPM'
+    });
+
     const osmCalle = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap'
@@ -262,7 +267,7 @@
     state.map = L.map('mapa-parcela', {
       center: [lat, lon],
       zoom: 16,
-      layers: [osmCalle]
+      layers: [esriSat]
     });
 
     // Selector de capas en el mapa (ícono de capas): mapas base abiertos, capas NASA GIBS y catastro rural del MAG
@@ -272,8 +277,14 @@
         'Catastro rural MAG (SIGTIERRAS)': state.wmsCatastro
       });
     } else {
-      L.control.layers({ 'Caminos y comunidades (OSM)': osmCalle },
-        { 'Catastro rural MAG (SIGTIERRAS)': state.wmsCatastro }, { position: 'topright' }).addTo(state.map);
+      L.control.layers(
+        {
+          'Satélite (Esri World Imagery)': esriSat,
+          'Caminos y comunidades (OSM)': osmCalle
+        },
+        { 'Catastro rural MAG (SIGTIERRAS)': state.wmsCatastro },
+        { position: 'topright' }
+      ).addTo(state.map);
     }
 
     state.drawnItems = new L.FeatureGroup();

@@ -53,7 +53,7 @@
     {
       clave: 'esri', nombre: 'Satélite (Esri World Imagery)', emoji: 'satellite',
       url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      opts: { maxZoom: 19, attribution: 'Tiles © Esri — World Imagery' }
+      opts: { maxZoom: 19, attribution: 'Imágenes Esri, Maxar | Datos NASA POWER, SRTM, HLS, GPM' }
     },
     {
       clave: 'sentinel', nombre: 'Satélite (Sentinel-2)', emoji: 'satellite',
