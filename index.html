@@ -334,19 +334,23 @@
               <div class="map-wrapper" id="map-wrapper">
                 <div class="map-toolbar">
                   <div class="map-toolbar-actions">
-                    <button type="button" id="btn-guided-draw" class="btn-sec btn-sm" aria-pressed="false" title="Trazar el lote esquina por esquina">
+                    <button type="button" id="btn-guided-draw" class="btn-sec btn-sm" aria-pressed="false"
+                      title="Trazar el lote esquina por esquina">
                       <i data-lucide="pentagon" class="icono"></i>
                       <span>Dibujar polígono</span>
                     </button>
-                    <button type="button" id="btn-draw-rectangle" class="btn-sec btn-sm" aria-pressed="false" title="Trazar un lote rectangular arrastrando el cursor">
+                    <button type="button" id="btn-draw-rectangle" class="btn-sec btn-sm" aria-pressed="false"
+                      title="Trazar un lote rectangular arrastrando el cursor">
                       <i data-lucide="square-dashed" class="icono"></i>
                       <span>Dibujar rectángulo</span>
                     </button>
-                    <button type="button" id="btn-edit-layers" class="btn-sec btn-sm" aria-pressed="false" title="Mover las esquinas del lote actual">
+                    <button type="button" id="btn-edit-layers" class="btn-sec btn-sm" aria-pressed="false"
+                      title="Mover las esquinas del lote actual">
                       <i data-lucide="move" class="icono"></i>
                       <span id="btn-edit-layers-text">Editar bordes</span>
                     </button>
-                    <button type="button" id="btn-gps-50m" class="btn-sec btn-sm" title="Centrar en mi ubicación GPS con un lote de 50×50 m">
+                    <button type="button" id="btn-gps-50m" class="btn-sec btn-sm"
+                      title="Centrar en mi ubicación GPS con un lote de 50×50 m">
                       <i data-lucide="locate-fixed" class="icono"></i>
                       <span>Mi posición (50×50 m)</span>
                     </button>
@@ -354,7 +358,8 @@
                       <i data-lucide="radio" class="icono"></i>
                       <span>Sensor en tierra (LoRa)</span>
                     </button>
-                    <label for="input-import-drone" class="btn-sec btn-sm solo-tecnico" style="cursor:pointer; margin:0;">
+                    <label for="input-import-drone" class="btn-sec btn-sm solo-tecnico"
+                      style="cursor:pointer; margin:0;">
                       <i data-lucide="upload" class="icono"></i>
                       <span>Importar Dron (KML/GeoJSON)</span>
                     </label>
@@ -368,8 +373,10 @@
 
                 <!-- Banner de dibujo / edición guiada con acciones en la parte superior -->
                 <div id="guided-draw-banner" class="guided-draw-banner" role="status" hidden>
-                  <span id="guided-draw-banner-text">Haz clic en las esquinas de tu terreno. Doble clic para terminar.</span>
-                  <span id="guided-draw-live-area" class="guided-live-area tabular-nums">Área en vivo: 0 m² (0.0 cuadras)</span>
+                  <span id="guided-draw-banner-text">Haz clic en las esquinas de tu terreno. Doble clic para
+                    terminar.</span>
+                  <span id="guided-draw-live-area" class="guided-live-area tabular-nums">Área en vivo: 0 m² (0.0
+                    cuadras)</span>
                   <div class="guided-banner-actions">
                     <button type="button" id="btn-finish-draw" class="btn btn-sm" hidden>Terminar lote</button>
                     <button type="button" id="btn-undo-draw" class="btn-sec btn-sm" hidden>Borrar último punto</button>
@@ -379,31 +386,37 @@
                 </div>
 
                 <div class="map-stage">
-                  <div id="mapa-parcela" class="map-container" aria-label="Mapa satelital interactivo de la parcela"></div>
+                  <div id="mapa-parcela" class="map-container" aria-label="Mapa satelital interactivo de la parcela">
+                  </div>
                   <div id="guided-draw-tooltip" class="guided-draw-tooltip" hidden>
                     Haz clic en las esquinas de tu terreno · Doble clic para cerrar
                   </div>
                 </div>
-                <div id="capas-nasa-panel" class="capas-nasa-panel tech-only" style="margin-top:10px;"></div>
 
                 <!-- Panel de calibración de nodo sensor LoRa (cuando hay sensor activo en el lote) -->
                 <div id="sensor-node-panel" class="estado-datos-vivo" hidden>
-                  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-                    <strong><i data-lucide="radio" class="icono"></i> Nodo Sensor LoRa activo en el lote <span id="sensor-node-coords" class="tabular-nums" style="font-weight:500; font-size:0.78rem; color:var(--color-text-muted);"></span></strong>
+                  <div
+                    style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <strong><i data-lucide="radio" class="icono"></i> Nodo Sensor LoRa activo en el lote <span
+                        id="sensor-node-coords" class="tabular-nums"
+                        style="font-weight:500; font-size:0.78rem; color:var(--color-text-muted);"></span></strong>
                     <button type="button" id="btn-remove-sensor" class="btn-link-sm">Quitar sensor</button>
                   </div>
                   <div class="form-grid-3" style="margin-top:8px;">
                     <div class="field-group">
                       <label for="sensor-lluvia-mm">Pluviómetro local (mm/año)</label>
-                      <input type="number" id="sensor-lluvia-mm" class="field-input tabular-nums" step="10" min="50" max="4000" />
+                      <input type="number" id="sensor-lluvia-mm" class="field-input tabular-nums" step="10" min="50"
+                        max="4000" />
                     </div>
                     <div class="field-group">
                       <label for="sensor-soc-pct">Sonda carbono / MOS (%)</label>
-                      <input type="number" id="sensor-soc-pct" class="field-input tabular-nums" step="0.1" min="0.2" max="15" />
+                      <input type="number" id="sensor-soc-pct" class="field-input tabular-nums" step="0.1" min="0.2"
+                        max="15" />
                     </div>
                     <div class="field-group">
                       <label for="sensor-ph">Sonda pH en suelo</label>
-                      <input type="number" id="sensor-ph" class="field-input tabular-nums" step="0.1" min="4.0" max="8.5" />
+                      <input type="number" id="sensor-ph" class="field-input tabular-nums" step="0.1" min="4.0"
+                        max="8.5" />
                     </div>
                   </div>
                 </div>
@@ -701,7 +714,8 @@
                   <input type="range" class="prio-slider" min="1" max="5" step="1" value="3"
                     aria-label="Prioridad ahorrar agua" aria-valuetext="Normal" />
                   <div class="prio-slider-escala" aria-hidden="true">
-                    <span>Poco</span><span>Normal</span><span>Mucho</span></div>
+                    <span>Poco</span><span>Normal</span><span>Mucho</span>
+                  </div>
                   <div class="prio-slider-estado"><span class="prio-iconos" aria-hidden="true"></span><b
                       class="prio-texto">Normal</b></div>
                 </div>
@@ -719,7 +733,8 @@
                   <input type="range" class="prio-slider" min="1" max="5" step="1" value="3"
                     aria-label="Prioridad cuidar la tierra" aria-valuetext="Normal" />
                   <div class="prio-slider-escala" aria-hidden="true">
-                    <span>Poco</span><span>Normal</span><span>Mucho</span></div>
+                    <span>Poco</span><span>Normal</span><span>Mucho</span>
+                  </div>
                   <div class="prio-slider-estado"><span class="prio-iconos" aria-hidden="true"></span><b
                       class="prio-texto">Normal</b></div>
                 </div>
@@ -737,7 +752,8 @@
                   <input type="range" class="prio-slider" min="1" max="5" step="1" value="3"
                     aria-label="Prioridad ganar más" aria-valuetext="Normal" />
                   <div class="prio-slider-escala" aria-hidden="true">
-                    <span>Poco</span><span>Normal</span><span>Mucho</span></div>
+                    <span>Poco</span><span>Normal</span><span>Mucho</span>
+                  </div>
                   <div class="prio-slider-estado"><span class="prio-iconos" aria-hidden="true"></span><b
                       class="prio-texto">Normal</b></div>
                 </div>
@@ -1290,6 +1306,7 @@
   <script src="js/motor.js"></script>
   <script src="js/datos_vivo.js"></script>
   <script src="js/ecuador_dpa.js"></script>
+  <script src="js/capas_nasa.js"></script>
   <script src="js/pronostico.js"></script>
   <script src="js/ayuda_agricultor.js"></script>
   <script src="js/vendor/jspdf.umd.min.js"></script>

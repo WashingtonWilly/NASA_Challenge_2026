@@ -160,7 +160,7 @@ def obtener_clima_mensual_power(lat: float, lon: float, inicio: str = "20150101"
                 salida[-1]["Viento_ms"] = round(sum(acum[m]["U2"]) / len(acum[m]["U2"]), 1)
                 salida[-1]["HR_pct"] = round(sum(acum[m]["RH"]) / len(acum[m]["RH"]))
         return {"meses": salida, "elev_celda_m": elev_celda, "correccion_T_C": round(dT, 2),
-                "periodo": f"{inicio[:4]}–{fin[:4]}",
+                "periodo": f"{inicio[:4]}–{max((max(a) for a in anios_por_mes.values() if a), default=int(fin[:4]))}",
                 "metodo_et0": "Penman-Monteith FAO-56 (radiación, viento y humedad de NASA POWER)" if usar_pm
                               else "Hargreaves FAO-56 (solo temperatura)"}
     except Exception:

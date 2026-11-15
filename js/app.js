@@ -242,14 +242,6 @@
     const lat = parcela.centroide?.lat ?? -1.7848;
     const lon = parcela.centroide?.lon ?? -78.6125;
 
-    const esriSat = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      {
-        maxZoom: 19,
-        attribution: 'Imágenes © Esri, Maxar, Earthstar Geographics'
-      }
-    );
-
     const osmCalle = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap'
@@ -270,19 +262,19 @@
     state.map = L.map('mapa-parcela', {
       center: [lat, lon],
       zoom: 16,
-      layers: [esriSat]
+      layers: [osmCalle]
     });
 
-    L.control.layers(
-      {
-        'Satélite (Esri World Imagery)': esriSat,
-        'Mapa de caminos y comunidades (OSM)': osmCalle
-      },
-      {
-        'Catastro Rural MAG (SIGTIERRAS WMS)': state.wmsCatastro
-      },
-      { position: 'topright' }
-    ).addTo(state.map);
+    // Selector de capas en el mapa (ícono de capas): mapas base abiertos, capas NASA GIBS y catastro rural del MAG
+    const panelCapas = document.getElementById('capas-nasa');
+    if (window.CapasNASA && panelCapas) {
+      state.capasNasa = window.CapasNASA.montar(state.map, panelCapas, {
+        'Catastro rural MAG (SIGTIERRAS)': state.wmsCatastro
+      });
+    } else {
+      L.control.layers({ 'Caminos y comunidades (OSM)': osmCalle },
+        { 'Catastro rural MAG (SIGTIERRAS)': state.wmsCatastro }, { position: 'topright' }).addTo(state.map);
+    }
 
     state.drawnItems = new L.FeatureGroup();
     state.map.addLayer(state.drawnItems);
@@ -2942,7 +2934,7 @@
 
         const iconSensor = L.divIcon({
           className: 'sensor-pin-wrapper',
-          html: '<div class="sensor-pin" title="Arrastra el nodo sensor dentro de tu parcela">📡</div>',
+          html: '<div class="sensor-pin" title="Arrastra el nodo sensor dentro de tu parcela"><i data-lucide="radio" class="icono"></i></div>',
           iconSize: [30, 30],
           iconAnchor: [15, 15]
         });
@@ -2953,7 +2945,7 @@
         }).addTo(state.map);
 
         state.sensorMarker.bindPopup(
-          '<strong>📡 Nodo Sensor LoRa en tierra</strong><br>Arrastra para ubicarlo en el lote. Calibra NASA POWER y SoilGrids.'
+          '<strong>Nodo sensor LoRa en tierra</strong><br>Arrastra para ubicarlo en el lote. Calibra NASA POWER y SoilGrids.'
         ).openPopup();
 
         if (sensorCoordsLabel) {

@@ -3341,3 +3341,33 @@ body:not(.modo-tecnico) .plan-prioridades .sliders-list { display: none !importa
 .informe-opcion { text-align: left; }
 .informe-opcion-titulo { flex-direction: row !important; }
 .conveniencia-pista { display: block; }
+
+/* --- Selector de capas dentro del mapa (ícono de capas) --- */
+.leaflet-control-layers {
+  border: 1px solid var(--borde) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 14px rgba(43, 42, 34, 0.18) !important;
+  font-family: var(--fuente);
+}
+.leaflet-control-layers-toggle { width: 44px !important; height: 44px !important; }
+.leaflet-control-layers-expanded { padding: 10px 14px 12px !important; background: var(--campo) !important; color: var(--tinta); max-width: 280px; }
+.leaflet-control-layers-list { margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; min-height: 0 !important; }
+.leaflet-control-layers-base::before,
+.leaflet-control-layers-overlays::before {
+  display: block;
+  margin: 2px 0 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--texto-2);
+}
+.leaflet-control-layers-base::before { content: "Mapa de fondo"; }
+.leaflet-control-layers-overlays::before { content: "Capas de la NASA y catastro"; }
+.leaflet-control-layers label { margin: 0; padding: 5px 0; font-size: 0.9rem; cursor: pointer; }
+.leaflet-control-layers label span { display: inline-flex; align-items: center; gap: 8px; }
+.leaflet-control-layers-selector { width: 18px; height: 18px; margin: 0 !important; top: 0 !important; accent-color: var(--oliva); }
+.leaflet-control-layers-separator { margin: 8px 0 !important; border-top-color: var(--borde) !important; }
+.capas-nasa[hidden] { display: none; }
+.capas-nasa .capas-leyenda { display: grid; }
+.capas-leyenda-ctrl .capas-fecha { justify-content: space-between; }
