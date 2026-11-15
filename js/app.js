@@ -279,11 +279,6 @@
     state.drawnItems = new L.FeatureGroup();
     state.map.addLayer(state.drawnItems);
 
-    const capasPanel = document.getElementById('capas-nasa-panel');
-    if (capasPanel && window.CapasNASA && typeof window.CapasNASA.montar === 'function') {
-      window.CapasNASA.montar(state.map, capasPanel);
-    }
-
     if (L.Control && L.Control.Draw) {
       if (L.drawLocal) {
         L.drawLocal.draw.toolbar.actions = { title: 'Cancelar dibujo del lote', text: 'Cancelar' };

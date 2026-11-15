@@ -51,6 +51,11 @@
 
   const BASES = [
     {
+      clave: 'esri', nombre: 'Satélite (Esri World Imagery)', emoji: 'satellite',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      opts: { maxZoom: 19, attribution: 'Tiles © Esri — World Imagery' }
+    },
+    {
       clave: 'sentinel', nombre: 'Satélite (Sentinel-2)', emoji: 'satellite',
       url: 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg',
       opts: { maxZoom: 19, maxNativeZoom: 15, attribution: 'Sentinel-2 cloudless 2016 © <a href="https://s2maps.eu">EOX</a> (CC BY 4.0), datos Copernicus' }
@@ -133,9 +138,9 @@
     });
     Object.entries(capasExtra || {}).forEach(([nombre, capa]) => { if (capa) overlaysCtl[nombre] = capa; });
 
-    // Quita cualquier capa base previa y deja Sentinel-2 por defecto
+    // Quita cualquier capa base previa y deja Esri World Imagery por defecto (ideal para delimitar parcelas)
     map.eachLayer(l => { if (l instanceof L.TileLayer) map.removeLayer(l); });
-    bases.sentinel.addTo(map);
+    (bases.esri || bases.sentinel).addTo(map);
     const control = L.control.layers(basesCtl, overlaysCtl, { position: 'topright', collapsed: true }).addTo(map);
 
     contenedor.hidden = true;
