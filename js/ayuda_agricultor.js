@@ -12,6 +12,10 @@
 (function () {
   'use strict';
 
+  // Solo estos lotes tienen pedido de historial satelital (HLS, SMAP, NASADEM) en NASA AppEEARS
+  const PARCELAS_SATELITALES = ['parcela_licto', 'parcela_guano'];
+  const esParcelaSatelital = p => Boolean(p && PARCELAS_SATELITALES.includes(p.id));
+
   const esc = s => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -38,7 +42,7 @@
       <div class="medidor" ${id ? `id="${id}"` : ''} role="img"
            aria-label="${esc(titulo)}: ${esc(valorTexto || (valor + ' ' + (unidad || '')))}, ${esc(zona.texto)}">
         <div class="medidor-cabeza">
-          <span class="medidor-titulo">${icono ? `<span class="medidor-emoji" aria-hidden="true">${icono}</span>` : ''}${esc(titulo)}</span>
+          <span class="medidor-titulo">${icono ? `<i data-lucide="${icono}" class="icono medidor-ico" aria-hidden="true"></i>` : ''}${esc(titulo)}</span>
           <span class="medidor-valor tabular-nums">${esc(valorTexto || `${valor} ${unidad || ''}`)}</span>
         </div>
         <div class="medidor-pista" aria-hidden="true">
@@ -55,7 +59,7 @@
     return `
       <div class="medidor-circulo" role="img" aria-label="${esc(titulo)}: ${esc(centro)}. ${esc(texto)}">
         <div class="anillo ${color}" style="--p:${p}">
-          <span class="anillo-centro">${icono ? `<span aria-hidden="true">${icono}</span>` : ''}<b class="tabular-nums">${esc(centro)}</b></span>
+          <span class="anillo-centro">${icono ? `<i data-lucide="${icono}" class="icono anillo-ico" aria-hidden="true"></i>` : ''}<b class="tabular-nums">${esc(centro)}</b></span>
         </div>
         <div class="anillo-texto"><strong>${esc(titulo)}</strong><span>${esc(texto)}</span></div>
       </div>`;
@@ -75,7 +79,7 @@
 
     const html = [];
     html.push(barra({
-      titulo: 'Inclinación del terreno', icono: '⛰️', valor: pend, min: 0, max: 40, unidad: '%',
+      titulo: 'Inclinación del terreno', icono: 'mountain', valor: pend, min: 0, max: 40, unidad: '%',
       valorTexto: `${pend} %`,
       zonas: [
         { hasta: 12, color: 'ok', texto: 'Plano o casi plano: fácil de trabajar' },
@@ -84,7 +88,7 @@
       ]
     }));
     html.push(barra({
-      titulo: 'Altura del lote', icono: '🏔️', valor: elev, min: 0, max: 4500, unidad: 'm',
+      titulo: 'Altura del lote', icono: 'mountain-snow', valor: elev, min: 0, max: 4500, unidad: 'm',
       valorTexto: `${elev.toLocaleString('es-EC')} m`,
       zonas: [
         { hasta: 1200, color: 'info', texto: 'Zona cálida (Costa / Amazonía)' },
@@ -93,9 +97,35 @@
         { hasta: 4500, color: 'alerta', texto: 'Páramo: pocos cultivos aguantan' }
       ]
     }));
+    // Tierra: agua que guarda (FAO-56 Tabla 19, 50 cm de raíz) y materia orgánica (carbono)
+    const textura = parcela.suelo?.textura || 'Franco';
+    const props = (window.BalanceMotor && window.BalanceMotor.propiedadesTextura)
+      ? window.BalanceMotor.propiedadesTextura(textura) : { taw: 0.155 };
+    const aguaMm = Math.round(props.taw * 500);
+    html.push(barra({
+      titulo: `Agua que guarda su tierra (${textura.toLowerCase()})`, icono: 'droplets', valor: aguaMm, min: 0, max: 100, unidad: 'mm',
+      valorTexto: `${aguaMm} mm`,
+      zonas: [
+        { hasta: 50, color: 'alerta', texto: 'Guarda poca agua: riegue seguido y en poca cantidad' },
+        { hasta: 70, color: 'ok', texto: 'Guarda agua en cantidad media' },
+        { hasta: 100, color: 'ok', texto: 'Guarda bien el agua entre lluvias' }
+      ]
+    }));
+    const socV = Number(parcela.suelo?.soc_pct);
+    if (Number.isFinite(socV) && socV > 0) {
+      html.push(barra({
+        titulo: 'Materia orgánica (carbono)', icono: 'leaf', valor: socV, min: 0, max: 8, unidad: '%',
+        valorTexto: `${socV} %`,
+        zonas: [
+          { hasta: 2, color: 'alerta', texto: 'Tierra pobre: añada abono orgánico' },
+          { hasta: 4, color: 'ok', texto: 'Buena materia orgánica' },
+          { hasta: 8, color: 'ok', texto: 'Tierra negra y rica en materia orgánica' }
+        ]
+      }));
+    }
     if (Number.isFinite(ph) && ph > 0) {
       html.push(barra({
-        titulo: 'Acidez de la tierra (pH)', icono: '🧪', valor: ph, min: 4, max: 9, unidad: '',
+        titulo: 'Acidez de la tierra (pH)', icono: 'flask-conical', valor: ph, min: 4, max: 9, unidad: '',
         valorTexto: `pH ${ph}`,
         zonas: [
           { hasta: 5.5, color: 'alerta', texto: 'Tierra ácida: haga análisis antes de encalar' },
@@ -108,7 +138,7 @@
     const circulos = [];
     if (et0 > 0) {
       circulos.push(circulo({
-        titulo: 'Agua de lluvia', icono: '💧', pct: Math.min(100, cubre),
+        titulo: 'Agua de lluvia', icono: 'droplet', pct: Math.min(100, cubre),
         color: cubre >= 85 ? 'ok' : (cubre >= 60 ? 'alerta' : 'riesgo'),
         centro: `${Math.min(cubre, 999)} %`,
         texto: cubre >= 100 ? 'Llueve lo que la tierra necesita o más'
@@ -120,7 +150,7 @@
       // 0 % = 6 °C o más (sin riesgo) · 100 % = -4 °C o menos (helada fuerte)
       const riesgo = Math.max(0, Math.min(100, (6 - tmin) * 10));
       circulos.push(circulo({
-        titulo: 'Riesgo de helada', icono: '❄️', pct: riesgo,
+        titulo: 'Riesgo de helada', icono: 'snowflake', pct: riesgo,
         color: tmin < 0 ? 'riesgo' : (tmin < 2 ? 'alerta' : 'ok'),
         centro: `${tmin} °C`,
         texto: tmin < 0 ? 'Hay noches bajo cero: cuide la floración'
@@ -160,7 +190,7 @@
     // Pendiente
     if (pend > 25) {
       out.push({
-        clase: 'riesgo', icono: '⛰️', titulo: `Terreno muy empinado (${pend} %)`,
+        clase: 'riesgo', icono: 'mountain', titulo: `Terreno muy empinado (${pend} %)`,
         tecnico: `Pendiente media ${pend} % (máx. ${parcela.terreno?.pendiente_max_pct ?? '?'} %) · fuente: ${fTer} · umbral > 25 %: filtro duro, se excluye labranza intensiva; factor de escorrentía f = ${pend > 25 ? 'alto' : 'medio'}.`,
         porque: 'Con lluvia fuerte se va la capa buena de la tierra. Por eso no recomendamos arar a fondo.',
         acciones: [
@@ -172,7 +202,7 @@
       });
     } else if (pend >= 12) {
       out.push({
-        clase: 'alerta', icono: '⛰️', titulo: `Ladera moderada (${pend} %)`,
+        clase: 'alerta', icono: 'mountain', titulo: `Ladera moderada (${pend} %)`,
         tecnico: `Pendiente media ${pend} % (máx. ${parcela.terreno?.pendiente_max_pct ?? '?'} %) · fuente: ${fTer} · rango 12–25 %: se exige labranza en contorno y cobertura (rastrojo).`,
         porque: 'La lluvia puede arrastrar tierra si los surcos van hacia abajo.',
         acciones: [
@@ -182,13 +212,13 @@
         ]
       });
     } else {
-      out.push({ clase: 'ok', icono: '⛰️', titulo: `Terreno plano (${pend} %)`, porque: 'Poca pérdida de tierra por lluvia.', acciones: [] });
+      out.push({ clase: 'ok', icono: 'mountain', titulo: `Terreno plano (${pend} %)`, porque: 'Poca pérdida de tierra por lluvia.', acciones: [] });
     }
 
     // Heladas
     if (tmin !== null && tmin < 0) {
       out.push({
-        clase: 'riesgo', icono: '❄️', titulo: `Heladas (hasta ${tmin} °C)`,
+        clase: 'riesgo', icono: 'snowflake', titulo: `Heladas (hasta ${tmin} °C)`,
         tecnico: `Tmin absoluta mensual ${tmin} °C (corregida por altitud −6,5 °C/km) · fuente: ${fCli} · umbral < 0 °C: se excluyen cultivos con tolera_helada = No si el ciclo cruza esos meses.`,
         porque: 'Las noches despejadas de junio a agosto queman hojas y flores de cultivos delicados.',
         acciones: [
@@ -200,7 +230,7 @@
       });
     } else if (tmin !== null && tmin < 2) {
       out.push({
-        clase: 'alerta', icono: '❄️', titulo: `Noches muy frías (${tmin} °C)`,
+        clase: 'alerta', icono: 'snowflake', titulo: `Noches muy frías (${tmin} °C)`,
         tecnico: `Tmin absoluta ${tmin} °C en ${clima.filter(m => m.Tmin_abs < 2).map(m => m.nombre_mes).join(', ') || '—'} · fuente: ${fCli} · rango 0–2 °C: riesgo en floración de cultivos de tolerancia moderada.`,
         porque: 'En los meses secos la temperatura puede bajar casi a cero.',
         acciones: [
@@ -209,13 +239,13 @@
         ]
       });
     } else if (tmin !== null) {
-      out.push({ clase: 'ok', icono: '❄️', titulo: 'Sin heladas', porque: `La mínima en 10 años fue ${tmin} °C.`, acciones: [] });
+      out.push({ clase: 'ok', icono: 'snowflake', titulo: 'Sin heladas', porque: `La mínima en 10 años fue ${tmin} °C.`, acciones: [] });
     }
 
     // Agua
     if (cubre !== null && cubre < 60) {
       out.push({
-        clase: 'riesgo', icono: '💧', titulo: 'Falta agua de lluvia',
+        clase: 'riesgo', icono: 'droplet', titulo: 'Falta agua de lluvia',
         tecnico: `Lluvia anual ${Math.round(lluvia)} mm vs ET₀ ${Math.round(et0)} mm (${metodo}) · cobertura ${cubre} % · meses con P < 0,5·ET₀: ${secos.join(', ') || '—'} · fuente: ${fCli}.`,
         porque: `La lluvia cubre solo ${cubre} % de lo que el suelo pierde al año.` + (secos.length ? ` Meses más secos: ${secos.join(', ')}.` : ''),
         acciones: [
@@ -227,7 +257,7 @@
       });
     } else if (cubre !== null && cubre < 85) {
       out.push({
-        clase: 'alerta', icono: '💧', titulo: 'Algunos meses secos',
+        clase: 'alerta', icono: 'droplet', titulo: 'Algunos meses secos',
         tecnico: `Lluvia anual ${Math.round(lluvia)} mm vs ET₀ ${Math.round(et0)} mm (${metodo}) · cobertura ${cubre} % · meses con P < 0,5·ET₀: ${secos.join(', ') || '—'}.`,
         porque: `La lluvia cubre ${cubre} % de la demanda.` + (secos.length ? ` Meses más secos: ${secos.join(', ')}.` : ''),
         acciones: [
@@ -240,7 +270,7 @@
     // Lluvia reciente fuera de lo normal (anomalía NASA POWER)
     if (typeof anom.pct === 'number' && anom.pct > 50) {
       out.push({
-        clase: 'riesgo', icono: '🌧️', titulo: `Llovió mucho más de lo normal (+${anom.pct} %)`,
+        clase: 'riesgo', icono: 'cloud-rain', titulo: `Llovió mucho más de lo normal (+${anom.pct} %)`,
         tecnico: `Anomalía PRECTOTCORR ${anom.ventana}: ${anom.lluvia_reciente_mm} mm vs normal ${anom.lluvia_normal_mm} mm (${anom.anios_referencia}) · ${anom.fuente || 'NASA POWER'} ~${anom.res_km || 50} km · umbral > +50 %.`,
         porque: `En ${anom.ventana || 'los últimos meses'} llovió mucho más que en un año normal. El suelo puede estar encharcado.`,
         acciones: [
@@ -252,7 +282,7 @@
       });
     } else if (typeof anom.pct === 'number' && anom.pct < -15) {
       out.push({
-        clase: 'alerta', icono: '☀️', titulo: `Temporada más seca de lo normal (${anom.pct} %)`,
+        clase: 'alerta', icono: 'sun', titulo: `Temporada más seca de lo normal (${anom.pct} %)`,
         tecnico: `Anomalía PRECTOTCORR ${anom.ventana}: ${anom.lluvia_reciente_mm} mm vs normal ${anom.lluvia_normal_mm} mm (${anom.anios_referencia}) · umbral < −15 %: se refuerza el peso hídrico del IRR.`,
         porque: `En ${anom.ventana || 'los últimos meses'} llovió menos que en un año normal.`,
         acciones: [
@@ -265,7 +295,7 @@
     // Acidez
     if (Number.isFinite(ph) && ph > 0 && ph < 5.5) {
       out.push({
-        clase: 'alerta', icono: '🧪', titulo: `Tierra ácida (pH ${ph})`,
+        clase: 'alerta', icono: 'flask-conical', titulo: `Tierra ácida (pH ${ph})`,
         tecnico: `pH(H₂O) ${ph} ponderado 0–30 cm · fuente: ${fSue} · umbral < 5,5: riesgo de Al intercambiable y fijación de P; dosis de cal según análisis (no por SoilGrids).`,
         porque: 'Las plantas aprovechan menos el fósforo y el calcio.',
         acciones: [
@@ -277,7 +307,7 @@
       });
     } else if (Number.isFinite(ph) && ph > 7.5) {
       out.push({
-        clase: 'alerta', icono: '🧪', titulo: `Tierra alcalina (pH ${ph})`,
+        clase: 'alerta', icono: 'flask-conical', titulo: `Tierra alcalina (pH ${ph})`,
         tecnico: `pH(H₂O) ${ph} ponderado 0–30 cm · fuente: ${fSue} · umbral > 7,5: menor disponibilidad de Fe, Zn, Mn y P.`,
         porque: 'Pueden faltar hierro y zinc: las hojas se ponen amarillas.',
         acciones: [
@@ -290,7 +320,7 @@
     // Materia orgánica
     if (Number.isFinite(soc) && soc > 0 && soc < 2) {
       out.push({
-        clase: 'alerta', icono: '🌱', titulo: 'Poca materia orgánica',
+        clase: 'alerta', icono: 'sprout', titulo: 'Poca materia orgánica',
         tecnico: `Carbono orgánico ${soc} % (0–30 cm) · fuente: ${fSue} · umbral < 2 %; N total ${parcela.suelo?.n_gkg ?? '?'} g/kg.`,
         porque: `El carbono del suelo es ${soc} %: la tierra guarda poca agua y poco abono.`,
         acciones: [
@@ -301,18 +331,18 @@
     }
 
     // Suelo desnudo (HLS)
-    if (!ndvi.length) {
+    if (!ndvi.length && esParcelaSatelital(parcela)) {
       out.push({
-        clase: 'info', icono: '🛰️', titulo: 'Sin historial satelital de este lote',
+        clase: 'info', icono: 'satellite', titulo: 'Sin historial satelital de este lote',
         tecnico: `HLS (HLSL30/HLSS30) NDVI/NDTI 30 m no cargado: se solicita por AppEEARS (Point Sample). Estado: ${est.ndvi || 'sin dato'}.`,
         porque: 'Las fotos del satélite de este lote todavía no están cargadas.',
         acciones: ['Cuéntenos en el Paso 2 qué sembró los últimos 2 años: así cuidamos que no vuelvan las plagas.']
       });
-    } else {
+    } else if (ndvi.length) {
       const desnudo = ndvi.filter(m => m.ndvi < 0.25).length;
       if (desnudo >= 8) {
         out.push({
-          clase: 'alerta', icono: '🛰️', titulo: `Suelo pelado muchos meses (${desnudo} de ${ndvi.length})`,
+          clase: 'alerta', icono: 'satellite', titulo: `Suelo pelado muchos meses (${desnudo} de ${ndvi.length})`,
           tecnico: `${desnudo}/${ndvi.length} observaciones mensuales con NDVI < 0,25 · HLS Landsat 8/9 + Sentinel-2, 30 m, Fmask aplicado · estado: ${est.ndvi || '—'}.`,
         porque: 'El satélite vio el lote sin plantas muchos meses. Así la lluvia y el viento se llevan la tierra.',
           acciones: [
@@ -334,7 +364,7 @@
       ? `${graves.length ? `${graves.length} ${graves.length === 1 ? 'cuidado' : 'cuidados'}` : ''}${graves.length && medios.length ? ' y ' : ''}${medios.length ? `${medios.length} ${medios.length === 1 ? 'aviso' : 'avisos'}` : ''} en su lote`
       : 'Su lote no tiene advertencias importantes';
     const lista3 = graves.concat(medios).slice(0, 3)
-      .map(a => `<li><span aria-hidden="true">${a.icono}</span> ${esc(a.titulo)}</li>`).join('');
+      .map(a => `<li><i data-lucide="${a.icono}" class="icono" aria-hidden="true"></i> ${esc(a.titulo)}</li>`).join('');
     return `
       <span class="resumen-cabeza ${clase}">
         <span class="resumen-semaforo" aria-hidden="true"></span>
@@ -356,20 +386,20 @@
     const botones = items.map((a, i) => `
       <button type="button" class="aviso-md-btn ${a.clase}${i === 0 ? ' activo' : ''}" role="tab"
               id="aviso-tab-${i}" aria-controls="aviso-panel-${i}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">
-        <span class="aviso-md-emoji" aria-hidden="true">${a.icono}</span>
+        <i data-lucide="${a.icono}" class="icono aviso-md-ico" aria-hidden="true"></i>
         <span class="aviso-md-txt"><span class="aviso-nivel">${nivel[a.clase]}</span><strong>${esc(a.titulo)}</strong></span>
       </button>`).join('');
     const paneles = items.map((a, i) => `
       <div class="aviso-md-panel aviso-agro ${a.clase}" role="tabpanel" id="aviso-panel-${i}" aria-labelledby="aviso-tab-${i}"${i === 0 ? '' : ' hidden'}>
         <div class="aviso-cabeza">
-          <span class="aviso-emoji" aria-hidden="true">${a.icono}</span>
+          <i data-lucide="${a.icono}" class="icono aviso-ico" aria-hidden="true"></i>
           <div class="aviso-titulos"><span class="aviso-nivel">${nivel[a.clase]}</span><strong>${esc(a.titulo)}</strong></div>
         </div>
         ${a.porque ? `<p class="aviso-porque">${esc(a.porque)}</p>` : ''}
-        ${a.tecnico ? `<p class="aviso-tecnico solo-tecnico">📐 ${esc(a.tecnico)}</p>` : ''}
+        ${a.tecnico ? `<p class="aviso-tecnico solo-tecnico"><i data-lucide="ruler" class="icono" aria-hidden="true"></i> ${esc(a.tecnico)}</p>` : ''}
         ${a.acciones.length ? `
           <div class="aviso-acciones aviso-acciones-fijas">
-            <p class="aviso-acciones-titulo">✅ ¿Qué puede hacer?</p>
+            <p class="aviso-acciones-titulo"><i data-lucide="list-checks" class="icono" aria-hidden="true"></i> ¿Qué puede hacer?</p>
             <ul>${a.acciones.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
           </div>` : '<p class="aviso-porque">No necesita hacer nada especial.</p>'}
       </div>`).join('');
@@ -408,17 +438,17 @@
     return lista.slice().sort((a, b) => orden[a.clase] - orden[b.clase]).map(a => `
       <div class="aviso-agro ${a.clase}">
         <div class="aviso-cabeza">
-          <span class="aviso-emoji" aria-hidden="true">${a.icono}</span>
+          <i data-lucide="${a.icono}" class="icono aviso-ico" aria-hidden="true"></i>
           <div class="aviso-titulos">
             <span class="aviso-nivel">${nivel[a.clase]}</span>
             <strong>${esc(a.titulo)}</strong>
           </div>
         </div>
         ${a.porque ? `<p class="aviso-porque">${esc(a.porque)}</p>` : ''}
-        ${a.tecnico ? `<p class="aviso-tecnico solo-tecnico">📐 ${esc(a.tecnico)}</p>` : ''}
+        ${a.tecnico ? `<p class="aviso-tecnico solo-tecnico"><i data-lucide="ruler" class="icono" aria-hidden="true"></i> ${esc(a.tecnico)}</p>` : ''}
         ${a.acciones.length ? `
           <details class="aviso-acciones" ${a.clase === 'riesgo' || (abrirTodo && a.clase === 'alerta') ? 'open' : ''}>
-            <summary>✅ ¿Qué puede hacer?</summary>
+            <summary><i data-lucide="list-checks" class="icono" aria-hidden="true"></i> ¿Qué puede hacer?</summary>
             <ul>${a.acciones.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
           </details>` : ''}
       </div>`).join('');
@@ -676,6 +706,6 @@
   window.AyudaAgricultor = {
     barra, circulo, medidoresLote, advertenciasLote, tarjetasAdvertencias, resumenRiesgos, listaDetalleAdvertencias, activarListaDetalle,
     remediosVeto, leer, puedeHablar, textoAdvertencias,
-    calendarioSiembra, mejoresMeses, filaCalendario, textoPlanWhatsApp, enlaceWhatsApp, MESES_LARGOS, tablaClimaTecnica
+    calendarioSiembra, mejoresMeses, filaCalendario, esParcelaSatelital, textoPlanWhatsApp, enlaceWhatsApp, MESES_LARGOS, tablaClimaTecnica
   };
 })();

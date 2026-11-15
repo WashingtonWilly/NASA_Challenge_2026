@@ -2834,7 +2834,7 @@ body:not(.modo-tecnico) .plan-prioridades .sliders-list { display: none !importa
 }
 .informe-opcion.activo { border-color: var(--oliva); background: #FFFFFF; }
 .informe-opcion input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--oliva); }
-.informe-opcion span { display: flex; flex-direction: column; line-height: 1.3; }
+.informe-opcion > span { display: flex; flex-direction: column; line-height: 1.3; }
 .informe-opcion small { color: var(--texto-2); }
 .btn-pdf {
   justify-content: center;
@@ -2953,3 +2953,78 @@ body:not(.modo-tecnico) .plan-prioridades .sliders-list { display: none !importa
 .pasos-strip .pasos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 900px) { .pasos-strip .pasos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .hero-valores, .pasos-strip .pasos { grid-template-columns: 1fr; } }
+
+/* ==========================================================================
+   Iconografía coherente (Lucide) en lugar de emojis
+   ========================================================================== */
+.icono { width: 1.1em; height: 1.1em; stroke-width: 2; vertical-align: -0.18em; flex-shrink: 0; }
+.medidor-ico { color: var(--oliva); width: 1.25em; height: 1.25em; }
+.anillo-ico { width: 1em; height: 1em; color: var(--texto-2); margin-bottom: 1px; }
+.aviso-md-ico { width: 30px; height: 30px; padding: 6px; border-radius: 10px; background: var(--ok-bg); color: var(--ok); stroke-width: 2.2; }
+.aviso-md-btn.alerta .aviso-md-ico { background: var(--alerta-bg); color: var(--alerta); }
+.aviso-md-btn.riesgo .aviso-md-ico { background: var(--riesgo-bg); color: var(--riesgo); }
+.aviso-md-btn.info .aviso-md-ico { background: var(--info-bg); color: var(--info); }
+.aviso-ico { width: 40px; height: 40px; padding: 8px; border-radius: 12px; background: var(--ok-bg); color: var(--ok); }
+.aviso-agro.alerta .aviso-ico { background: var(--alerta-bg); color: var(--alerta); }
+.aviso-agro.riesgo .aviso-ico { background: var(--riesgo-bg); color: var(--riesgo); }
+.aviso-agro.info .aviso-ico { background: var(--info-bg); color: var(--info); }
+.aviso-acciones-titulo .icono, .aviso-acciones summary .icono { width: 1.1em; height: 1.1em; }
+/* Viñetas de acciones: marca de verificación dibujada con CSS */
+.aviso-acciones-fijas li::before,
+.aviso-acciones li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.32em;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ok-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234F6B1F' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 11px no-repeat;
+}
+.resumen-lista .icono { width: 1em; height: 1em; color: var(--texto-2); }
+.pron-ico { width: 26px; height: 26px; color: var(--tierra); margin: 2px 0; }
+.pron-dia.alerta .pron-ico, .pron-dia.riesgo .pron-ico { color: #3F5A73; }
+.capa-chip .icono { width: 1em; height: 1em; }
+.hero-valores .hv-ico { grid-row: 1 / 3; width: 34px; height: 34px; padding: 7px; border-radius: 10px; background: var(--ok-bg); color: var(--oliva); }
+.rot-mini-et .icono { color: var(--oliva); }
+.rot-mes-siembra .icono { width: 0.95em; height: 0.95em; }
+.vetado-motivo .icono { color: var(--riesgo); }
+.informe-icono { width: 24px; height: 24px; justify-self: center; color: var(--texto-2); }
+.informe-lista li.hecho .informe-icono { color: var(--ok); }
+.informe-lista li.dato-pendiente .informe-icono { color: var(--info); }
+.subtab .icono { width: 1.15em; height: 1.15em; }
+.girando { animation: girar 1s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+/* Indicador de prioridad: 5 segmentos */
+.prio-iconos { display: inline-flex; gap: 3px; }
+.prio-seg { width: 14px; height: 8px; border-radius: 3px; background: var(--banda); border: 1px solid var(--borde); }
+.prio-seg.lleno { background: var(--oliva); border-color: var(--oliva); }
+.btn-escuchar .icono, .btn-whatsapp .icono, .btn-pdf .icono { width: 1.15em; height: 1.15em; }
+
+/* --- Paso 4: conveniencia de cada plan --- */
+.informe-opcion-cuerpo { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.informe-opcion-titulo { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.sello-mejor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--oliva);
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.sello-mejor .icono { width: 0.9em; height: 0.9em; fill: currentColor; }
+.informe-opcion.mejor { border-color: var(--oliva); }
+.conveniencia { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin-top: 2px; }
+.conveniencia-pista { height: 12px; border-radius: 999px; background: var(--banda); overflow: hidden; }
+.conveniencia-lleno { display: block; height: 100%; border-radius: 999px; }
+.conveniencia-lleno.ok { background: var(--ok); }
+.conveniencia-lleno.alerta { background: #D69A2D; }
+.conveniencia-lleno.riesgo { background: var(--riesgo); }
+.conveniencia b { font-size: 1.05rem; color: var(--tinta); min-width: 3.2em; text-align: right; }
+
+.informe-opcion { text-align: left; }
+.informe-opcion-titulo { flex-direction: row !important; }
+.conveniencia-pista { display: block; }

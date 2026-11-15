@@ -73,6 +73,7 @@
     const p = datos.parcela;
     const res = datos.resultado;
     const est = p.estado_datos || {};
+    const esSat = AY ? AY.esParcelaSatelital(p) : true;
     const opciones = datos.opciones || {};
     const rot = [...res.recomendadas, res.actual].find(r => r.id === datos.rotElegidaId) || res.recomendadas[0];
     const area = p.area_ha || 1;
@@ -149,6 +150,18 @@
     doc.text(t(`${p.nombre} · ${p.area_ha} ha · ${miles(p.terreno?.elev_m)} m de altura`), M, y + 8.5);
     y += 16;
 
+    // Conveniencia del plan elegido frente a las demás opciones
+    const opcionesOrd = [...res.recomendadas, res.actual].slice().sort((a, b) => b.irrPct - a.irrPct);
+    const esMejor = opcionesOrd[0] && opcionesOrd[0].id === rot.id;
+    doc.setFillColor(...(esMejor ? [230, 234, 211] : [251, 239, 207]));
+    doc.roundedRect(M, y - 4, ancho, 11, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...OLIVA);
+    doc.text(t(`Este plan le conviene en un ${rot.irrPct} %`), M + 4, y + 3);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...TINTA);
+    doc.text(t(esMejor ? `Es la mejor de las ${opcionesOrd.length} opciones para su lote.`
+      : `La mejor opción para su lote llega a ${opcionesOrd[0].irrPct} %.`), W - M - 4, y + 3, { align: 'right' });
+    y += 13;
+
     // Tres años en tarjetas grandes
     doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(...OLIVA);
     doc.text(t('Qué sembrar los próximos 3 años'), M, y); y += 4;
@@ -178,7 +191,7 @@
     const cifras = [
       [`$${miles(ganLote)}`, 'ganancia estimada al año', 'en todo su lote'],
       [`${rot.balanceHidrico.coberturaAguaPct} %`, 'del agua la da la lluvia', rot.balanceHidrico.deficitTotal > 0 ? `riego de apoyo: ${miles(Math.round(rot.balanceHidrico.deficitTotal * 10000 / 3))} L/ha al año` : 'no necesita riego'],
-      [`${rot.irrPct} de 100`, 'puntaje para su lote', 'cuida agua, tierra y bolsillo']
+      [`${rot.irrPct} %`, 'de conveniencia para su lote', 'equilibra agua, tierra y ganancia']
     ];
     cifras.forEach((cf, i) => {
       const x = M + i * (anchoT + 4);
@@ -456,8 +469,10 @@
         ['Lluvia reciente vs. normal', est.anomalia || 'NASA POWER PRECTOTCORR', estadoTexto(est.anomalia)],
         ['Altitud y pendiente', esEjemplo(est.terreno) || esSinDato(est.terreno) ? 'SRTM / NASADEM 30 m (pendiente de AppEEARS)' : est.terreno, estadoTexto(est.terreno)],
         ['Suelo (textura, pH, carbono, nitrógeno)', est.suelo || 'ISRIC SoilGrids 250 m', estadoTexto(est.suelo)],
-        ['Historial de verdor (NDVI/NDTI)', esEjemplo(est.ndvi) || esSinDato(est.ndvi) ? 'HLS Landsat 8/9 + Sentinel-2, 30 m (pendiente de AppEEARS)' : est.ndvi, estadoTexto(est.ndvi)],
-        ['Humedad del suelo', esEjemplo(est.smap) || esSinDato(est.smap) ? 'SMAP L4, 9 km (pendiente de AppEEARS)' : est.smap, estadoTexto(est.smap)],
+        ...(esSat ? [
+          ['Historial de verdor (NDVI/NDTI)', esEjemplo(est.ndvi) || esSinDato(est.ndvi) ? 'HLS Landsat 8/9 + Sentinel-2, 30 m (pendiente de AppEEARS)' : est.ndvi, estadoTexto(est.ndvi)],
+          ['Humedad del suelo', esEjemplo(est.smap) || esSinDato(est.smap) ? 'SMAP L4, 9 km (pendiente de AppEEARS)' : est.smap, estadoTexto(est.smap)]
+        ] : []),
         ['Precios al productor', 'MAG-SIPA, boletín dic 2025', 'Dato oficial'],
         ['Rendimientos', 'ESPAC-INEC 2024–2025', 'Dato oficial (algunos cultivos estimados)'],
         ['Costos de producción', 'Estimación del equipo', 'Estimado: validar con la asociación local']

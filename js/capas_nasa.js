@@ -24,25 +24,25 @@
   const CAPAS = [
     {
       clave: 'ndvi', id: 'MODIS_Terra_NDVI_8Day', ext: 'png', niveles: [9, 8, 7], retraso: 10,
-      emoji: '🌱', nombre: 'Verdor de cultivos', sensor: 'MODIS Terra NDVI · 8 días · 250 m',
+      emoji: 'sprout', nombre: 'Verdor de cultivos', sensor: 'MODIS Terra NDVI · 8 días · 250 m',
       leyenda: 'Café = suelo pelado o seco · Verde intenso = cultivo vigoroso',
       gradiente: 'linear-gradient(90deg,#c8a165,#e6d27a,#9bc35a,#3d8b2f,#0f5a1e)'
     },
     {
       clave: 'humedad', id: 'SMAP_L4_Analyzed_Root_Zone_Soil_Moisture', ext: 'png', niveles: [6, 7, 5, 8], retraso: 5,
-      emoji: '💧', nombre: 'Humedad del suelo (raíz)', sensor: 'SMAP L4 · 0–100 cm · 9 km',
+      emoji: 'droplets', nombre: 'Humedad del suelo (raíz)', sensor: 'SMAP L4 · 0–100 cm · 9 km',
       leyenda: 'Tonos claros = suelo seco · Tonos intensos = suelo húmedo',
       gradiente: null
     },
     {
       clave: 'lluvia', id: 'IMERG_Precipitation_Rate', ext: 'png', niveles: [6, 7, 5, 8], retraso: 2,
-      emoji: '🌧️', nombre: 'Lluvia reciente', sensor: 'GPM IMERG · 30 min · 10 km',
+      emoji: 'cloud-rain', nombre: 'Lluvia reciente', sensor: 'GPM IMERG · 30 min · 10 km',
       leyenda: 'Colores = intensidad de la lluvia en ese momento (mm/h)',
       gradiente: null
     },
     {
       clave: 'temp', id: 'MODIS_Terra_Land_Surface_Temp_Day', ext: 'png', niveles: [7, 6, 8], retraso: 2,
-      emoji: '🌡️', nombre: 'Temperatura del suelo (día)', sensor: 'MODIS Terra LST · diaria · 1 km',
+      emoji: 'thermometer', nombre: 'Temperatura del suelo (día)', sensor: 'MODIS Terra LST · diaria · 1 km',
       leyenda: 'Azul = frío · Rojo = caliente',
       gradiente: 'linear-gradient(90deg,#2c3e9e,#4ba3d6,#f2e86d,#f08a2b,#b21e1e)'
     }
@@ -50,22 +50,22 @@
 
   const BASES = [
     {
-      clave: 'sentinel', nombre: 'Satélite (Sentinel-2)', emoji: '🛰️',
+      clave: 'sentinel', nombre: 'Satélite (Sentinel-2)', emoji: 'satellite',
       url: 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg',
       opts: { maxZoom: 19, maxNativeZoom: 15, attribution: 'Sentinel-2 cloudless 2016 © <a href="https://s2maps.eu">EOX</a> (CC BY 4.0), datos Copernicus' }
     },
     {
-      clave: 'relieve', nombre: 'Relieve (SRTM)', emoji: '⛰️',
+      clave: 'relieve', nombre: 'Relieve (SRTM)', emoji: 'mountain',
       url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
       opts: { maxZoom: 17, attribution: '© OpenStreetMap, SRTM · estilo © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)' }
     },
     {
-      clave: 'calles', nombre: 'Caminos y comunidades', emoji: '🗺️',
+      clave: 'calles', nombre: 'Caminos y comunidades', emoji: 'map',
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       opts: { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }
     },
     {
-      clave: 'viirs', nombre: 'Imagen NASA del día', emoji: '🌎', gibs: true,
+      clave: 'viirs', nombre: 'Imagen NASA del día', emoji: 'globe', gibs: true,
       id: 'VIIRS_SNPP_CorrectedReflectance_TrueColor', ext: 'jpg', niveles: [9, 8], retraso: 1,
       opts: { maxZoom: 19, attribution: 'NASA GIBS · VIIRS SNPP' }
     }
@@ -128,19 +128,19 @@
 
     contenedor.innerHTML = `
       <div class="capas-cabeza">
-        <strong><span aria-hidden="true">🛰️</span> Capas de la NASA sobre su lote</strong>
+        <strong><i data-lucide="layers" class="icono" aria-hidden="true"></i> Capas de la NASA sobre su lote</strong>
         <label class="capas-fecha">Fecha
           <input type="date" id="capas-fecha" max="${fechaISO(0)}" />
         </label>
       </div>
       <div class="capas-fila" role="group" aria-label="Mapa base">
         <span class="capas-etiqueta">Mapa</span>
-        ${BASES.map(b => `<button type="button" class="capa-chip${b.clave === 'sentinel' ? ' activo' : ''}" data-base="${b.clave}" aria-pressed="${b.clave === 'sentinel'}"><span aria-hidden="true">${b.emoji}</span> ${b.nombre}</button>`).join('')}
+        ${BASES.map(b => `<button type="button" class="capa-chip${b.clave === 'sentinel' ? ' activo' : ''}" data-base="${b.clave}" aria-pressed="${b.clave === 'sentinel'}"><i data-lucide="${b.emoji}" class="icono" aria-hidden="true"></i> ${b.nombre}</button>`).join('')}
       </div>
       <div class="capas-fila" role="group" aria-label="Capa NASA">
         <span class="capas-etiqueta">Ver</span>
         <button type="button" class="capa-chip activo" data-capa="" aria-pressed="true">Ninguna</button>
-        ${CAPAS.map(c => `<button type="button" class="capa-chip" data-capa="${c.clave}" aria-pressed="false"><span aria-hidden="true">${c.emoji}</span> ${c.nombre}</button>`).join('')}
+        ${CAPAS.map(c => `<button type="button" class="capa-chip" data-capa="${c.clave}" aria-pressed="false"><i data-lucide="${c.emoji}" class="icono" aria-hidden="true"></i> ${c.nombre}</button>`).join('')}
       </div>
       <div class="capas-leyenda" id="capas-leyenda" hidden>
         <div class="capas-leyenda-txt"><strong id="capas-ley-titulo"></strong><span id="capas-ley-sensor"></span><span id="capas-ley-texto"></span></div>
@@ -162,7 +162,7 @@
     const pintarLeyenda = () => {
       if (!defActual) { leyenda.hidden = true; return; }
       leyenda.hidden = false;
-      contenedor.querySelector('#capas-ley-titulo').textContent = `${defActual.emoji} ${defActual.nombre}`;
+      contenedor.querySelector('#capas-ley-titulo').textContent = defActual.nombre;
       contenedor.querySelector('#capas-ley-sensor').textContent = `${defActual.sensor} · imagen del ${estado.fechaManual || fechaISO(defActual.retraso)}`;
       contenedor.querySelector('#capas-ley-texto').textContent = defActual.leyenda;
       const g = contenedor.querySelector('#capas-gradiente');
@@ -206,6 +206,7 @@
       if (bases.viirs.actualizarFecha) bases.viirs.actualizarFecha();
       pintarLeyenda();
     });
+    if (window.lucide) window.lucide.createIcons();
     map.on('moveend', () => { if (defActual) linkWv.href = enlaceWorldview(defActual, map, estado.fechaManual || fechaISO(defActual.retraso)); });
     return estado;
   }

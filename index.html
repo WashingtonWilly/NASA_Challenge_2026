@@ -168,10 +168,10 @@
                 entiende: qué sembrar, en qué mes, qué riesgos tiene su lote y qué hacer para evitarlos.
               </p>
               <ul class="hero-valores" aria-label="Lo que ofrece RotaSat">
-                <li><span aria-hidden="true">🛰️</span><strong>9 fuentes satelitales</strong><small>NASA POWER, SRTM, HLS, MODIS, SMAP, IMERG…</small></li>
-                <li><span aria-hidden="true">📍</span><strong>Cualquier lote del Ecuador</strong><small>Dibuje su terreno en el mapa</small></li>
-                <li><span aria-hidden="true">✅</span><strong>Qué hacer, no solo datos</strong><small>Heladas, sequía, erosión, acidez</small></li>
-                <li><span aria-hidden="true">📄</span><strong>Plan en PDF y WhatsApp</strong><small>Con voz y letra grande</small></li>
+                <li><i data-lucide="satellite" class="icono hv-ico"></i><strong>9 fuentes satelitales</strong><small>NASA POWER, SRTM, HLS, MODIS, SMAP, IMERG…</small></li>
+                <li><i data-lucide="map-pin" class="icono hv-ico"></i><strong>Cualquier lote del Ecuador</strong><small>Dibuje su terreno en el mapa</small></li>
+                <li><i data-lucide="list-checks" class="icono hv-ico"></i><strong>Qué hacer, no solo datos</strong><small>Heladas, sequía, erosión, acidez</small></li>
+                <li><i data-lucide="file-down" class="icono hv-ico"></i><strong>Plan en PDF y WhatsApp</strong><small>Con voz y letra grande</small></li>
               </ul>
               <div class="hero-actions">
                 <button type="button" class="btn" data-tab-go="tab-terreno">Evaluar mi parcela</button>
@@ -259,11 +259,11 @@
           <div class="subtabs" role="tablist" aria-label="Secciones" data-subtabs="lote">
             <button type="button" class="subtab activo" role="tab" id="st-lote-mapa"
               aria-selected="true" aria-controls="sp-lote-mapa" data-subtab="lote-mapa">
-              <span aria-hidden="true">📍</span> Mapa y diagnóstico
+              <i data-lucide="map-pin" class="icono"></i> Mapa y diagnóstico
             </button>
             <button type="button" class="subtab" role="tab" id="st-lote-tierra"
               aria-selected="false" aria-controls="sp-lote-tierra" data-subtab="lote-tierra">
-              <span aria-hidden="true">🌱</span> Mi tierra y cosechas anteriores
+              <i data-lucide="sprout" class="icono"></i> Mi tierra y cosechas anteriores
             </button>
           </div>
 
@@ -531,10 +531,10 @@
 
           <div class="subtabs" role="tablist" aria-label="Secciones" data-subtabs="riesgos">
             <button type="button" class="subtab activo" role="tab" id="st-riesgos-avisos" aria-selected="true" aria-controls="sp-riesgos-avisos" data-subtab="riesgos-avisos">
-              <span aria-hidden="true">⚠️</span> Advertencias <span class="subtab-cuenta" id="cuenta-avisos">–</span>
+              <i data-lucide="triangle-alert" class="icono"></i> Advertencias <span class="subtab-cuenta" id="cuenta-avisos">–</span>
             </button>
             <button type="button" class="subtab" role="tab" id="st-riesgos-vetados" aria-selected="false" aria-controls="sp-riesgos-vetados" data-subtab="riesgos-vetados">
-              <span aria-hidden="true">🚫</span> Cultivos que no conviene <span class="subtab-cuenta" id="cuenta-vetados">–</span>
+              <i data-lucide="ban" class="icono"></i> Cultivos que no conviene <span class="subtab-cuenta" id="cuenta-vetados">–</span>
             </button>
           </div>
           <div class="subpanel" id="sp-riesgos-avisos" role="tabpanel" aria-labelledby="st-riesgos-avisos" data-subpanel="riesgos-avisos">
@@ -542,7 +542,7 @@
                 <div class="vuln-cabeza">
                   <h3><i data-lucide="shield-check" class="icono"></i> Advertencias de su lote</h3>
                   <button type="button" id="btn-escuchar-avisos" class="btn-escuchar" aria-label="Escuchar las advertencias en voz alta">
-                    <span aria-hidden="true">🔊</span> Escuchar
+                    <i data-lucide="volume-2" class="icono"></i> Escuchar
                   </button>
                 </div>
                 <div id="vuln-badges-container" class="vuln-badges avisos-lista">
@@ -602,7 +602,7 @@
                     <input type="range" class="prio-slider" min="1" max="5" step="1" value="3"
                       aria-label="Prioridad ahorrar agua" aria-valuetext="Normal" />
                     <div class="prio-slider-escala" aria-hidden="true"><span>Poco</span><span>Normal</span><span>Mucho</span></div>
-                    <div class="prio-slider-estado"><span class="prio-iconos" aria-hidden="true">💧💧💧</span><b class="prio-texto">Normal</b></div>
+                    <div class="prio-slider-estado"><span class="prio-iconos" aria-hidden="true"></span><b class="prio-texto">Normal</b></div>
                   </div>
                 </div>
 
@@ -618,7 +618,7 @@
                     <input type="range" class="prio-slider" min="1" max="5" step="1" value="3"
                       aria-label="Prioridad cuidar la tierra" aria-valuetext="Normal" />
                     <div class="prio-slider-escala" aria-hidden="true"><span>Poco</span><span>Normal</span><span>Mucho</span></div>
-                    <div class="prio-slider-estado"><span class="prio-iconos" aria-hidden="true">🌱🌱🌱</span><b class="prio-texto">Normal</b></div>
+                    <div class="prio-slider-estado"><span class="prio-iconos" aria-hidden="true"></span><b class="prio-texto">Normal</b></div>
                   </div>
                 </div>
 
@@ -634,7 +634,7 @@
                     <input type="range" class="prio-slider" min="1" max="5" step="1" value="3"
                       aria-label="Prioridad ganar más" aria-valuetext="Normal" />
                     <div class="prio-slider-escala" aria-hidden="true"><span>Poco</span><span>Normal</span><span>Mucho</span></div>
-                    <div class="prio-slider-estado"><span class="prio-iconos" aria-hidden="true">💰💰💰</span><b class="prio-texto">Normal</b></div>
+                    <div class="prio-slider-estado"><span class="prio-iconos" aria-hidden="true"></span><b class="prio-texto">Normal</b></div>
                   </div>
                 </div>
               </div>
@@ -710,15 +710,15 @@
           <div class="subtabs" role="tablist" aria-label="Secciones" data-subtabs="plan">
             <button type="button" class="subtab activo" role="tab" id="st-plan-opciones"
               aria-selected="true" aria-controls="sp-plan-opciones" data-subtab="plan-opciones">
-              <span aria-hidden="true">⭐</span> Opciones recomendadas
+              <i data-lucide="star" class="icono"></i> Opciones recomendadas
             </button>
             <button type="button" class="subtab" role="tab" id="st-plan-calendario"
               aria-selected="false" aria-controls="sp-plan-calendario" data-subtab="plan-calendario">
-              <span aria-hidden="true">📅</span> ¿Cuándo sembrar?
+              <i data-lucide="calendar-days" class="icono"></i> ¿Cuándo sembrar?
             </button>
             <button type="button" class="subtab" role="tab" id="st-plan-graficos"
               aria-selected="false" aria-controls="sp-plan-graficos" data-subtab="plan-graficos">
-              <span aria-hidden="true">📊</span> Gráficos NASA
+              <i data-lucide="activity" class="icono"></i> Gráficos NASA
             </button>
           </div>
 
@@ -825,7 +825,7 @@
                 <div id="informe-opciones-lista"></div>
               </fieldset>
               <button type="button" id="btn-descargar-pdf" class="btn btn-pdf">
-                <span aria-hidden="true">📄</span> Descargar PDF
+                <i data-lucide="file-down" class="icono"></i> Descargar PDF
               </button>
               <p id="informe-estado" class="informe-estado" role="status" aria-live="polite"></p>
               <ul class="informe-incluye">
@@ -849,11 +849,11 @@
           <div class="subtabs" role="tablist" aria-label="Secciones" data-subtabs="nasa">
             <button type="button" class="subtab activo" role="tab" id="st-nasa-sat"
               aria-selected="true" aria-controls="sp-nasa-sat" data-subtab="nasa-sat">
-              <span aria-hidden="true">🛰️</span> Satélites y sensores
+              <i data-lucide="satellite" class="icono"></i> Satélites y sensores
             </button>
             <button type="button" class="subtab" role="tab" id="st-nasa-metodo"
               aria-selected="false" aria-controls="sp-nasa-metodo" data-subtab="nasa-metodo">
-              <span aria-hidden="true">🧮</span> Metodología y fórmulas
+              <i data-lucide="calculator" class="icono"></i> Metodología y fórmulas
             </button>
           </div>
 
@@ -1086,7 +1086,7 @@
   </div><!-- /.app-shell -->
 
   <!-- Scripts Externos: Lucide Icons, Leaflet, Leaflet.draw y Chart.js -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/vendor/lucide.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin=""></script>
