@@ -137,36 +137,22 @@
     const lat = parcela.centroide?.lat ?? -1.7848;
     const lon = parcela.centroide?.lon ?? -78.6125;
 
-    const esriSat = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      {
-        maxZoom: 19,
-        attribution: 'Imágenes Esri, Maxar | Datos NASA POWER, SRTM, HLS, GPM'
-      }
-    );
-
-    const osmCalle = L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      {
-        maxZoom: 19,
-        attribution: 'OpenStreetMap contributors'
-      }
-    );
+    const osmCalle = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    });
 
     state.map = L.map('mapa-parcela', {
       center: [lat, lon],
       zoom: 16,
-      layers: [esriSat]
+      layers: [osmCalle]
     });
 
-    L.control.layers(
-      {
-        'Satélite (Esri World Imagery)': esriSat,
-        'Mapa de caminos y comunidades (OSM)': osmCalle
-      },
-      {},
-      { position: 'topright' }
-    ).addTo(state.map);
+    // Mapas base abiertos + capas satelitales NASA GIBS (panel bajo el mapa)
+    const panelCapas = document.getElementById('capas-nasa');
+    if (window.CapasNASA && panelCapas) {
+      state.capasNasa = window.CapasNASA.montar(state.map, panelCapas);
+    }
 
     state.drawnItems = new L.FeatureGroup();
     state.map.addLayer(state.drawnItems);
@@ -497,6 +483,29 @@
     el.innerHTML = `<strong>${parcela.nombre}</strong> <span class="unidad">· ${parcela.ubicacion_texto || ''}</span> ${etiqueta}`;
   }
 
+  /** Pide el pronóstico de 7 días del lote una sola vez por ubicación y vuelve a pintar al llegar. */
+  function solicitarPronostico(parcela) {
+    const card = document.getElementById('pronostico-card');
+    if (!window.Pronostico || !card || !parcela.centroide) return;
+    const clave = `${parcela.centroide.lat},${parcela.centroide.lon}`;
+    if (state.pronosticoClave === clave) {
+      card.innerHTML = window.Pronostico.tarjeta(state.pronostico, state.pronosticoError);
+      return;
+    }
+    if (state.pronosticoPidiendo === clave) return;
+    state.pronosticoPidiendo = clave;
+    card.innerHTML = window.Pronostico.tarjeta(null);
+    window.Pronostico.cargar(parcela.centroide.lat, parcela.centroide.lon, parcela.terreno?.elev_m)
+      .then(p => { state.pronostico = p; state.pronosticoError = false; })
+      .catch(() => { state.pronostico = null; state.pronosticoError = true; })
+      .finally(() => {
+        state.pronosticoClave = clave;
+        state.pronosticoPidiendo = null;
+        const actual = obtenerParcelaActual();
+        if (actual && `${actual.centroide?.lat},${actual.centroide?.lon}` === clave) actualizarTodo();
+      });
+  }
+
   function renderizarPaso1Terreno(parcela) {
     renderizarParcelaActiva(parcela);
     marcarFuente('tag-elev', parcela, 'terreno');
@@ -607,7 +616,11 @@
       .join('');
     const AY = window.AyudaAgricultor;
     if (AY) {
-      const avisos = AY.advertenciasLote(parcela, state.opciones);
+      const clavePron = `${parcela.centroide?.lat},${parcela.centroide?.lon}`;
+      const pron = state.pronosticoClave === clavePron ? state.pronostico : null;
+      const avisos = AY.advertenciasLote(parcela, state.opciones)
+        .concat(window.Pronostico ? window.Pronostico.avisos(pron) : []);
+      solicitarPronostico(parcela);
       state.avisosLote = avisos;
       vulnContainer.innerHTML = AY.listaDetalleAdvertencias(avisos);
       AY.activarListaDetalle(vulnContainer);
@@ -2151,7 +2164,8 @@
           sliders: state.sliders,
           avisos: state.avisosLote || [],
           catalogo: state.catalogo,
-          nombreAgricultor: (document.getElementById('informe-nombre')?.value || '').trim()
+          nombreAgricultor: (document.getElementById('informe-nombre')?.value || '').trim(),
+          pronostico: state.pronosticoClave === `${parcela.centroide?.lat},${parcela.centroide?.lon}` ? state.pronostico : null
         });
         if (estado) estado.textContent = '✅ Listo: el PDF se guardó en su carpeta de Descargas.';
       } catch (e) {
