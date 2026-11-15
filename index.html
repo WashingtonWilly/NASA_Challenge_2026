@@ -87,7 +87,7 @@
               <i data-lucide="satellite" class="icono"></i>
               <span>Datos NASA</span>
             </span>
-            <span class="sidebar-badge-num">8</span>
+            <span class="sidebar-badge-num">9</span>
           </button>
         </nav>
 
@@ -164,10 +164,15 @@
               <div class="mono">Sistema de apoyo a la decisión agrícola</div>
               <h1>Rotación de cultivos resiliente para el agro andino y costero</h1>
               <p class="lead">
-                RotaSat combina observaciones satelitales de la Tierra de la NASA (POWER, GPM, SMAP, NASADEM/SRTM y HLS)
-                con datos edáficos de SoilGrids y el conocimiento del agricultor para planificar secuencias de siembra a
-                36 meses.
+                RotaSat convierte datos de satélites de la NASA en un plan de siembra de 3 años que cualquier agricultor
+                entiende: qué sembrar, en qué mes, qué riesgos tiene su lote y qué hacer para evitarlos.
               </p>
+              <ul class="hero-valores" aria-label="Lo que ofrece RotaSat">
+                <li><span aria-hidden="true">🛰️</span><strong>9 fuentes satelitales</strong><small>NASA POWER, SRTM, HLS, MODIS, SMAP, IMERG…</small></li>
+                <li><span aria-hidden="true">📍</span><strong>Cualquier lote del Ecuador</strong><small>Dibuje su terreno en el mapa</small></li>
+                <li><span aria-hidden="true">✅</span><strong>Qué hacer, no solo datos</strong><small>Heladas, sequía, erosión, acidez</small></li>
+                <li><span aria-hidden="true">📄</span><strong>Plan en PDF y WhatsApp</strong><small>Con voz y letra grande</small></li>
+              </ul>
               <div class="hero-actions">
                 <button type="button" class="btn" data-tab-go="tab-terreno">Evaluar mi parcela</button>
                 <a href="#tab-satelites" data-tab-go="tab-satelites:nasa-metodo">Ver cómo lo calculamos</a>
@@ -225,6 +230,14 @@
                 </div>
                 <h3>Mi plan de siembra</h3>
                 <p>Elija qué le importa más y compare las 3 mejores rotaciones, con los meses ideales para sembrar.</p>
+              </a>
+              <a href="#tab-informe" class="paso" data-tab-go="tab-informe">
+                <div class="paso-meta">
+                  <i data-lucide="file-down" class="icono"></i>
+                  <span class="mono">Paso 4</span>
+                </div>
+                <h3>Mi informe PDF</h3>
+                <p>Descargue su plan en una hoja fácil de leer, con el detalle técnico para el agrónomo.</p>
               </a>
             </div>
           </div>
@@ -313,11 +326,13 @@
                 </button>
               </div>
               <div id="mapa-parcela" class="map-container" aria-label="Mapa satelital interactivo de la parcela"></div>
+              <div id="capas-nasa" class="capas-nasa" aria-label="Capas satelitales de la NASA"></div>
               <div id="parcela-activa" class="parcela-activa" role="status"></div>
               <div id="estado-datos-vivo" class="estado-datos-vivo" role="status" aria-live="polite" hidden></div>
             </div>
 
             <div class="terreno-telemetry">
+              <div class="pronostico-card" id="pronostico-card" aria-live="polite"></div>
               <a href="#tab-riesgos" class="resumen-riesgos" id="resumen-riesgos" data-tab-go="tab-riesgos">
                 <!-- Poblado por app.js -->
               </a>
@@ -846,18 +861,18 @@
           <div class="vetados-grid">
             <div class="card-datos">
               <h3><span>NASA POWER</span><span class="mono">~50 km</span></h3>
-              <div class="fila"><span>Variables</span><span>Precipitación, Tmax, Tmin</span></div>
-              <div class="fila"><span>Frecuencia</span><span>Serie diaria / 10 años</span></div>
+              <div class="fila"><span>Variables</span><span>Lluvia, Tmax, Tmin, radiación, viento, humedad</span></div>
+              <div class="fila"><span>Uso</span><span>Clima 10 años, ET₀, heladas, calendario de siembra</span></div>
             </div>
             <div class="card-datos">
               <h3><span>GPM IMERG</span><span class="mono">10 km</span></h3>
-              <div class="fila"><span>Variables</span><span>Anomalía trimestral de lluvia</span></div>
-              <div class="fila"><span>Frecuencia</span><span>Mensual en vivo</span></div>
+              <div class="fila"><span>Variables</span><span>Intensidad de lluvia (cada 30 min)</span></div>
+              <div class="fila"><span>Uso</span><span>Capa del mapa (NASA GIBS)</span></div>
             </div>
             <div class="card-datos">
               <h3><span>SMAP L4</span><span class="mono">9 km</span></h3>
-              <div class="fila"><span>Variables</span><span>Humedad radicular</span></div>
-              <div class="fila"><span>Frecuencia</span><span>Balance hídrico inicial</span></div>
+              <div class="fila"><span>Variables</span><span>Humedad del suelo en la raíz (0–100 cm)</span></div>
+              <div class="fila"><span>Uso</span><span>Capa del mapa (NASA GIBS); serie del lote vía AppEEARS</span></div>
             </div>
             <div class="card-datos">
               <h3><span>NASADEM</span><span class="mono">30 m</span></h3>
@@ -878,6 +893,11 @@
               <h3><span>Sentinel-2 (HLS)</span><span class="mono">30 m</span></h3>
               <div class="fila"><span>Variables</span><span>Verdor y suelo descubierto</span></div>
               <div class="fila"><span>Frecuencia</span><span>Armonizado con Landsat</span></div>
+            </div>
+            <div class="card-datos">
+              <h3><span>MODIS Terra (NDVI y LST)</span><span class="mono">250 m · 1 km</span></h3>
+              <div class="fila"><span>Variables</span><span>Verdor 8 días y temperatura de superficie</span></div>
+              <div class="fila"><span>Uso</span><span>Capas del mapa (NASA GIBS)</span></div>
             </div>
             <div class="card-datos">
               <h3><span>ISRIC SoilGrids v2.0</span><span class="mono">250 m</span></h3>
@@ -1052,8 +1072,9 @@
           <div>
             <p><strong>Equipo RotaSat</strong> · NASA International Space Apps Challenge 2026 · Sede Riobamba, Ecuador
             </p>
-            <p>Fuentes de datos: NASA POWER, GPM IMERG, SMAP L4, NASADEM/SRTM, HLS (Landsat 8/9 + Sentinel-2), ISRIC
-              SoilGrids, MAG-SIPA e INIAP.</p>
+            <p>Datos: NASA POWER, NASA GIBS (MODIS, SMAP, GPM IMERG, VIIRS), NASADEM/SRTM, HLS (Landsat 8/9 + Sentinel-2),
+              ISRIC SoilGrids, MAG-SIPA e INIAP. Mapas abiertos: OpenStreetMap, OpenTopoMap y Sentinel-2 cloudless (EOX).
+              Pronóstico semanal: Open-Meteo (CC BY 4.0).</p>
           </div>
           <div>
             <a href="https://github.com/WashingtonWilly/NASA_Challenge_2026" target="_blank" rel="noopener">Repositorio
@@ -1078,6 +1099,8 @@
   <script src="js/motor.js"></script>
   <script src="js/datos_vivo.js"></script>
   <script src="js/ecuador_dpa.js"></script>
+  <script src="js/capas_nasa.js"></script>
+  <script src="js/pronostico.js"></script>
   <script src="js/ayuda_agricultor.js"></script>
   <script src="js/vendor/jspdf.umd.min.js"></script>
   <script src="js/vendor/jspdf.plugin.autotable.min.js"></script>

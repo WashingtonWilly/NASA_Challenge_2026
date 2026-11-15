@@ -138,6 +138,137 @@
     doc.text(t(fechaTxt), W - M, 13, { align: 'right' });
     y = 38;
 
+    // =====================================================================
+    // PÁGINA 1 — «Su plan en una hoja»: letra grande, sin tecnicismos
+    // =====================================================================
+    const H = doc.internal.pageSize.getHeight();
+    doc.setTextColor(...TINTA);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(17);
+    doc.text(t(datos.nombreAgricultor ? `Plan de siembra de ${datos.nombreAgricultor}` : 'Su plan de siembra'), M, y + 2);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...GRIS);
+    doc.text(t(`${p.nombre} · ${p.area_ha} ha · ${miles(p.terreno?.elev_m)} m de altura`), M, y + 8.5);
+    y += 16;
+
+    // Tres años en tarjetas grandes
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(...OLIVA);
+    doc.text(t('Qué sembrar los próximos 3 años'), M, y); y += 4;
+    const anchoT = (ancho - 8) / 3;
+    const altoT = 33;
+    rot.cultivos.forEach((c, i) => {
+      const x = M + i * (anchoT + 4);
+      const mej = AY ? AY.mejoresMeses(AY.calendarioSiembra(c, p, opciones), 1)[0] : null;
+      doc.setFillColor(...PAPEL); doc.setDrawColor(...BANDA);
+      doc.roundedRect(x, y, anchoT, altoT, 2.5, 2.5, 'FD');
+      doc.setFillColor(...TIERRA); doc.rect(x, y, anchoT, 2.2, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...TIERRA);
+      doc.text(`AÑO ${i + 1}`, x + 4, y + 8);
+      doc.setFontSize(14.5); doc.setTextColor(...TINTA);
+      const nom = doc.splitTextToSize(t(c.nombre), anchoT - 8).slice(0, 2);
+      doc.text(nom, x + 4, y + 15);
+      const yy = y + 15 + nom.length * 5.6;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...TINTA);
+      doc.text(t(mej ? `Siembre en ${AY.MESES_LARGOS[mej.mes - 1]}` : 'Siembre solo con riego'), x + 4, yy + 1);
+      doc.setFontSize(9.5); doc.setTextColor(...GRIS);
+      doc.text(t(mej ? `Cosecha en ${AY.MESES_LARGOS[mej.cosecha - 1]}` : ''), x + 4, yy + 6.5);
+    });
+    y += altoT + 8;
+
+    // Tres cifras clave
+    const ganLote = Math.round(rot.detalles.rentabilidad.margenAnualPromedioUsdHa * area);
+    const cifras = [
+      [`$${miles(ganLote)}`, 'ganancia estimada al año', 'en todo su lote'],
+      [`${rot.balanceHidrico.coberturaAguaPct} %`, 'del agua la da la lluvia', rot.balanceHidrico.deficitTotal > 0 ? `riego de apoyo: ${miles(Math.round(rot.balanceHidrico.deficitTotal * 10000 / 3))} L/ha al año` : 'no necesita riego'],
+      [`${rot.irrPct} de 100`, 'puntaje para su lote', 'cuida agua, tierra y bolsillo']
+    ];
+    cifras.forEach((cf, i) => {
+      const x = M + i * (anchoT + 4);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(19); doc.setTextColor(...OLIVA);
+      doc.text(t(cf[0]), x, y + 6);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...TINTA);
+      doc.text(t(cf[1]), x, y + 12);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...GRIS);
+      doc.text(doc.splitTextToSize(t(cf[2]), anchoT - 2), x, y + 16.5);
+    });
+    y += 26;
+
+    // Lista de tareas para marcar
+    doc.setDrawColor(...BANDA); doc.line(M, y - 3, W - M, y - 3);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(...OLIVA);
+    doc.text(t('Lo que debe hacer (marque cuando lo haga)'), M, y + 3); y += 9;
+    const ordenT = { riesgo: 0, alerta: 1, info: 2, ok: 3 };
+    const tareas = [];
+    (datos.avisos || []).slice().sort((a, b) => ordenT[a.clase] - ordenT[b.clase])
+      .filter(a => a.clase !== 'ok' && (a.acciones || []).length)
+      .forEach(a => { if (tareas.length < 7) tareas.push({ txt: a.acciones[0], motivo: a.titulo, clase: a.clase }); });
+    tareas.forEach(tk => {
+      const lineas = doc.splitTextToSize(t(tk.txt), ancho - 12);
+      doc.setDrawColor(...TINTA); doc.setLineWidth(0.4);
+      doc.rect(M, y - 3.6, 4.6, 4.6);
+      doc.setLineWidth(0.2);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...TINTA);
+      doc.text(lineas, M + 8, y);
+      y += lineas.length * 4.8;
+      doc.setFontSize(8); doc.setTextColor(...(tk.clase === 'riesgo' ? [155, 44, 31] : GRIS));
+      doc.text(t(`Por: ${tk.motivo}`), M + 8, y);
+      y += 5.2;
+    });
+
+    // Esta semana (si hay pronóstico)
+    const pron = datos.pronostico;
+    if (pron && pron.dias && pron.dias.length && y < H - 60) {
+      y += 1;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...OLIVA);
+      doc.text(t('El tiempo esta semana'), M, y); y += 2.5;
+      const anchoD = ancho / pron.dias.length;
+      pron.dias.forEach((d, i) => {
+        const x = M + i * anchoD;
+        const frio = d.tmin <= 0 ? [246, 220, 212] : (d.tmin <= 2 ? [251, 239, 207] : PAPEL);
+        doc.setFillColor(...frio); doc.roundedRect(x + 0.6, y, anchoD - 1.2, 15, 1.5, 1.5, 'F');
+        const dt = new Date(d.fecha + 'T12:00:00');
+        const nom = i === 0 ? 'Hoy' : ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][dt.getDay()];
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...TINTA);
+        doc.text(t(nom), x + anchoD / 2, y + 4.2, { align: 'center' });
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+        doc.text(t(`${Math.round(d.tmin)}° / ${Math.round(d.tmax)}°`), x + anchoD / 2, y + 8.6, { align: 'center' });
+        doc.setTextColor(63, 90, 115);
+        doc.text(t(d.lluvia >= 0.1 ? `${d.lluvia.toFixed(d.lluvia < 10 ? 1 : 0)} mm` : 'sin lluvia'), x + anchoD / 2, y + 12.8, { align: 'center' });
+      });
+      y += 18;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.2); doc.setTextColor(...GRIS);
+      doc.text(t('Mínima / máxima del día. Fondo rojo = helada; amarillo = noche muy fría. Pronóstico abierto Open-Meteo ajustado a su altura.'), M, y);
+      y += 5;
+    }
+
+    // No siembre esto
+    const vetP = res.cultivosVetados || [];
+    const fito = vetP.filter(v => !v.razones.every(r => /^Altitud fuera de rango/i.test(r)));
+    if (fito.length && y < H - 34) {
+      doc.setFillColor(251, 240, 236); doc.setDrawColor(155, 44, 31);
+      const txtNo = fito.slice(0, 3).map(v => {
+        const rm = AY ? AY.remediosVeto(v.razones, v.cultivo, []) : { motivo: '' };
+        return `${v.cultivo.nombre}: ${rm.motivo.toLowerCase()}`;
+      }).join(' · ');
+      const lin = doc.splitTextToSize(t(`No siembre este año — ${txtNo}.`), ancho - 8);
+      doc.roundedRect(M, y, ancho, lin.length * 4.6 + 5, 2, 2, 'FD');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(155, 44, 31);
+      doc.text(lin, M + 4, y + 5.2);
+      y += lin.length * 4.6 + 9;
+    }
+
+    doc.setFont('helvetica', 'italic'); doc.setFontSize(8.5); doc.setTextColor(...GRIS);
+    doc.text(t('Plan hecho con datos de satélites de la NASA (POWER, SRTM, HLS) y suelos ISRIC. Las páginas siguientes tienen el detalle para el técnico.'), M, H - 18, { maxWidth: ancho });
+
+    // =====================================================================
+    // ANEXO TÉCNICO
+    // =====================================================================
+    doc.addPage();
+    y = 16;
+    doc.setFillColor(...OLIVA); doc.rect(0, 0, W, 10, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(255, 255, 255);
+    doc.text(t('ANEXO TÉCNICO — detalle de datos y cálculos'), M, 6.6);
+    doc.text(t(p.nombre || ''), W - M, 6.6, { align: 'right' });
+    y = 18;
+
     // ---------------- 1. Lote ----------------
     titulo('1. Datos del lote');
     const histIds = p.historia_declarada || [];
