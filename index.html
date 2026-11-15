@@ -91,6 +91,12 @@
             </span>
             <span class="sidebar-badge-num">9</span>
           </button>
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-3d">
+            <span class="sidebar-item-left">
+              <i data-lucide="layers" class="icono"></i>
+              <span>Maqueta 3D</span>
+            </span>
+          </button>
         </nav>
 
         <!-- Tarjeta inferior: Parcela en memoria -->
@@ -1155,6 +1161,47 @@
 
           </div>
 
+        </section>
+
+        <!-- MÓDULO: EXPLORADOR 3D (visor aislado en iframe; sus estilos no afectan al resto) -->
+        <section id="tab-3d" class="step-section tab-panel" data-tab-panel="tab-3d" role="tabpanel" hidden>
+          <div class="step-header">
+            <div class="mono"><i data-lucide="layers" class="icono"></i> Explorador geoespacial</div>
+            <h2>Explora el territorio en 3D</h2>
+            <p>Maqueta de cuatro capas: mapa base, relieve, curvas de nivel y uso agrícola. Gire con el mouse o el
+              dedo, active el recorrido guiado o cambie entre vista isométrica, superior y lateral.</p>
+          </div>
+          <iframe class="iframe-3d" data-src="./3d/index.html" title="Explorador 3D de capas geoespaciales AllpaWiñay"
+            allow="fullscreen" allowfullscreen
+            style="display:block;width:100%;height:1620px;border:0;border-radius:12px;background:transparent"></iframe>
+          <p class="nota-3d" style="font-size:.85rem;opacity:.75;margin-top:.6rem">
+            Modelo ilustrativo de las capas de un territorio andino: no reemplaza a las mediciones de cada parcela,
+            que están en las pestañas «Mi lote» y «Datos NASA».
+          </p>
+          <script>
+            // El visor 3D se carga recién cuando la pestaña se muestra: si arrancara oculto,
+            // se inicializaría sin tamaño y la maqueta quedaría en blanco.
+            (function () {
+              var sec = document.getElementById('tab-3d');
+              var ifr = sec && sec.querySelector('iframe.iframe-3d');
+              if (!sec || !ifr) return;
+              function cargar() {
+                if (!sec.hidden && !ifr.getAttribute('src')) ifr.setAttribute('src', ifr.dataset.src);
+              }
+              // Altura automática: el iframe mide lo mismo que el visor, sin barra de desplazamiento interna
+              ifr.addEventListener('load', function () {
+                try {
+                  var doc = ifr.contentDocument, v = doc && doc.querySelector('.viewer');
+                  if (!v) return;
+                  var ajustar = function () { ifr.style.height = Math.ceil(v.getBoundingClientRect().height + 16) + 'px'; };
+                  new ResizeObserver(ajustar).observe(v);
+                  ajustar();
+                } catch (e) { /* si no se puede leer el iframe, queda la altura fija del CSS */ }
+              });
+              new MutationObserver(cargar).observe(sec, { attributes: true, attributeFilter: ['hidden', 'class', 'style'] });
+              cargar();
+            })();
+          </script>
         </section>
 
         <!-- MÓDULO 7: ADMINISTRACIÓN -->

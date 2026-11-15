@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Explorador geoespacial 3D · AllpaWiñay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{--papel:#EFEADC;--claro:#F7F3E8;--campo:#FBF8F0;--banda:#E4DDCB;--tinta:#2B2A22;--texto:#5A5440;--gris:#6B6450;--oliva:#3E4A1E;--tierra:#A6512B;--borde:#D6CDB4;--curva:#C9BFA2;--blanco:#FBF6EA}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:'Public Sans',sans-serif;color:var(--tinta);background:transparent}
+body{padding:8px;font-size:14px}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--tierra);outline-offset:2px}
+button[disabled]{opacity:.5;cursor:not-allowed}
+.viewer{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,.88fr);gap:12px;align-items:stretch}
+.scene-card{position:relative;min-height:645px;border:1px solid var(--borde);background:var(--papel);overflow:hidden;isolation:isolate}
+.scene-card canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.scene-card canvas:active{cursor:grabbing}
+.scene-top{position:absolute;z-index:4;inset:12px 12px auto;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;pointer-events:none}
+.scene-top .mini-kicker{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--gris);background:rgba(247,243,232,.95);padding:7px 9px;border:1px solid var(--borde);max-width:300px}
+.scene-top button{pointer-events:auto;background:var(--claro);border:1px solid var(--borde);color:var(--oliva);padding:8px 10px;border-radius:2px;font-size:12px;font-weight:600}
+.scene-top button:hover{border-color:var(--oliva)}
+.scene-bottom{position:absolute;z-index:4;left:12px;right:12px;bottom:12px;display:flex;gap:8px;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.scene-bottom .hint{max-width:330px;background:rgba(247,243,232,.95);border:1px solid var(--borde);padding:8px 10px;font-size:11px;line-height:1.5;color:var(--gris)}
+.scene-bottom .counter{background:var(--oliva);color:var(--blanco);padding:8px 10px;font:500 11px 'IBM Plex Mono',monospace;white-space:nowrap}
+.poster{position:absolute;inset:0;z-index:6;background:var(--papel);display:flex;justify-content:center;align-items:center;flex-direction:column;gap:8px;padding:25px}
+.poster img{max-width:92%;max-height:84%;object-fit:contain}
+.poster span{font-size:12px;text-align:center;line-height:1.5;color:var(--gris);background:var(--claro);padding:7px 11px;border:1px solid var(--borde)}
+.poster[hidden]{display:none}
+.hover-tip{position:absolute;z-index:5;pointer-events:none;padding:7px 10px;background:var(--oliva);color:var(--blanco);font-size:12px;white-space:nowrap;max-width:200px;transform:translate(12px,-14px);border-radius:1px}
+.hover-tip[hidden]{display:none}
+.marker{position:absolute;z-index:3;pointer-events:auto;transform:translate(-50%,-50%);border:1px solid var(--borde);padding:5px 8px;background:rgba(247,243,232,.94);color:var(--oliva);font:500 10px 'IBM Plex Mono',monospace;white-space:nowrap;transition:border-color .15s,background .15s}
+.marker:hover,.marker[aria-pressed=true]{background:#F1E0CF;border-color:var(--tierra);color:var(--tierra)}
+.marker[hidden]{display:none}
+.panel{background:var(--claro);border:1px solid var(--borde);padding:18px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.kicker{font:400 11px 'IBM Plex Mono',monospace;letter-spacing:.035em;color:var(--gris);margin:0}
+h1{font-size:22px;line-height:1.17;color:var(--oliva);margin:6px 0 7px;font-weight:700;letter-spacing:-.015em}
+.lead{font-size:12.5px;color:var(--texto);line-height:1.65;margin:0}
+.headline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+h2{font-size:13px;font-weight:700;color:var(--oliva);margin:0}
+.note{font:400 10px 'IBM Plex Mono',monospace;color:var(--gris)}
+.layer-list{display:flex;flex-direction:column;gap:6px}
+.layer-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}
+.layer-select{display:flex;gap:10px;align-items:center;min-width:0;text-align:left;background:var(--campo);border:1px solid var(--borde);border-left:3px solid transparent;padding:10px 10px;color:var(--tinta);border-radius:0;transition:background .15s,border-color .15s}
+.layer-select:hover{background:var(--banda)}
+.layer-select[aria-pressed=true]{background:#F4E6D7;border-color:var(--tierra);border-left-color:var(--tierra)}
+.layer-select .num{font:500 11px 'IBM Plex Mono',monospace;color:var(--gris)}
+.layer-select .title{display:block;font-weight:600;font-size:12.5px}
+.layer-select .sub{display:block;font-size:10.5px;color:var(--gris);margin-top:2px;font-weight:400}
+.layer-toggle{width:70px;border:1px solid var(--borde);background:var(--campo);color:var(--oliva);font-weight:600;font-size:11px;border-radius:1px;padding:7px 4px}
+.layer-toggle:hover{background:var(--banda)}
+.layer-toggle[aria-pressed=false]{color:var(--gris);background:var(--papel)}
+button.simple{border:1px solid var(--borde);color:var(--oliva);background:var(--campo);padding:9px 10px;border-radius:3px;font-weight:600;font-size:11.5px;text-align:center}
+button.simple:hover{background:var(--banda);border-color:var(--oliva)}
+button.simple[aria-pressed=true]{background:#E6EAD3;border-color:var(--oliva)}
+button.primary{background:var(--tierra);color:var(--blanco);border:1px solid var(--tierra);font-size:12px;font-weight:600;padding:11px 12px;border-radius:3px}
+button.primary:hover{background:#8C4322}
+.detail{border-top:3px solid var(--oliva);padding:11px 12px;background:var(--papel)}
+.detail .tag{color:var(--gris);font:400 10px 'IBM Plex Mono',monospace}
+.detail strong{color:var(--oliva);font-size:14px;display:block;margin:5px 0}
+.detail p{font-size:12px;color:var(--texto);line-height:1.55;margin:0}
+.detail .mini-actions{display:flex;gap:7px;margin-top:10px}
+.detail .mini-actions button{flex:1}
+.btn-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.btn-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.field label{font-weight:600;font-size:12px;color:var(--oliva)}
+.field .range-line{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px}
+.field output{font:500 11px 'IBM Plex Mono',monospace;color:var(--gris)}
+input[type=range]{width:100%;accent-color:var(--tierra);cursor:pointer}
+.separator{height:1px;background:var(--borde)}
+.panel-foot{display:flex;justify-content:space-between;gap:8px;align-items:center;border-top:1px solid var(--borde);padding-top:11px;margin-top:auto}
+.state{margin:0;font-size:11px;line-height:1.5;color:var(--gris)}
+.power{font:400 10px 'IBM Plex Mono',monospace;color:var(--gris);white-space:nowrap}
+.help{font-size:10.5px;line-height:1.5;color:var(--gris)}
+.scene-card:fullscreen{width:100%;height:100%;min-height:100vh}
+@media(max-width:840px){.viewer{grid-template-columns:1fr}.scene-card{height:55vh;min-height:390px;max-height:590px}.panel{gap:13px}.layer-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}}
+@media(max-width:520px){body{padding:4px}.scene-card{min-height:315px;height:46vh;max-height:430px}.panel{padding:12px}.layer-list{grid-template-columns:1fr}.scene-top{inset:8px 8px auto}.scene-bottom{left:8px;right:8px;bottom:8px}.scene-bottom .hint{max-width:190px;font-size:10px}.marker{padding:3px 5px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
+<script>
+  /* Dentro de la app RotaSat (iframe) el visor usa una sola columna: maqueta arriba y panel abajo.
+     Así la maqueta gana ancho y se evita un fallo de dibujo del diseño de dos columnas dentro de iframes. */
+  if (window.self !== window.top) document.documentElement.classList.add('embebido');
+</script>
+<style>
+  .embebido body{padding:0}
+  .embebido .viewer{grid-template-columns:1fr!important;max-width:none}
+  .embebido .scene-card{height:620px!important;min-height:0!important;max-height:none!important}
+  @media(max-width:520px){.embebido .scene-card{height:430px!important}}
+</style>
+</head>
+<body>
+<main class="viewer" aria-label="Explorador tridimensional de AllpaWiñay">
+  <section class="scene-card" id="sceneCard" aria-label="Modelo 3D de cuatro capas geoespaciales">
+    <div class="poster" id="poster" role="status"><img src="./assets/vista_previa.webp" alt="Cuatro capas geoespaciales: paisaje, curvas, relieve y mapa base"/><span id="posterMessage">Cargando las cuatro capas 3D…</span></div>
+    <div class="scene-top"><div class="mini-kicker">ALLPAWIÑAY / GEOVISUALIZACIÓN 3D</div><button id="fullscreen" title="Pantalla completa" type="button" aria-label="Alternar pantalla completa">Pantalla completa</button></div>
+    <div id="hoverTip" class="hover-tip" hidden></div>
+    <button class="marker" data-marker="agricultura" type="button" aria-pressed="true" hidden>04 · Agrícola</button>
+    <button class="marker" data-marker="curvas" type="button" aria-pressed="false" hidden>03 · Curvas</button>
+    <button class="marker" data-marker="relieve" type="button" aria-pressed="false" hidden>02 · Relieve</button>
+    <button class="marker" data-marker="mapa" type="button" aria-pressed="false" hidden>01 · Mapa</button>
+    <div class="scene-bottom"><div class="hint">Arrastra para girar · Zoom con rueda o dos dedos · Haz clic en una capa</div><span class="counter" id="visibleCount">4 / 4 CAPAS</span></div>
+  </section>
+  <aside class="panel" aria-label="Herramientas para explorar el territorio">
+    <header><p class="kicker">EXPLORADOR · 04 CAPAS</p><h1>Explora el territorio</h1><p class="lead">Selecciona las capas para conocer su función. Cambia la perspectiva, compáralas o realiza un recorrido guiado.</p></header>
+    <section aria-label="Capas"><div class="headline"><h2>Capas disponibles</h2><span class="note">SELECCIONAR / VISIBILIDAD</span></div>
+      <div class="layer-list">
+        <div class="layer-row"><button class="layer-select" data-layer="agricultura" aria-pressed="true" type="button"><span class="num">04</span><span><span class="title">Paisaje agrícola</span><span class="sub">Cobertura y parcelas</span></span></button><button class="layer-toggle" data-toggle="agricultura" aria-pressed="true" type="button">Visible</button></div>
+        <div class="layer-row"><button class="layer-select" data-layer="curvas" aria-pressed="false" type="button"><span class="num">03</span><span><span class="title">Curvas de nivel</span><span class="sub">Representación altimétrica</span></span></button><button class="layer-toggle" data-toggle="curvas" aria-pressed="true" type="button">Visible</button></div>
+        <div class="layer-row"><button class="layer-select" data-layer="relieve" aria-pressed="false" type="button"><span class="num">02</span><span><span class="title">Relieve montañoso</span><span class="sub">Forma y pendientes</span></span></button><button class="layer-toggle" data-toggle="relieve" aria-pressed="true" type="button">Visible</button></div>
+        <div class="layer-row"><button class="layer-select" data-layer="mapa" aria-pressed="false" type="button"><span class="num">01</span><span><span class="title">Mapa base</span><span class="sub">Vías y contexto espacial</span></span></button><button class="layer-toggle" data-toggle="mapa" aria-pressed="true" type="button">Visible</button></div>
+      </div>
+    </section>
+    <section class="detail" aria-live="polite"><span class="tag" id="detailLabel">CAPA 04 / 04</span><strong id="detailTitle">Paisaje agrícola</strong><p id="detailText">Mosaico agrícola de referencia para observar la cobertura y el uso del territorio.</p><div class="mini-actions"><button type="button" id="focus" class="simple">Acercar a capa</button><button type="button" id="isolate" class="simple" aria-pressed="false">Aislar capa</button></div></section>
+    <section aria-label="Separación de capas"><div class="headline"><h2>Explosión de capas</h2><span class="note" id="spacingLabel">NORMAL</span></div><div class="btn-grid"><button class="simple spacing-choice" type="button" data-spacing="1.15" aria-pressed="false">Compactas</button><button class="simple spacing-choice" type="button" data-spacing="1.6" aria-pressed="true">Normal</button><button class="simple spacing-choice" type="button" data-spacing="2.7" aria-pressed="false">Separadas</button></div><div class="field" style="margin-top:9px"><div class="range-line"><label for="spacing">Distancia vertical</label><output id="spacingValue">1,6</output></div><input id="spacing" type="range" min="1.0" max="2.9" step="0.1" value="1.6" /></div></section>
+    <section aria-label="Perspectiva"><div class="headline"><h2>Perspectiva</h2><span class="note">CÁMARA</span></div><div class="btn-grid"><button class="simple view-btn" type="button" data-view="iso" aria-pressed="true">Isométrica</button><button class="simple view-btn" type="button" data-view="top" aria-pressed="false">Superior</button><button class="simple view-btn" type="button" data-view="side" aria-pressed="false">Lateral</button></div></section>
+    <section aria-label="Acciones"><div class="headline"><h2>Exploración</h2></div><div class="btn-two"><button id="tour" class="primary" type="button">Iniciar recorrido</button><button id="compare" class="simple" type="button" aria-pressed="false">Relieve + curvas</button><button id="showAll" class="simple" type="button">Mostrar todas</button><button id="rotate" class="simple" type="button" aria-pressed="true">Pausar rotación</button><button id="reset" class="simple" type="button" style="grid-column:1 / -1">Restablecer vista completa</button></div></section>
+    <div class="panel-foot"><p id="status" class="state" role="status" aria-live="polite">Preparando visor 3D…</p><span class="power">MODELO CONCEPTUAL</span></div>
+    <p class="help">Este modelo reconstruye visualmente la imagen de referencia. No representa mediciones topográficas, elevaciones ni coordenadas reales.</p>
+  </aside>
+</main>
+<script type="module">
+const el=id=>document.getElementById(id);
+const stage=el('sceneCard'),poster=el('poster'),posterMessage=el('posterMessage'),status=el('status'),hoverTip=el('hoverTip');
+const META={
+ agricultura:{number:'04',title:'Paisaje agrícola',text:'Mosaico agrícola de referencia. Identifica parcelas y coberturas visibles, sin inferir cultivos ni índices satelitales verificados.',anchor:4.95},
+ curvas:{number:'03',title:'Curvas de nivel',text:'Ilustración de líneas de altitud. Los números visibles pertenecen a la imagen y no equivalen a cotas medidas.',anchor:3.30},
+ relieve:{number:'02',title:'Relieve montañoso',text:'Representación aproximada de formas del terreno. Sirve para explicar cómo se relaciona el relieve con otras capas.',anchor:1.98},
+ mapa:{number:'01',title:'Mapa base',text:'Cartografía ilustrativa con caminos, manzanas y elementos de referencia para situar las otras capas.',anchor:.22}
+};
+const bottomUp=['mapa','relieve','curvas','agricultura'];
+const topDown=[...bottomUp].reverse();
+const objects={mapa:[],relieve:[],curvas:[],agricultura:[]};
+const shown={mapa:true,relieve:true,curvas:true,agricultura:true};
+let selected='agricultura',isolated=false,compare=false,spacing=1.6,autoRotate=true,loaded=false,tourStep=-1,hovered=null;
+let THREE,scene,renderer,camera,controls,raf,resizeObserver,raycaster,pointer,transition=null;
+const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const getKey=(n)=>{
+ if(n==='base_de_mapa'||n.startsWith('Capa_01_'))return 'mapa';
+ if(n==='base_relieve'||n.startsWith('Capa_02_'))return 'relieve';
+ if(n==='base_curvas_nivel'||n.startsWith('Capa_03_'))return 'curvas';
+ if(n==='base_paisaje'||n.startsWith('Capa_04_'))return 'agricultura';
+ return null;
+};
+const setStatus=t=>{status.textContent=t};
+function effectiveVisible(k){return shown[k] && (!isolated||k===selected)}
+function setRotate(value){autoRotate=!!value;el('rotate').textContent=autoRotate?'Pausar rotación':'Reanudar rotación';el('rotate').setAttribute('aria-pressed',String(autoRotate));if(controls)controls.autoRotate=autoRotate}
+function setSpacing(value){spacing=Number(value);el('spacing').value=spacing;el('spacingValue').textContent=spacing.toFixed(1).replace('.',',');el('spacingLabel').textContent=spacing<1.4?'COMPACTAS':spacing>2.25?'SEPARADAS':'NORMAL';document.querySelectorAll('.spacing-choice').forEach(btn=>btn.setAttribute('aria-pressed',String(Math.abs(Number(btn.dataset.spacing)-spacing)<.06)));}
+function updateUI(){
+ for(const b of document.querySelectorAll('[data-layer]'))b.setAttribute('aria-pressed',String(b.dataset.layer===selected));
+ for(const b of document.querySelectorAll('[data-toggle]')){const k=b.dataset.toggle;b.textContent=effectiveVisible(k)?'Visible':'Oculta';b.setAttribute('aria-pressed',String(effectiveVisible(k)));b.setAttribute('aria-label',(effectiveVisible(k)?'Ocultar ':'Mostrar ')+META[k].title);}
+ for(const b of document.querySelectorAll('[data-marker]'))b.setAttribute('aria-pressed',String(b.dataset.marker===selected));
+ el('detailLabel').textContent='CAPA '+META[selected].number+' / 04';el('detailTitle').textContent=META[selected].title;el('detailText').textContent=META[selected].text;
+ el('isolate').textContent=isolated?'Salir de aislamiento':'Aislar capa';el('isolate').setAttribute('aria-pressed',String(isolated));
+ el('compare').setAttribute('aria-pressed',String(compare));
+ const n=bottomUp.filter(effectiveVisible).length;el('visibleCount').textContent=`${n} / 4 CAPAS`;
+}
+function syncMeshes(){
+ for(let i=0;i<bottomUp.length;i++){
+  const k=bottomUp[i],dy=(spacing-1.6)*i;
+  for(const mesh of objects[k]){mesh.visible=effectiveVisible(k);mesh.userData.targetOffset=dy;}
+ }
+ updateUI();
+}
+function select(k){selected=k;if(!shown[k])shown[k]=true;if(compare){compare=false;bottomUp.forEach(z=>shown[z]=true)}syncMeshes();setStatus('Seleccionada: '+META[k].title+'. Haz clic en Acercar a capa para examinarla.');}
+function toggle(k){if(isolated)isolated=false;if(compare)compare=false;shown[k]=!shown[k];syncMeshes();setStatus(META[k].title+': '+(shown[k]?'visible.':'oculta.'));}
+function animateCamera(position,target){if(!camera||!controls)return;setRotate(false);transition={startP:camera.position.clone(),startT:controls.target.clone(),endP:new THREE.Vector3(...position),endT:new THREE.Vector3(...target),progress:0};}
+function view(which){
+ if(!camera)return;
+ const centers={iso:[[11.4,9.6,11.4],[0,2.45,0]],top:[[.15,18.5,.25],[0,2.45,0]],side:[[17.5,5.4,.12],[0,2.45,0]]};
+ animateCamera(...centers[which]);
+ document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===which)));
+ setStatus('Vista '+({iso:'isométrica',top:'superior',side:'lateral'}[which])+'.');
+}
+function focusSelected(){if(!camera)return;const height=META[selected].anchor+(spacing-1.6)*bottomUp.indexOf(selected),target=[0,height,0];animateCamera([8.8,height+5.6,8.8],target);setStatus('Enfoque: '+META[selected].title+'.');}
+function reset(){selected='agricultura';isolated=false;compare=false;tourStep=-1;bottomUp.forEach(k=>shown[k]=true);setSpacing(1.6);setRotate(!prefersReduced);el('tour').textContent='Iniciar recorrido';document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view==='iso')));syncMeshes();if(loaded){animateCamera([11.4,9.6,11.4],[0,2.45,0]);setRotate(!prefersReduced)}setStatus('Vista restablecida. Selecciona una capa para explorarla.');}
+function compareRelief(){compare=!compare;isolated=false;if(compare){shown.mapa=false;shown.agricultura=false;shown.curvas=true;shown.relieve=true;selected='curvas';setStatus('Comparación: relieve y curvas de nivel.');}else{bottomUp.forEach(k=>shown[k]=true);setStatus('Mostrando de nuevo las cuatro capas.');}syncMeshes();}
+function tour(){tourStep=(tourStep+1)%topDown.length;const k=topDown[tourStep];isolated=false;compare=false;shown[k]=true;select(k);focusSelected();el('tour').textContent=tourStep===3?'Reiniciar recorrido':`Siguiente (${tourStep+2}/4)`;setStatus(`Recorrido ${tourStep+1}/4: ${META[k].title}. ${META[k].text}`);}
+function setFullscreen(){if(document.fullscreenElement)document.exitFullscreen();else stage.requestFullscreen?.();}
+function pointerHit(e){if(!loaded)return null;const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);const list=bottomUp.flatMap(k=>objects[k]).filter(o=>o.visible);const hit=raycaster.intersectObjects(list,false)[0];return hit?.object?.userData?.layer||null}
+function updateHover(e){if(!loaded)return;const key=pointerHit(e);if(hovered!==key){hovered=key;renderer.domElement.style.cursor=key?'pointer':'grab'}if(!key){hoverTip.hidden=true;return;}const rect=stage.getBoundingClientRect();hoverTip.textContent=META[key].title;hoverTip.style.left=Math.min(e.clientX-rect.left,rect.width-150)+'px';hoverTip.style.top=Math.max(e.clientY-rect.top,20)+'px';hoverTip.hidden=false;}
+function positionMarkers(){if(!loaded)return;for(const k of bottomUp){const m=document.querySelector(`[data-marker="${k}"]`);if(!effectiveVisible(k)){m.hidden=true;continue;}const p=new THREE.Vector3(4.05,META[k].anchor+(spacing-1.6)*bottomUp.indexOf(k),3.5).project(camera);if(p.z>1||p.z< -1){m.hidden=true;continue;}m.hidden=false;m.style.left=((p.x+1)/2*stage.clientWidth)+'px';m.style.top=((1-p.y)/2*stage.clientHeight)+'px';}}
+function listen(){
+ document.querySelectorAll('[data-layer]').forEach(b=>b.addEventListener('click',()=>select(b.dataset.layer)));
+ document.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',()=>toggle(b.dataset.toggle)));
+ document.querySelectorAll('[data-marker]').forEach(b=>b.addEventListener('click',()=>select(b.dataset.marker)));
+ document.querySelectorAll('.spacing-choice').forEach(b=>b.addEventListener('click',()=>{setSpacing(b.dataset.spacing);syncMeshes();setStatus('Separación actualizada.')}));
+ el('spacing').addEventListener('input',e=>{setSpacing(e.target.value);syncMeshes()});
+ document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>view(b.dataset.view)));
+ el('focus').addEventListener('click',focusSelected);el('isolate').addEventListener('click',()=>{isolated=!isolated;shown[selected]=true;compare=false;syncMeshes();setStatus(isolated?'Solo se muestra '+META[selected].title+'.':'Aislamiento desactivado.');});
+ el('compare').addEventListener('click',compareRelief);
+ el('showAll').addEventListener('click',()=>{isolated=false;compare=false;bottomUp.forEach(k=>shown[k]=true);syncMeshes();setStatus('Las cuatro capas están visibles.');});
+ el('rotate').addEventListener('click',()=>{setRotate(!autoRotate);setStatus(autoRotate?'Rotación automática activada.':'Rotación automática pausada.');});
+ el('reset').addEventListener('click',reset);el('tour').addEventListener('click',tour);el('fullscreen').addEventListener('click',setFullscreen);
+ document.addEventListener('fullscreenchange',()=>{el('fullscreen').textContent=document.fullscreenElement?'Salir de pantalla completa':'Pantalla completa';});
+ document.addEventListener('keydown',e=>{if(/^(input|textarea|button)$/i.test(document.activeElement?.tagName||''))return;if(['1','2','3','4'].includes(e.key)){select(bottomUp[Number(e.key)-1]);}else if(e.key.toLowerCase()==='r'){reset();}else if(e.code==='Space'){e.preventDefault();setRotate(!autoRotate);}});
+}
+async function load3D(){
+ try{
+  THREE=await import('three');
+  const [{OrbitControls},{GLTFLoader}]=await Promise.all([import('three/addons/controls/OrbitControls.js'),import('three/addons/loaders/GLTFLoader.js')]);
+  scene=new THREE.Scene();scene.background=null;
+  camera=new THREE.PerspectiveCamera(40,1,.1,120);camera.position.set(11.4,9.6,11.4);
+  renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'high-performance'});
+  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));
+  stage.appendChild(renderer.domElement);
+  controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.065;controls.enablePan=false;controls.minDistance=5.4;controls.maxDistance=32;controls.minPolarAngle=.08;controls.maxPolarAngle=Math.PI*.505;controls.target.set(0,2.45,0);controls.autoRotate=false;controls.autoRotateSpeed=.55;controls.update();
+  controls.addEventListener('start',()=>{transition=null;setRotate(false);});
+  scene.add(new THREE.AmbientLight(0xffffff,1.45));const sun=new THREE.DirectionalLight(0xffffff,2.0);sun.position.set(8,14,7);scene.add(sun);const fill=new THREE.DirectionalLight(0xffffff,.55);fill.position.set(-6,5,-8);scene.add(fill);
+  setStatus('Cargando geometría y texturas del terreno…');
+  const model=await new GLTFLoader().loadAsync('./models/capas_geoespaciales_allpawinay.glb');
+  model.scene.traverse(o=>{if(!o.isMesh)return;const k=getKey(o.name);if(!k)return;o.userData.layer=k;o.userData.targetOffset=0;objects[k].push(o);const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach((m,i)=>{if(!m)return;const copy=m.clone();copy.side=THREE.DoubleSide;if(Array.isArray(o.material))o.material[i]=copy;else o.material=copy;});});
+  if(bottomUp.some(k=>objects[k].length===0))throw new Error('No se reconocen las cuatro capas del archivo GLB.');
+  scene.add(model.scene);raycaster=new THREE.Raycaster();pointer=new THREE.Vector2();
+  let down=null;
+  renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY}});
+  renderer.domElement.addEventListener('pointerup',e=>{if(!down)return;const move=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;if(move<7){const hit=pointerHit(e);if(hit)select(hit);}});
+  renderer.domElement.addEventListener('pointermove',updateHover);
+  renderer.domElement.addEventListener('pointerleave',()=>{hovered=null;hoverTip.hidden=true;renderer.domElement.style.cursor='grab';});
+  const resize=()=>{const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);};
+  resizeObserver=new ResizeObserver(resize);resizeObserver.observe(stage);resize();loaded=true;poster.hidden=true;
+  const render=()=>{
+   raf=requestAnimationFrame(render);
+   const easing=prefersReduced?1:.18;
+   bottomUp.forEach(k=>objects[k].forEach(o=>{const d=o.userData.targetOffset||0;o.position.y+= (d-o.position.y)*easing;}));
+   if(transition){transition.progress=Math.min(1,transition.progress+(prefersReduced?1:.038));const t=transition.progress*transition.progress*(3-2*transition.progress);camera.position.lerpVectors(transition.startP,transition.endP,t);controls.target.lerpVectors(transition.startT,transition.endT,t);if(transition.progress>=1)transition=null;}
+   controls.autoRotate=autoRotate;controls.update();positionMarkers();
+   for(const k of bottomUp){const intensity=(k===selected ? .08 : 0)+(k===hovered ? .075 : 0);for(const o of objects[k]){const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>{if(m?.emissive){m.emissive.set('#A6512B');m.emissiveIntensity=intensity;}})}}
+   renderer.render(scene,camera);
+  };
+  syncMeshes();document.querySelectorAll('.panel button,.scene-top button,.marker').forEach(b=>b.disabled=false);setRotate(!prefersReduced);setStatus('Modelo listo. Haz clic en una capa o inicia el recorrido.');render();
+ }catch(err){console.error('Error del visor 3D:',err);poster.hidden=false;posterMessage.textContent='No se pudo abrir el modelo 3D. La imagen de referencia sigue disponible. Ejecuta este proyecto desde un servidor local y comprueba la conexión a Internet.';setStatus('No se pudo cargar el 3D. Revisa la consola (F12).');}
+}
+listen();updateUI();document.querySelectorAll('.panel button,.scene-top button,.marker').forEach(b=>b.disabled=true);load3D();
+</script>
+</body>
+</html>
