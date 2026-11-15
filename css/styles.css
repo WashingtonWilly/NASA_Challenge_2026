@@ -2112,10 +2112,27 @@ body.modo-tecnico .solo-agricultor {
   height: 18px;
 }
 
+.rot-simple-profit-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .rot-simple-profit-val {
   font-size: 18px;
   font-weight: 700;
   color: var(--tinta);
+}
+
+.rot-profit-fusion-badge {
+  display: block;
+  padding: 5px 9px;
+  border-left: 2px solid var(--tierra);
+  background-color: #F6F1E6;
+  border-radius: 0 3px 3px 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--gris);
 }
 
 .rot-simple-bullets {

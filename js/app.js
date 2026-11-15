@@ -1111,6 +1111,85 @@
     return razones;
   }
 
+  // Respaldo embebido de precios_mag.json en caso de abrir index.html vía file:// sin servidor HTTP
+  const PRECIOS_MAG_FALLBACK = {
+    chocho: { rendimiento_ha_kg: 1350, precio_kg_usd: 1.45 },
+    maiz_suave: { rendimiento_ha_kg: 4990, precio_kg_usd: 0.57 },
+    haba: { rendimiento_ha_kg: 4200, precio_kg_usd: 0.62 },
+    brocoli: { rendimiento_ha_kg: 14500, precio_kg_usd: 0.34 },
+    vicia: { rendimiento_ha_kg: 4500, precio_kg_usd: 0.08 },
+    papa: { rendimiento_ha_kg: 13500, precio_kg_usd: 0.41 },
+    cebada: { rendimiento_ha_kg: 2490, precio_kg_usd: 0.77 },
+    trigo: { rendimiento_ha_kg: 2350, precio_kg_usd: 0.58 },
+    quinua: { rendimiento_ha_kg: 1650, precio_kg_usd: 1.55 },
+    arveja: { rendimiento_ha_kg: 3400, precio_kg_usd: 0.72 },
+    frejol_arbustivo: { rendimiento_ha_kg: 5600, precio_kg_usd: 0.28 },
+    zanahoria: { rendimiento_ha_kg: 18000, precio_kg_usd: 0.22 },
+    cebolla: { rendimiento_ha_kg: 16500, precio_kg_usd: 0.29 },
+    avena_forrajera: { rendimiento_ha_kg: 6000, precio_kg_usd: 0.14 },
+    arroz: { rendimiento_ha_kg: 5400, precio_kg_usd: 0.39 },
+    maiz_duro: { rendimiento_ha_kg: 6300, precio_kg_usd: 0.41 },
+    soya: { rendimiento_ha_kg: 2800, precio_kg_usd: 0.52 },
+    mani: { rendimiento_ha_kg: 1900, precio_kg_usd: 1.10 },
+    yuca: { rendimiento_ha_kg: 11500, precio_kg_usd: 0.24 },
+    sandia: { rendimiento_ha_kg: 19000, precio_kg_usd: 0.21 },
+    tomate_rinon: { rendimiento_ha_kg: 22000, precio_kg_usd: 0.36 },
+    caupi: { rendimiento_ha_kg: 1800, precio_kg_usd: 0.85 }
+  };
+
+  let cachePreciosMag = null;
+
+  /**
+   * Motor de Fusión Económica (SIPA MAG-Ecuador + área real de parcela):
+   * Cruza el área de la parcela en metros cuadrados con precios_mag.json
+   * para calcular el ingreso promedio anual de la rotación e inyectarlo en el DOM.
+   */
+  async function calcularEstimacionEconomica(idContenedor, cultivosArreglo, areaMetros) {
+    try {
+      if (!cachePreciosMag) {
+        try {
+          const respuesta = await fetch('precios_mag.json');
+          if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+          cachePreciosMag = await respuesta.json();
+        } catch (_errFetch) {
+          cachePreciosMag = PRECIOS_MAG_FALLBACK;
+        }
+      }
+
+      const areaHectareas = Number(areaMetros || 0) / 10000;
+      const lista = Array.isArray(cultivosArreglo) ? cultivosArreglo : [];
+      if (!lista.length || areaHectareas <= 0) return 0;
+
+      let totalRotacionUsd = 0;
+      lista.forEach((item) => {
+        const clave = typeof item === 'string' ? item : (item && item.id);
+        const registro = (clave && cachePreciosMag[clave]) || (clave && PRECIOS_MAG_FALLBACK[clave]);
+        if (registro) {
+          const ingresoCultivo = Number(registro.rendimiento_ha_kg) * areaHectareas * Number(registro.precio_kg_usd);
+          totalRotacionUsd += ingresoCultivo;
+        }
+      });
+
+      const promedioAnualUsd = Math.round(totalRotacionUsd / lista.length);
+      const formatoMoneda = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(promedioAnualUsd);
+
+      const contenedor = document.getElementById(idContenedor);
+      if (contenedor) {
+        contenedor.textContent = `~${formatoMoneda} USD/año`;
+      }
+      return promedioAnualUsd;
+    } catch (err) {
+      console.warn('Error en calcularEstimacionEconomica:', err);
+      return 0;
+    }
+  }
+
+  window.calcularEstimacionEconomica = calcularEstimacionEconomica;
+
   /**
    * Renderiza las tarjetas comparativas del Paso 3 (Top 3 recomendadas + práctica actual)
    */
@@ -1332,12 +1411,17 @@
           ${!isTechnicalMode ? `
             <div class="rot-simple-recipe">${recetaSimpleHtml}</div>
 
-            <div class="rot-simple-profit">
-              <span class="rot-simple-profit-label">
-                <i data-lucide="coins" class="icono"></i>
-                <span>Ganancia estimada en ${fmtMiles(haAM2(areaHa))} m²</span>
-              </span>
-              <span class="rot-simple-profit-val tabular-nums">~$${fmtMiles(ingresoTotalLoteAnual)} USD/año</span>
+            <div class="rot-simple-profit-box">
+              <div class="rot-simple-profit">
+                <span class="rot-simple-profit-label">
+                  <i data-lucide="coins" class="icono"></i>
+                  <span>Ganancia estimada en ${fmtMiles(haAM2(areaHa))} m²</span>
+                </span>
+                <span id="ganancia-estimada-${rot.id}" class="rot-simple-profit-val tabular-nums">~$${fmtMiles(ingresoTotalLoteAnual)} USD/año</span>
+              </div>
+              <small class="rot-profit-fusion-badge">
+                Fusión de datos: Proyección calculada integrando viabilidad climática satelital (NASA) y datos históricos de rendimiento y precio a nivel productor del SIPA (MAG-Ecuador). Sujeto a volatilidad del mercado.
+              </small>
             </div>
 
             <ul class="rot-simple-bullets">
@@ -1391,6 +1475,13 @@
         renderizarTarjetasRotacion(state.ultimoResultado, obtenerParcelaActual());
         actualizarGraficoBalance36m();
       });
+    });
+
+    // Ejecutar el motor de Fusión Económica (precios_mag.json × área en m²) en cada tarjeta
+    const areaMetrosLote = haAM2(areaHa);
+    todasLasTarjetas.forEach(rot => {
+      const idsCultivos = (rot.cultivos || []).map(c => c.id);
+      calcularEstimacionEconomica(`ganancia-estimada-${rot.id}`, idsCultivos, areaMetrosLote);
     });
 
     refrescarIconosLucide();

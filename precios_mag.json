@@ -1,0 +1,134 @@
+{
+  "chocho": {
+    "nombre": "Chocho (Andino)",
+    "rendimiento_ha_kg": 1350,
+    "precio_kg_usd": 1.45,
+    "nota": "Grano seco a nivel productor (SIPA MAG-Ecuador, Sierra Central)"
+  },
+  "maiz_suave": {
+    "nombre": "Maíz suave (choclo / seco)",
+    "rendimiento_ha_kg": 4990,
+    "precio_kg_usd": 0.57,
+    "nota": "Promedio ponderado productor Sierra (ESPAC / SIPA MAG)"
+  },
+  "haba": {
+    "nombre": "Haba tierna / seca",
+    "rendimiento_ha_kg": 4200,
+    "precio_kg_usd": 0.62,
+    "nota": "Vaina y grano a nivel productor en Carchi, Chimborazo y Cotopaxi"
+  },
+  "brocoli": {
+    "nombre": "Brócoli",
+    "rendimiento_ha_kg": 14500,
+    "precio_kg_usd": 0.34,
+    "nota": "Pella fresca para mercado nacional y agroindustria en Sierra Centro-Norte"
+  },
+  "vicia": {
+    "nombre": "Vicia (Abono verde / forraje)",
+    "rendimiento_ha_kg": 4500,
+    "precio_kg_usd": 0.08,
+    "nota": "Valorizado por ahorro equivalente en fertilizante nitrogenado (urea) y forraje"
+  },
+  "papa": {
+    "nombre": "Papa (Superchola / INIAP)",
+    "rendimiento_ha_kg": 13500,
+    "precio_kg_usd": 0.41,
+    "nota": "Tubérculo fresco a nivel productor (SIPA MAG-Ecuador)"
+  },
+  "cebada": {
+    "nombre": "Cebada",
+    "rendimiento_ha_kg": 2490,
+    "precio_kg_usd": 0.77,
+    "nota": "Grano seco en productores de Chimborazo y Cotopaxi"
+  },
+  "trigo": {
+    "nombre": "Trigo",
+    "rendimiento_ha_kg": 2350,
+    "precio_kg_usd": 0.58,
+    "nota": "Grano seco a nivel productor Sierra"
+  },
+  "quinua": {
+    "nombre": "Quinua",
+    "rendimiento_ha_kg": 1650,
+    "precio_kg_usd": 1.55,
+    "nota": "Grano de exportación y mercado local en Chimborazo"
+  },
+  "arveja": {
+    "nombre": "Arveja tierna",
+    "rendimiento_ha_kg": 3400,
+    "precio_kg_usd": 0.72,
+    "nota": "Vaina tierna a nivel productor (SIPA MAG)"
+  },
+  "frejol_arbustivo": {
+    "nombre": "Fréjol arbustivo",
+    "rendimiento_ha_kg": 5600,
+    "precio_kg_usd": 0.28,
+    "nota": "Fréjol tierno/seco en valles interandinos"
+  },
+  "zanahoria": {
+    "nombre": "Zanahoria amarilla",
+    "rendimiento_ha_kg": 18000,
+    "precio_kg_usd": 0.22,
+    "nota": "Raíz fresca en Chambo, Guano y Ambato"
+  },
+  "cebolla": {
+    "nombre": "Cebolla colorada / rama",
+    "rendimiento_ha_kg": 16500,
+    "precio_kg_usd": 0.29,
+    "nota": "Bulbo/rama a nivel productor Sierra Central"
+  },
+  "avena_forrajera": {
+    "nombre": "Avena forrajera",
+    "rendimiento_ha_kg": 6000,
+    "precio_kg_usd": 0.14,
+    "nota": "Materia seca / corte forrajero para ganadería lechera"
+  },
+  "arroz": {
+    "nombre": "Arroz cáscara",
+    "rendimiento_ha_kg": 5400,
+    "precio_kg_usd": 0.39,
+    "nota": "SIPA MAG-Ecuador"
+  },
+  "maiz_duro": {
+    "nombre": "Maíz duro seco",
+    "rendimiento_ha_kg": 6300,
+    "precio_kg_usd": 0.41,
+    "nota": "SIPA MAG-Ecuador"
+  },
+  "soya": {
+    "nombre": "Soya",
+    "rendimiento_ha_kg": 2800,
+    "precio_kg_usd": 0.52,
+    "nota": "SIPA MAG-Ecuador"
+  },
+  "mani": {
+    "nombre": "Maní",
+    "rendimiento_ha_kg": 1900,
+    "precio_kg_usd": 1.10,
+    "nota": "SIPA MAG-Ecuador"
+  },
+  "yuca": {
+    "nombre": "Yuca",
+    "rendimiento_ha_kg": 11500,
+    "precio_kg_usd": 0.24,
+    "nota": "SIPA MAG-Ecuador"
+  },
+  "sandia": {
+    "nombre": "Sandía",
+    "rendimiento_ha_kg": 19000,
+    "precio_kg_usd": 0.21,
+    "nota": "SIPA MAG-Ecuador"
+  },
+  "tomate_rinon": {
+    "nombre": "Tomate riñón",
+    "rendimiento_ha_kg": 22000,
+    "precio_kg_usd": 0.36,
+    "nota": "SIPA MAG-Ecuador"
+  },
+  "caupi": {
+    "nombre": "Fréjol caupí",
+    "rendimiento_ha_kg": 1800,
+    "precio_kg_usd": 0.85,
+    "nota": "SIPA MAG-Ecuador"
+  }
+}
