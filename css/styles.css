@@ -2573,3 +2573,136 @@ body.modo-tecnico .cal-pct.solo-tecnico { display: block !important; }
 .tabla-clima td.aviso { color: var(--alerta); font-weight: 600; }
 .tabla-clima tfoot th, .tabla-clima tfoot td { font-weight: 700; border-top: 2px solid var(--borde); }
 .tabla-nota { margin: 6px 0 0; font-size: 0.75rem; color: var(--texto-2); }
+
+/* ==========================================================================
+   Navegación por pasos: pestañitas internas y distribución de cada módulo
+   ========================================================================== */
+
+/* --- Pestañitas internas (tipo segmento) --- */
+.subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 18px;
+  padding: 5px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: var(--banda);
+  width: fit-content;
+  max-width: 100%;
+}
+.subtab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--texto-2);
+  font: 600 0.95rem var(--fuente);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.subtab:hover { background: rgba(255, 255, 255, 0.55); color: var(--tinta); }
+.subtab.activo {
+  background: var(--campo);
+  color: var(--oliva);
+  box-shadow: 0 1px 3px rgba(43, 42, 34, 0.14), inset 0 -3px 0 var(--tierra);
+}
+.subtab:focus-visible { outline: 3px solid var(--tierra); outline-offset: 2px; }
+.subpanel[hidden] { display: none !important; }
+.subpanel { animation: aparecer 0.18s ease-out; }
+@keyframes aparecer { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* --- Mi lote: resumen de riesgos junto al mapa --- */
+.resumen-riesgos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--borde);
+  border-left: 6px solid var(--ok);
+  background: var(--campo);
+  color: var(--tinta);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.resumen-riesgos:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(43, 42, 34, 0.1); }
+.resumen-riesgos:focus-visible { outline: 3px solid var(--tierra); outline-offset: 2px; }
+.resumen-riesgos:has(.resumen-cabeza.riesgo) { border-left-color: var(--riesgo); background: #FBF0EC; }
+.resumen-riesgos:has(.resumen-cabeza.alerta) { border-left-color: #D69A2D; background: #FBF5E8; }
+.resumen-cabeza { display: flex; align-items: center; gap: 10px; font-size: 1.02rem; }
+.resumen-semaforo { width: 14px; height: 14px; border-radius: 50%; background: var(--ok); flex-shrink: 0; }
+.resumen-cabeza.alerta .resumen-semaforo { background: #D69A2D; }
+.resumen-cabeza.riesgo .resumen-semaforo { background: var(--riesgo); box-shadow: 0 0 0 4px rgba(155, 44, 31, 0.15); }
+.resumen-lista { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; font-size: 0.9rem; color: var(--texto-2); }
+.resumen-accion { align-self: flex-start; font-weight: 700; color: var(--tierra); font-size: 0.95rem; }
+
+/* --- Mi lote: pestañita «Mi tierra» --- */
+.lote-tierra-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(260px, 2fr);
+  gap: 20px;
+  align-items: start;
+}
+.lote-tierra-aside { display: flex; flex-direction: column; gap: 14px; }
+.btn-siguiente { justify-content: center; min-height: 50px; font-size: 1rem; }
+.paso-siguiente { display: flex; justify-content: flex-end; margin-top: 20px; }
+
+/* --- Riesgos y qué hacer: avisos en cuadrícula --- */
+.riesgos-card { padding: 18px 20px; }
+.riesgos-card .vuln-cabeza h3 { font-size: 1.1rem; }
+.riesgos-card .avisos-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  align-items: start;
+  gap: 14px;
+}
+.riesgos-card .aviso-agro { height: 100%; }
+#tab-riesgos .vetados-grid { align-items: start; }
+
+/* --- Mi plan de siembra: prioridades en una franja horizontal --- */
+.plan-prioridades { margin-bottom: 18px; }
+.plan-prioridades .panel-card-header { flex-wrap: wrap; }
+.plan-prioridades .panel-card-header h3 { margin: 0; }
+.plan-prioridades .ayuda-gesto { flex-basis: 100%; }
+.plan-prioridades .priority-simple-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.plan-prioridades .sliders-list {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+body:not(.modo-tecnico) .plan-prioridades .sliders-list { display: none !important; }
+.plan-prioridades .scenario-box { grid-column: 1 / -1; }
+#sp-plan-calendario .calendario-siembra { margin-top: 0; }
+#sp-plan-graficos .charts-grid { margin-top: 0; }
+
+@media (max-width: 1100px) {
+  .terreno-grid, .lote-tierra-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .plan-prioridades .priority-simple-list,
+  .plan-prioridades .sliders-list { grid-template-columns: 1fr; }
+  .riesgos-card .avisos-lista { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .subtabs { width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; overflow-x: auto; }
+  .subtab { justify-content: center; padding: 8px 10px; font-size: 0.85rem; flex-direction: column; gap: 2px; text-align: center; line-height: 1.2; }
+  .subtab span[aria-hidden] { font-size: 1.2rem; }
+  .paso-siguiente { justify-content: stretch; }
+  .paso-siguiente .btn { width: 100%; }
+}
+
+/* Mes de siembra dentro de la receta y grupo de cultivos por altitud */
+.rot-mes-siembra { display: block; margin-top: 4px; font-size: 0.8rem; font-weight: 600; color: var(--tierra); }
+.vetado-grupo { grid-column: 1 / -1; border-left-color: #D69A2D; }
+.vetado-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.chip-cultivo { padding: 3px 10px; border-radius: 999px; background: var(--banda); border: 1px solid var(--borde); font-size: 0.85rem; }
+.terreno-telemetry .anillo { width: 74px; height: 74px; }
+.terreno-telemetry .anillo::before { inset: 9px; }

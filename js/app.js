@@ -609,7 +609,9 @@
     if (AY) {
       const avisos = AY.advertenciasLote(parcela, state.opciones);
       state.avisosLote = avisos;
-      vulnContainer.innerHTML = AY.tarjetasAdvertencias(avisos);
+      vulnContainer.innerHTML = AY.tarjetasAdvertencias(avisos, { abrir: true });
+      const resumen = document.getElementById('resumen-riesgos');
+      if (resumen) resumen.innerHTML = AY.resumenRiesgos(avisos);
       const medEl = document.getElementById('medidores-lote');
       if (medEl) medEl.innerHTML = AY.medidoresLote(parcela, state.opciones);
       const tabEl = document.getElementById('tabla-clima-tecnica');
@@ -633,8 +635,9 @@
 
     const sbVuln = document.getElementById('sidebar-vuln-badge');
     if (sbVuln) {
-      const tieneAlto = badges.some(b => b.clase === 'riesgo');
-      const tieneMedio = badges.some(b => b.clase === 'alerta');
+      const fuenteNivel = state.avisosLote || badges;
+      const tieneAlto = fuenteNivel.some(b => b.clase === 'riesgo');
+      const tieneMedio = fuenteNivel.some(b => b.clase === 'alerta');
       const nivel = tieneAlto ? 'Alto' : (tieneMedio ? 'Medio' : 'Bajo');
       const claseExtra = tieneAlto ? '' : (tieneMedio ? ' medio' : ' bajo');
       sbVuln.className = `sidebar-badge-status${claseExtra}`;
@@ -885,7 +888,7 @@
 
     const chartsGrid = document.getElementById('charts-grid-rotaciones');
     if (chartsGrid) {
-      chartsGrid.hidden = !hayAlgunaTecnica;
+      chartsGrid.hidden = false; // vive en la pestañita «Gráficos NASA»
       if (hayAlgunaTecnica) {
         setTimeout(() => {
           if (state.chartBalance) state.chartBalance.resize();
@@ -913,12 +916,17 @@
       const ingresoTotalLoteAnual = Math.round(rot.detalles.rentabilidad.margenAnualPromedioUsdHa * areaHa);
 
       // Vista Simple: Receta (solo años y cultivo)
-      const recetaSimpleHtml = rot.cultivos.map((c, i) => `
+      const AYr = window.AyudaAgricultor;
+      const recetaSimpleHtml = rot.cultivos.map((c, i) => {
+        const mej = AYr ? AYr.mejoresMeses(AYr.calendarioSiembra(c, parcela, state.opciones), 1)[0] : null;
+        return `
         <div class="rot-simple-step">
           <span class="year-label">${anosCortos[i]}</span>
           <strong>${c.nombre}</strong>
+          ${mej ? `<span class="rot-mes-siembra">📅 Siembre en ${AYr.MESES_LARGOS[mej.mes - 1]}</span>` : ''}
         </div>
-      `).join('');
+      `;
+      }).join('');
 
       // Vista Simple: Beneficios resumidos en lenguaje cotidiano
       const cobAgua = rot.balanceHidrico.coberturaAguaPct;
@@ -1422,7 +1430,26 @@
       return a.tipoVeto === 'fitosanitario' ? -1 : 1;
     });
 
-    cont.innerHTML = ordenados.map(item => {
+    const soloAltitud = ordenados.filter(it => it.razones.length && it.razones.every(r => /^Altitud fuera de rango/i.test(r)));
+    const resto = ordenados.filter(it => !soloAltitud.includes(it));
+    const elevLote = obtenerParcelaActual()?.terreno?.elev_m;
+    const tarjetaAltitud = soloAltitud.length ? `
+      <div class="vetado-item vetado-grupo">
+        <div class="vetado-head">
+          <span>🏔️ No se dan a ${fmtMiles(elevLote)} m de altura</span>
+          <span class="estado alerta solo-tecnico">Medio · Límite altitudinal</span>
+        </div>
+        <p class="vetado-chips">${soloAltitud.map(it => `<span class="chip-cultivo" title="${it.razones[0]}">${it.cultivo.nombre}</span>`).join('')}</p>
+        <details class="aviso-acciones">
+          <summary>✅ ¿Qué puede hacer?</summary>
+          <ul>
+            <li>La altura no se puede cambiar: elija entre los ${resultado.cultivosAptos.length} cultivos que sí se dan aquí (${resultado.cultivosAptos.slice(0, 5).map(c => c.nombre).join(', ')}${resultado.cultivosAptos.length > 5 ? '…' : ''}).</li>
+            <li>Pregunte en INIAP o al técnico por variedades adaptadas a su piso de altura.</li>
+          </ul>
+        </details>
+      </div>` : '';
+
+    cont.innerHTML = tarjetaAltitud + resto.map(item => {
       const c = item.cultivo;
       const etiquetaTipo = item.tipoVeto === 'fitosanitario'
         ? '<span class="estado riesgo">Alto · Pausa fitosanitaria</span>'
@@ -1729,8 +1756,10 @@
     const tabButtons = document.querySelectorAll('.sidebar-item[data-tab-target]');
     const tabPanels = document.querySelectorAll('[data-tab-panel]');
 
-    function activarPestana(targetId) {
-      if (!targetId) return;
+    function activarPestana(targetIdCompleto) {
+      if (!targetIdCompleto) return;
+      const [targetId, subId] = String(targetIdCompleto).split(':');
+      if (subId) activarSubpestana(subId);
 
       tabButtons.forEach(btn => {
         const esActivo = btn.getAttribute('data-tab-target') === targetId;
@@ -1751,7 +1780,7 @@
         btnToggle.setAttribute('aria-expanded', 'false');
       }
 
-      if (targetId === 'tab-terreno' && state.map) {
+      if (targetId === 'tab-terreno' && state.map && !document.getElementById('sp-lote-mapa')?.hidden) {
         setTimeout(() => {
           state.map.invalidateSize();
           dibujarPoligonoParcelaActual(false);
@@ -1771,6 +1800,43 @@
     tabButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         activarPestana(btn.getAttribute('data-tab-target'));
+      });
+    });
+
+    // Pestañitas internas (Mi lote, Mi plan de siembra, Datos NASA)
+    function activarSubpestana(subId) {
+      const btn = document.querySelector(`.subtab[data-subtab="${subId}"]`);
+      if (!btn) return;
+      const grupo = btn.closest('[data-subtabs]');
+      grupo.querySelectorAll('.subtab').forEach(b => {
+        const on = b === btn;
+        b.classList.toggle('activo', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+        b.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(b.getAttribute('aria-controls'));
+        if (panel) panel.hidden = !on;
+      });
+      if (subId === 'lote-mapa' && state.map) {
+        setTimeout(() => { state.map.invalidateSize(); dibujarPoligonoParcelaActual(false); }, 60);
+      }
+      if (subId === 'plan-graficos') {
+        setTimeout(() => {
+          if (state.chartBalance) state.chartBalance.resize();
+          if (state.chartHLS) state.chartHLS.resize();
+        }, 60);
+      }
+    }
+    document.querySelectorAll('[data-subtabs]').forEach(grupo => {
+      const botones = Array.from(grupo.querySelectorAll('.subtab'));
+      botones.forEach((b, i) => {
+        b.tabIndex = b.classList.contains('activo') ? 0 : -1;
+        b.addEventListener('click', () => activarSubpestana(b.getAttribute('data-subtab')));
+        b.addEventListener('keydown', e => {
+          if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+          const sig = botones[(i + (e.key === 'ArrowRight' ? 1 : botones.length - 1)) % botones.length];
+          sig.focus();
+          activarSubpestana(sig.getAttribute('data-subtab'));
+        });
       });
     });
 

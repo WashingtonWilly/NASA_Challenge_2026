@@ -325,7 +325,27 @@
     return out;
   }
 
-  function tarjetasAdvertencias(lista) {
+  /** Tarjeta corta junto al mapa: cuántos cuidados hay y enlace a «Riesgos y qué hacer». */
+  function resumenRiesgos(lista) {
+    const graves = lista.filter(a => a.clase === 'riesgo');
+    const medios = lista.filter(a => a.clase === 'alerta');
+    const clase = graves.length ? 'riesgo' : (medios.length ? 'alerta' : 'ok');
+    const titulo = graves.length || medios.length
+      ? `${graves.length ? `${graves.length} ${graves.length === 1 ? 'cuidado' : 'cuidados'}` : ''}${graves.length && medios.length ? ' y ' : ''}${medios.length ? `${medios.length} ${medios.length === 1 ? 'aviso' : 'avisos'}` : ''} en su lote`
+      : 'Su lote no tiene advertencias importantes';
+    const lista3 = graves.concat(medios).slice(0, 3)
+      .map(a => `<li><span aria-hidden="true">${a.icono}</span> ${esc(a.titulo)}</li>`).join('');
+    return `
+      <span class="resumen-cabeza ${clase}">
+        <span class="resumen-semaforo" aria-hidden="true"></span>
+        <strong>${titulo}</strong>
+      </span>
+      ${lista3 ? `<ul class="resumen-lista">${lista3}</ul>` : ''}
+      <span class="resumen-accion">Ver qué hacer →</span>`;
+  }
+
+  function tarjetasAdvertencias(lista, opciones) {
+    const abrirTodo = Boolean(opciones && opciones.abrir);
     const orden = { riesgo: 0, alerta: 1, info: 2, ok: 3 };
     const nivel = { riesgo: 'Cuidado', alerta: 'Atención', info: 'Dato', ok: 'Bien' };
     return lista.slice().sort((a, b) => orden[a.clase] - orden[b.clase]).map(a => `
@@ -340,7 +360,7 @@
         ${a.porque ? `<p class="aviso-porque">${esc(a.porque)}</p>` : ''}
         ${a.tecnico ? `<p class="aviso-tecnico solo-tecnico">📐 ${esc(a.tecnico)}</p>` : ''}
         ${a.acciones.length ? `
-          <details class="aviso-acciones" ${a.clase === 'riesgo' ? 'open' : ''}>
+          <details class="aviso-acciones" ${a.clase === 'riesgo' || (abrirTodo && a.clase === 'alerta') ? 'open' : ''}>
             <summary>✅ ¿Qué puede hacer?</summary>
             <ul>${a.acciones.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
           </details>` : ''}
@@ -355,36 +375,36 @@
     const texto = (razones || []).join(' ');
     const sugeridos = (aptos || []).slice(0, 4).map(c => c.nombre).join(', ');
     const acc = [];
-    let motivo = 'No conviene este año';
+    let motivo = null; // el primer motivo encontrado manda (altura > pendiente > helada > pausa)
     if (/Altitud fuera de rango/i.test(texto)) {
-      motivo = 'No se da a esta altura';
+      motivo = motivo || 'No se da a esta altura';
       acc.push(`La altura no se puede cambiar. Mejor siembre algo que sí se da aquí${sugeridos ? `: ${sugeridos}` : ''}.`);
       acc.push('Pregunte en INIAP o al técnico por variedades adaptadas a su zona.');
     }
     if (/erosión|pendiente/i.test(texto)) {
-      motivo = 'Terreno muy empinado';
+      motivo = motivo || 'Terreno muy empinado';
       acc.push('Si hace terrazas o zanjas de infiltración, podrá trabajar el suelo con menos riesgo.');
       acc.push('Mientras tanto, siembre cultivos que cubren el suelo (avena con vicia, chocho, quinua).');
     }
     if (/helada/i.test(texto)) {
-      motivo = 'Se quema con la helada';
+      motivo = motivo || 'Se quema con la helada';
       acc.push(`Cambie la fecha de siembra para que ${cultivo.nombre.toLowerCase()} no florezca en los meses de helada.`);
       acc.push('Busque una variedad resistente al frío o siembre en la parte baja y protegida del lote.');
     }
     const pausa = texto.match(/requiere (\d+) años de descanso|pausa mínima: (\d+) años/i);
     if (/Pausa fitosanitaria|plagas del suelo|No recomendamos/i.test(texto)) {
-      motivo = 'La tierra necesita descansar de esta familia';
+      motivo = motivo || 'La tierra necesita descansar de esta familia';
       const n = pausa ? (pausa[1] || pausa[2]) : null;
       acc.push(`Espere${n ? ` ${n} años` : ''} antes de volver a sembrar ${cultivo.familia.toLowerCase()} en este lote.`);
       acc.push('Mientras tanto siembre una leguminosa (haba, chocho, arveja) o un cereal: cortan el ciclo de las plagas.');
       acc.push('Arranque las plantas que rebrotan solas (papas "huachas"): ahí se esconden plagas y lancha.');
       acc.push('Cuando vuelva a sembrar, use semilla sana o certificada.');
     } else if (/repetir/i.test(texto)) {
-      motivo = 'No repita el mismo cultivo';
+      motivo = motivo || 'No repita el mismo cultivo';
       acc.push('Alterne con un cultivo de otra familia este año y vuelva a sembrarlo después.');
     }
     if (!acc.length) acc.push('Consulte con el técnico de su zona antes de sembrarlo.');
-    return { motivo, acciones: acc };
+    return { motivo: motivo || 'No conviene este año', acciones: acc };
   }
 
   // ---------------------------------------------------------------------------
@@ -597,7 +617,7 @@
   }
 
   window.AyudaAgricultor = {
-    barra, circulo, medidoresLote, advertenciasLote, tarjetasAdvertencias,
+    barra, circulo, medidoresLote, advertenciasLote, tarjetasAdvertencias, resumenRiesgos,
     remediosVeto, leer, puedeHablar, textoAdvertencias,
     calendarioSiembra, mejoresMeses, filaCalendario, textoPlanWhatsApp, enlaceWhatsApp, MESES_LARGOS, tablaClimaTecnica
   };

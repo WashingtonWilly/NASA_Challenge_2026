@@ -51,48 +51,37 @@
         <div class="sidebar-section-label">Módulos de control</div>
 
         <nav class="sidebar-menu" role="tablist" aria-orientation="vertical">
-          <button type="button" class="sidebar-item activo" role="tab" aria-selected="true"
-            data-tab-target="tab-simulador">
+          <button type="button" class="sidebar-item activo" role="tab" aria-selected="true" data-tab-target="tab-simulador">
             <span class="sidebar-item-left">
               <i data-lucide="compass" class="icono"></i>
               <span>Inicio</span>
             </span>
           </button>
-
           <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-terreno">
             <span class="sidebar-item-left">
               <i data-lucide="map" class="icono"></i>
-              <span>Mi terreno</span>
+              <span>Mi lote</span>
             </span>
           </button>
-
-          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-suelo">
+          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-riesgos">
             <span class="sidebar-item-left">
-              <i data-lucide="sprout" class="icono"></i>
-              <span>Suelo y prioridades</span>
+              <i data-lucide="shield-alert" class="icono"></i>
+              <span>Riesgos y qué hacer</span>
             </span>
+            <span id="sidebar-vuln-badge" class="sidebar-badge-status"><span class="status-dot" aria-hidden="true"></span>—</span>
           </button>
-
           <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-rotaciones">
             <span class="sidebar-item-left">
-              <i data-lucide="shuffle" class="icono"></i>
-              <span>Comparar rotaciones</span>
+              <i data-lucide="calendar-check" class="icono"></i>
+              <span>Mi plan de siembra</span>
             </span>
           </button>
-
           <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-satelites">
             <span class="sidebar-item-left">
               <i data-lucide="satellite" class="icono"></i>
-              <span>Satélites y sensores</span>
+              <span>Datos NASA</span>
             </span>
             <span class="sidebar-badge-num">8</span>
-          </button>
-
-          <button type="button" class="sidebar-item" role="tab" aria-selected="false" data-tab-target="tab-metodologia">
-            <span class="sidebar-item-left">
-              <i data-lucide="calculator" class="icono"></i>
-              <span>Metodología NASA</span>
-            </span>
           </button>
         </nav>
 
@@ -175,7 +164,7 @@
               </p>
               <div class="hero-actions">
                 <button type="button" class="btn" data-tab-go="tab-terreno">Evaluar mi parcela</button>
-                <a href="#tab-metodologia" data-tab-go="tab-metodologia">Ver cómo lo calculamos</a>
+                <a href="#tab-satelites" data-tab-go="tab-satelites:nasa-metodo">Ver cómo lo calculamos</a>
               </div>
             </div>
 
@@ -212,25 +201,24 @@
                   <i data-lucide="map" class="icono"></i>
                   <span class="mono">Paso 1</span>
                 </div>
-                <h3>Mi terreno</h3>
-                <p>Seleccione una parcela o dibuje los linderos para extraer relieve, clima y vulnerabilidades.</p>
+                <h3>Mi lote</h3>
+                <p>Ubique o dibuje su lote en el mapa y cuéntenos cómo es su tierra y qué sembró antes.</p>
               </a>
-              <a href="#tab-suelo" class="paso" data-tab-go="tab-suelo">
+              <a href="#tab-riesgos" class="paso" data-tab-go="tab-riesgos">
                 <div class="paso-meta">
-                  <i data-lucide="sprout" class="icono"></i>
+                  <i data-lucide="shield-alert" class="icono"></i>
                   <span class="mono">Paso 2</span>
                 </div>
-                <h3>Suelo y prioridades</h3>
-                <p>Ajuste textura, carbono orgánico y pH, declare los cultivos previos y pondere sus metas.</p>
+                <h3>Riesgos y qué hacer</h3>
+                <p>Vea las advertencias de su lote (heladas, sequía, erosión, acidez) y las acciones para evitarlas.</p>
               </a>
               <a href="#tab-rotaciones" class="paso" data-tab-go="tab-rotaciones">
                 <div class="paso-meta">
                   <i data-lucide="shuffle" class="icono"></i>
                   <span class="mono">Paso 3</span>
                 </div>
-                <h3>Comparar rotaciones</h3>
-                <p>Contraste las 3 rotaciones más resilientes frente a su práctica actual y revise el balance hídrico.
-                </p>
+                <h3>Mi plan de siembra</h3>
+                <p>Elija qué le importa más y compare las 3 mejores rotaciones, con los meses ideales para sembrar.</p>
               </a>
             </div>
           </div>
@@ -240,16 +228,27 @@
       <!-- CONTENIDO PRINCIPAL DE MÓDULOS -->
       <main class="main-container">
 
-        <!-- MÓDULO 1: MI TERRENO -->
+        <!-- MÓDULO 1: MI LOTE (terreno + tierra) -->
         <section id="tab-terreno" class="step-section tab-panel" data-tab-panel="tab-terreno" role="tabpanel" hidden>
           <div class="step-header">
             <div class="mono"><i data-lucide="map" class="icono"></i> Paso 1</div>
-            <h2>Mi terreno y diagnóstico satelital de la parcela</h2>
-            <p>Busque su parroquia, escriba coordenadas o dibuje los linderos de su lote sobre el mapa satelital. Las
-              parcelas de Licto y Guano incluyen historial satelital; cualquier otro punto del Ecuador se evalúa con
-              datos en vivo.</p>
+            <h2>Mi lote</h2>
+            <p>Ubique su lote en el mapa y cuéntenos cómo es su tierra. Los satélites de la NASA miden la altura, la
+              inclinación y el clima; usted aporta lo que conoce de su campo.</p>
           </div>
 
+          <div class="subtabs" role="tablist" aria-label="Secciones" data-subtabs="lote">
+            <button type="button" class="subtab activo" role="tab" id="st-lote-mapa"
+              aria-selected="true" aria-controls="sp-lote-mapa" data-subtab="lote-mapa">
+              <span aria-hidden="true">📍</span> Mapa y diagnóstico
+            </button>
+            <button type="button" class="subtab" role="tab" id="st-lote-tierra"
+              aria-selected="false" aria-controls="sp-lote-tierra" data-subtab="lote-tierra">
+              <span aria-hidden="true">🌱</span> Mi tierra y cosechas anteriores
+            </button>
+          </div>
+
+          <div class="subpanel" id="sp-lote-mapa" role="tabpanel" aria-labelledby="st-lote-mapa" data-subpanel="lote-mapa">
           <div class="location-control-panel" role="region" aria-label="Panel de búsqueda y filtrado de ubicaciones">
             <!-- Primer Bloque: Búsqueda Libre -->
             <div class="location-card">
@@ -312,8 +311,10 @@
               <div id="estado-datos-vivo" class="estado-datos-vivo" role="status" aria-live="polite" hidden></div>
             </div>
 
-            <!-- Telemetría Biofísica NASA (Tarjeta de datos) -->
             <div class="terreno-telemetry">
+              <a href="#tab-riesgos" class="resumen-riesgos" id="resumen-riesgos" data-tab-go="tab-riesgos">
+                <!-- Poblado por app.js -->
+              </a>
               <div class="card-datos card-medidores">
                 <h3><span><i data-lucide="gauge" class="icono"></i> Su lote de un vistazo</span></h3>
                 <div id="medidores-lote" class="medidores-lote" aria-live="polite"></div>
@@ -364,41 +365,12 @@
                 <div id="tabla-clima-tecnica"></div>
               </div>
 
-              <div class="vulnerability-card">
-                <div class="vuln-cabeza">
-                  <h3><i data-lucide="shield-check" class="icono"></i> Advertencias de su lote y qué hacer</h3>
-                  <button type="button" id="btn-escuchar-avisos" class="btn-escuchar" aria-label="Escuchar las advertencias en voz alta">
-                    <span aria-hidden="true">🔊</span> Escuchar
-                  </button>
-                </div>
-                <div id="vuln-badges-container" class="vuln-badges avisos-lista">
-                  <!-- Poblado dinámicamente por app.js -->
-                </div>
-              </div>
-
-              <div class="vulnerability-card">
-                <h3><i data-lucide="wheat" class="icono"></i> El satélite apoya, el agricultor decide</h3>
-                <p style="margin:0; font-size:0.85rem; color: var(--texto-2);">
-                  Los satélites de la NASA observan el clima regional (10–50 <span class="unidad">km</span>), la
-                  pendiente (30 <span class="unidad">m</span>) y el verdor histórico (30 <span class="unidad">m</span>),
-                  pero no reemplazan su experiencia local. En el paso 2 puede corregir los datos de su suelo y definir
-                  sus prioridades.
-                </p>
-              </div>
             </div>
           </div>
-        </section>
-
-        <!-- MÓDULO 2: MI SUELO, HISTORIAL Y PRIORIDADES -->
-        <section id="tab-suelo" class="step-section tab-panel" data-tab-panel="tab-suelo" role="tabpanel" hidden>
-          <div class="step-header">
-            <div class="mono"><i data-lucide="sprout" class="icono"></i> Paso 2</div>
-            <h2>Mi tierra, lo que sembré antes y mis prioridades</h2>
-            <p class="solo-agricultor">Cuéntenos con sus propias palabras cómo es su tierra y qué busca lograr en estos 3 años.</p>
-            <p class="solo-tecnico">Ajuste los datos de laboratorio (SoilGrids / INIAP), verifique pendiente de campo y calibre los pesos IRR sin sobrescribir la base del agricultor.</p>
           </div>
 
-          <div class="paso2-grid">
+          <div class="subpanel" id="sp-lote-tierra" role="tabpanel" aria-labelledby="st-lote-tierra" data-subpanel="lote-tierra" hidden>
+          <div class="lote-tierra-grid">
             <!-- Columna Izquierda: Base del Agricultor + Panel Técnico de Laboratorio -->
             <div class="panel-card">
               <div class="panel-card-header">
@@ -511,8 +483,74 @@
               </div>
             </div>
 
+            <div class="lote-tierra-aside">
+              <div class="vulnerability-card">
+                <h3><i data-lucide="wheat" class="icono"></i> El satélite apoya, el agricultor decide</h3>
+                <p style="margin:0; font-size:0.85rem; color: var(--texto-2);">
+                  Los satélites de la NASA observan el clima regional (10–50 <span class="unidad">km</span>), la
+                  pendiente (30 <span class="unidad">m</span>) y el verdor histórico (30 <span class="unidad">m</span>),
+                  pero no reemplazan su experiencia local. En el paso 2 puede corregir los datos de su suelo y definir
+                  sus prioridades.
+                </p>
+              </div>
+              <button type="button" class="btn btn-siguiente" data-tab-go="tab-riesgos">Siguiente: ver riesgos y qué hacer →</button>
+            </div>
+          </div>
+          </div>
+
+        </section>
+
+        <!-- MÓDULO 2: RIESGOS Y QUÉ HACER -->
+        <section id="tab-riesgos" class="step-section tab-panel" data-tab-panel="tab-riesgos" role="tabpanel" hidden>
+          <div class="step-header">
+            <div class="mono"><i data-lucide="shield-alert" class="icono"></i> Paso 2</div>
+            <h2>Riesgos de su lote y qué hacer</h2>
+            <p>Lo que los satélites detectaron en su lote y las acciones concretas para evitarlo o contrarrestarlo.</p>
+          </div>
+              <div class="vulnerability-card riesgos-card">
+                <div class="vuln-cabeza">
+                  <h3><i data-lucide="shield-check" class="icono"></i> Advertencias de su lote</h3>
+                  <button type="button" id="btn-escuchar-avisos" class="btn-escuchar" aria-label="Escuchar las advertencias en voz alta">
+                    <span aria-hidden="true">🔊</span> Escuchar
+                  </button>
+                </div>
+                <div id="vuln-badges-container" class="vuln-badges avisos-lista">
+                  <!-- Poblado dinámicamente por app.js -->
+                </div>
+              </div>
+
+
+          <!-- Inspector de Cultivos Vetados -->
+          <div class="vetados-section">
+            <div class="panel-card-header">
+              <h3><i data-lucide="ban" class="icono"></i> Cultivos que no conviene sembrar aquí, y qué hacer</h3>
+              <span id="vetados-count-badge" class="mono">Cargando diagnósticos...</span>
+            </div>
+            <p style="margin: 8px 0 0; font-size: 0.85rem; color: var(--texto-2);">
+              Registro transparente de cada especie excluida por el motor agronómico debido a pausas fitosanitarias,
+              riesgo de helada, rango altitudinal o pendiente.
+            </p>
+            <div id="vetados-grid-container" class="vetados-grid">
+              <!-- Generado dinámicamente por app.js -->
+            </div>
+          </div>
+
+
+          <div class="paso-siguiente">
+            <button type="button" class="btn btn-siguiente" data-tab-go="tab-rotaciones">Siguiente: ver mi plan de siembra →</button>
+          </div>
+        </section>
+
+        <!-- MÓDULO 3: MI PLAN DE SIEMBRA (prioridades + rotaciones + calendario) -->
+        <section id="tab-rotaciones" class="step-section tab-panel" data-tab-panel="tab-rotaciones" role="tabpanel" hidden>
+          <div class="step-header">
+            <div class="mono"><i data-lucide="shuffle" class="icono"></i> Paso 3</div>
+            <h2>Mi plan de siembra para 3 años</h2>
+            <p>Mueva las barritas según lo que más le importa: las opciones se reordenan al instante.</p>
+          </div>
+
             <!-- Columna Derecha: Prioridades Simples (Agricultor) + Calibración Matemática (Técnico) -->
-            <div class="panel-card">
+            <div class="panel-card plan-prioridades">
               <div class="panel-card-header">
                 <h3><i data-lucide="sliders-horizontal" class="icono"></i> ¿Qué es lo más importante para usted?</h3>
                 <p class="ayuda-gesto solo-agricultor">Mueva cada barrita con el dedo: a la derecha si le importa más.</p>
@@ -635,20 +673,25 @@
                   </div>
                 </div>
               </div>
+
             </div>
-          </div>
-        </section>
 
-        <!-- MÓDULO 3: COMPARATIVA DE ROTACIONES -->
-        <section id="tab-rotaciones" class="step-section tab-panel" data-tab-panel="tab-rotaciones" role="tabpanel"
-          hidden>
-          <div class="step-header">
-            <div class="mono"><i data-lucide="shuffle" class="icono"></i> Paso 3</div>
-            <h2>Comparativa de estrategias de rotación a 3 años (36 meses)</h2>
-            <p>Contraste las 3 estrategias con mayor índice de resiliencia frente a su práctica actual, con respaldo de
-              datos satelitales NASA, beneficios cuantificados, lagunas de información y riesgos locales.</p>
+          <div class="subtabs" role="tablist" aria-label="Secciones" data-subtabs="plan">
+            <button type="button" class="subtab activo" role="tab" id="st-plan-opciones"
+              aria-selected="true" aria-controls="sp-plan-opciones" data-subtab="plan-opciones">
+              <span aria-hidden="true">⭐</span> Opciones recomendadas
+            </button>
+            <button type="button" class="subtab" role="tab" id="st-plan-calendario"
+              aria-selected="false" aria-controls="sp-plan-calendario" data-subtab="plan-calendario">
+              <span aria-hidden="true">📅</span> ¿Cuándo sembrar?
+            </button>
+            <button type="button" class="subtab" role="tab" id="st-plan-graficos"
+              aria-selected="false" aria-controls="sp-plan-graficos" data-subtab="plan-graficos">
+              <span aria-hidden="true">📊</span> Gráficos NASA
+            </button>
           </div>
 
+          <div class="subpanel" id="sp-plan-opciones" role="tabpanel" aria-labelledby="st-plan-opciones" data-subpanel="plan-opciones">
           <!-- Barra de metadatos del motor (solo técnico) -->
           <div id="engine-meta-bar" class="engine-meta-bar solo-tecnico">
             Calculando evaluación multicriterio IRR...
@@ -659,6 +702,10 @@
             <!-- Generado dinámicamente por app.js -->
           </div>
 
+
+          </div>
+
+          <div class="subpanel" id="sp-plan-calendario" role="tabpanel" aria-labelledby="st-plan-calendario" data-subpanel="plan-calendario" hidden>
           <!-- ¿Cuándo sembrar? Calendario con el clima NASA POWER del lote -->
           <div class="calendario-siembra panel-card" id="calendario-siembra">
             <div class="panel-card-header">
@@ -675,6 +722,10 @@
             <p id="cal-detalle" class="cal-detalle" role="status" aria-live="polite"></p>
           </div>
 
+
+          </div>
+
+          <div class="subpanel" id="sp-plan-graficos" role="tabpanel" aria-labelledby="st-plan-graficos" data-subpanel="plan-graficos" hidden>
           <!-- Gráficos Interactivos: Balance Hídrico 36m + Historial HLS NDVI/NDTI (ocultos en Vista Simple) -->
           <div id="charts-grid-rotaciones" class="charts-grid" hidden>
             <div class="chart-card">
@@ -703,33 +754,31 @@
             </div>
           </div>
 
-          <!-- Inspector de Cultivos Vetados -->
-          <div class="vetados-section">
-            <div class="panel-card-header">
-              <h3><i data-lucide="shield-check" class="icono"></i> Cultivos descartados en este lote por filtros de
-                protección</h3>
-              <span id="vetados-count-badge" class="mono">Cargando diagnósticos...</span>
-            </div>
-            <p style="margin: 8px 0 0; font-size: 0.85rem; color: var(--texto-2);">
-              Registro transparente de cada especie excluida por el motor agronómico debido a pausas fitosanitarias,
-              riesgo de helada, rango altitudinal o pendiente.
-            </p>
-            <div id="vetados-grid-container" class="vetados-grid">
-              <!-- Generado dinámicamente por app.js -->
-            </div>
+
           </div>
 
         </section>
 
-        <!-- MÓDULO 4: SATÉLITES Y SENSORES (8) -->
-        <section id="tab-satelites" class="step-section tab-panel" data-tab-panel="tab-satelites" role="tabpanel"
-          hidden>
+        <!-- MÓDULO 4: DATOS NASA (satélites + metodología) -->
+        <section id="tab-satelites" class="step-section tab-panel" data-tab-panel="tab-satelites" role="tabpanel" hidden>
           <div class="step-header">
-            <div class="mono"><i data-lucide="satellite" class="icono"></i> Constelación activa (8)</div>
-            <h2>Satélites y sensores integrados en la parcela</h2>
-            <p>Fuentes de observación de la Tierra de la NASA y cartografía edáfica que alimentan el motor agronómico.
-            </p>
+            <div class="mono"><i data-lucide="satellite" class="icono"></i> Transparencia científica</div>
+            <h2>Datos NASA y cómo lo calculamos</h2>
+            <p>Fuentes de observación de la Tierra que alimentan RotaSat y el modelo matemático detrás de cada recomendación.</p>
           </div>
+
+          <div class="subtabs" role="tablist" aria-label="Secciones" data-subtabs="nasa">
+            <button type="button" class="subtab activo" role="tab" id="st-nasa-sat"
+              aria-selected="true" aria-controls="sp-nasa-sat" data-subtab="nasa-sat">
+              <span aria-hidden="true">🛰️</span> Satélites y sensores
+            </button>
+            <button type="button" class="subtab" role="tab" id="st-nasa-metodo"
+              aria-selected="false" aria-controls="sp-nasa-metodo" data-subtab="nasa-metodo">
+              <span aria-hidden="true">🧮</span> Metodología y fórmulas
+            </button>
+          </div>
+
+          <div class="subpanel" id="sp-nasa-sat" role="tabpanel" aria-labelledby="st-nasa-sat" data-subpanel="nasa-sat">
           <div class="vetados-grid">
             <div class="card-datos">
               <h3><span>NASA POWER</span><span class="mono">~50 km</span></h3>
@@ -772,16 +821,10 @@
               <div class="fila"><span>Frecuencia</span><span>Editable en campo</span></div>
             </div>
           </div>
-        </section>
 
-        <!-- MÓDULO 5: METODOLOGÍA NASA -->
-        <section id="tab-metodologia" class="step-section tab-panel" data-tab-panel="tab-metodologia" role="tabpanel"
-          hidden>
-          <div class="step-header">
-            <div class="mono"><i data-lucide="calculator" class="icono"></i> Transparencia científica</div>
-            <h2>Metodología NASA y modelo matemático IRR</h2>
-            <p>Armonización de los productos orbitales e ISRIC hacia la escala mensual de parcela a 36 meses.</p>
           </div>
+
+          <div class="subpanel" id="sp-nasa-metodo" role="tabpanel" aria-labelledby="st-nasa-metodo" data-subpanel="nasa-metodo" hidden>
           <div id="panel-calculo">
             <details open>
               <summary>
@@ -860,6 +903,9 @@
               </div>
             </details>
           </div>
+
+          </div>
+
         </section>
 
         <!-- MÓDULO 7: ADMINISTRACIÓN -->
